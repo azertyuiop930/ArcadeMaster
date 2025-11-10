@@ -5,15 +5,12 @@ const AUTH_CONTROLS = document.getElementById('auth-controls');
 const STORAGE_KEY = 'arcadeMasterUsers';
 
 // --- Constantes de Rôles et Defaults ---
-// REMPLACER cette URL par une image de profil par défaut de votre choix.
-const DEFAULT_PDP_URL = 'https://i.imgur.com/39hN7hG.png'; 
 const ADMIN_USERS = ['Zelda5962']; // Utilisateurs ayant le rôle ADMIN
 
 // --- Fonctions de base de données ---
 
 function loadUsers() {
     const usersJson = localStorage.getItem(STORAGE_KEY);
-    // Retourne un objet vide si rien n'est trouvé pour éviter les erreurs de lecture
     return usersJson ? JSON.parse(usersJson) : {}; 
 }
 
@@ -39,7 +36,6 @@ function login(username) {
 function logout() {
     localStorage.removeItem('currentUser');
     renderAuthControls();
-    // Recharger la page si l'utilisateur est sur la page de compte après déconnexion
     if (window.location.pathname.endsWith('authentification.html')) {
         window.location.reload(); 
     }
@@ -52,19 +48,7 @@ function getUserData(username) {
     return users[username] || null; 
 }
 
-// FONCTION PDP: Mise à jour de l'URL de la Photo de Profil
-function updatePDP(username, newUrl) {
-    const users = loadUsers();
-    if (users[username]) {
-        users[username].pdp = newUrl;
-        saveUsers(users);
-        return true;
-    }
-    return false;
-}
-
-// --- Gestion du mot de passe ---
-
+// Gestion du mot de passe
 function changePassword(username, newPassword) {
     const users = loadUsers();
     if (users[username]) {
@@ -76,7 +60,6 @@ function changePassword(username, newPassword) {
 }
 
 // --- Sauvegarde des Scores/Progression ---
-// Cette fonction inclut l'initialisation du champ pdp si l'utilisateur est nouveau
 function saveGameData(username, game, data) {
     const users = loadUsers();
     
@@ -84,14 +67,9 @@ function saveGameData(username, game, data) {
     if (!users[username]) {
         users[username] = { 
             password: '', 
-            games: {}, 
-            pdp: DEFAULT_PDP_URL // S'assure que la PDP par défaut est présente
+            games: {}
+            // Pas de PDP ici
         };
-    }
-    
-    // Assurez-vous que la clé 'pdp' existe (au cas où l'utilisateur est très ancien)
-    if (users[username].pdp === undefined) {
-        users[username].pdp = DEFAULT_PDP_URL;
     }
     
     // Assurez-vous que l'objet games existe
@@ -145,17 +123,12 @@ function renderAuthControls() {
     AUTH_CONTROLS.innerHTML = ''; 
 
     if (currentUser) {
-        // Utilisateur connecté : Montrer le nom, l'image de profil et le bouton Compte
-        const userData = getUserData(currentUser);
-        // Utilise l'URL stockée ou l'URL par défaut si elle n'existe pas
-        const pdpUrl = userData ? userData.pdp || DEFAULT_PDP_URL : DEFAULT_PDP_URL;
-        
+        // Utilisateur connecté : Montrer le nom et le bouton Compte (SANS PDP)
         const adminLink = isAdmin(currentUser) 
             ? '<a href="admin.html" class="nav-link" style="color:yellow; text-decoration:none;">ADMIN</a>' 
             : '';
 
         AUTH_CONTROLS.innerHTML = `
-            <img src="${pdpUrl}" alt="PDP" id="nav-pdp">
             <span id="user-info-display">${currentUser}</span> 
             <a href="authentification.html" id="account-button">⚙️ Compte</a>
             ${adminLink}
@@ -189,7 +162,6 @@ function renderAuthControls() {
 
 // --- Initialisation ---
 
-// Assurez-vous que l'initialisation est bien déclenchée au chargement du DOM
 document.addEventListener('DOMContentLoaded', renderAuthControls);
 
 // Rendre les fonctions importantes accessibles globalement
@@ -202,4 +174,4 @@ window.changePassword = changePassword;
 window.login = login;
 window.isAdmin = isAdmin;
 window.getUserData = getUserData;
-window.updatePDP = updatePDP;
+// Suppression de window.updatePDP
