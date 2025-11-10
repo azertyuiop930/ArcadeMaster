@@ -26,11 +26,16 @@
             margin: 20px auto;
             background-color: var(--color-surface);
             border-radius: 8px;
+            border: 1px solid var(--color-warning); /* Ajout visuel */
+        }
+        #user-management {
+            margin-top: 30px;
         }
         #user-list {
             list-style: none;
             padding: 0;
         }
+        /* Style pour chaque utilisateur */
         #user-list li {
             background-color: #333;
             margin-bottom: 10px;
@@ -40,6 +45,17 @@
             justify-content: space-between;
             align-items: center;
         }
+        .user-details {
+             display: flex;
+             align-items: center;
+             gap: 10px;
+        }
+        .user-pdp-admin {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 1px solid var(--color-primary);
+        }
         .admin-controls button {
             margin-left: 10px;
             padding: 5px 10px;
@@ -47,21 +63,17 @@
             border: none;
             border-radius: 4px;
         }
-        .admin-controls .promote {
-            background-color: #2ecc71;
-            color: white;
-        }
-        .admin-controls .demote {
-            background-color: #e67e22;
-            color: white;
-        }
         .admin-controls .delete {
-            background-color: #e74c3c;
+            background-color: var(--color-secondary);
             color: white;
+        }
+        .admin-controls .delete:hover {
+            background-color: #cc0000;
         }
         .admin-status {
             font-weight: bold;
-            color: var(--color-primary);
+            color: var(--color-warning);
+            margin-left: 10px;
         }
     </style>
 </head>
@@ -81,35 +93,43 @@
         <a href="index.html">🏠 Accueil</a>
         <a href="jeux.html">🕹️ Menu Jeux</a>
         <a href="credits.html">📝 Crédits</a>
-        </div>
+        <a href="authentification.html">⚙️ Compte</a> </div>
 
     <div class="container">
         <div id="admin-panel">
-            <h1>Panneau d'Administration</h1>
-            <p id="admin-message" style="color: #e74c3c;"></p>
+            <h1>🛡️ Panneau d'Administration</h1>
+            <p id="admin-message" style="text-align: center; color: #f39c12;"></p>
             
             <section id="user-management">
                 <h2>Gestion des Utilisateurs</h2>
                 <ul id="user-list">
-                    </ul>
+                    <p style="text-align: center;">Chargement des données...</p>
+                </ul>
             </section>
         </div>
     </div>
 
     <script src="auth.js"></script>
     <script>
-        // Le code d'initialisation de la page admin se trouve dans auth.js
         document.addEventListener('DOMContentLoaded', () => {
             renderAuthControls();
             
-            // On s'assure que seules les fonctions d'admin sont appelées ici
-            if (typeof renderAdminPanel === 'function') {
-                renderAdminPanel();
-            } else {
-                 document.getElementById('admin-message').textContent = "Accès refusé. Vous devez être administrateur pour voir cette page.";
-                 document.getElementById('admin-panel').style.display = 'none';
-            }
+            // Vérification de l'accès et chargement du panneau
+            setTimeout(() => {
+                const currentUser = getCurrentUser();
+                if (currentUser && typeof isAdmin === 'function' && isAdmin(currentUser)) {
+                    document.getElementById('admin-message').textContent = "Cette page n'est visible que par les administrateurs.";
+                    renderAdminPanel();
+                } else {
+                    document.getElementById('admin-message').textContent = "Accès non autorisé.";
+                    document.getElementById('user-management').innerHTML = ''; // Cache la liste
+                    // Redirection au cas où l'utilisateur essaie de tricher
+                    // window.location.href = 'index.html'; 
+                }
+            }, 200);
         });
+        
+        // La fonction deleteUser est maintenant globale via auth.js
     </script>
 </body>
 </html>
