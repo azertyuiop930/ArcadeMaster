@@ -118,7 +118,7 @@
         <a href="jeux.html">🕹️ Menu Jeux</a>
         <a href="credits.html">📝 Crédits</a>
         <a href="authentification.html">⚙️ Compte</a>
-        </div>
+    </div>
 
     <div class="container">
         <div class="admin-panel">
@@ -137,8 +137,7 @@
             </div>
             
             <hr class="separator">
-            
-            </div>
+        </div>
     </div>
 
     <script src="auth.js"></script>
@@ -157,7 +156,6 @@
             const userListContainer = document.getElementById('userListContainer');
             const adminUsernameElement = document.getElementById('adminUsername');
             
-            // Mise à jour du message de bienvenue
             adminUsernameElement.textContent = currentUser || 'Inconnu';
 
             const users = loadUsers();
@@ -177,7 +175,6 @@
                         </div>
                         <div class="admin-controls">
                             ${username !== currentUser && !isAdminUser 
-                                // Bouton "Supprimer" uniquement si ce n'est pas l'utilisateur connecté et non un admin
                                 ? `<button class="delete" onclick="deleteUser('${username}')">Supprimer</button>` 
                                 : (username === currentUser 
                                     ? '<span style="color:#aaa;">(Vous)</span>' 
@@ -199,7 +196,6 @@
                 renderAuthControls();
             }
             
-            // Rediriger si non connecté ou non admin (Sécurité)
             if (!getCurrentUser() || getUserData(getCurrentUser()).role !== 'admin') {
                 window.location.href = 'index.html'; 
                 return;
