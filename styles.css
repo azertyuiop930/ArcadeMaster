@@ -7,13 +7,7 @@ body {
     background-color: #454543; /* COULEUR DE FOND PRINCIPALE */
     color: #E0E0E0; 
     margin: 0;
-    padding: 0;
-    /* Centrage du contenu principal */
-    display: flex; 
-    justify-content: center; 
-    align-items: flex-start;
-    min-height: 100vh;
-    padding-top: 60px; /* Espace pour la barre de navigation fixe */
+    padding: 20px; /* Padding de base pour un affichage simple */
 }
 
 a {
@@ -32,6 +26,7 @@ h1 {
     border-bottom: 2px solid #00FF00;
     padding-bottom: 5px;
     text-align: center;
+    margin-bottom: 30px;
 }
 
 h2 {
@@ -39,29 +34,17 @@ h2 {
 }
 
 /* ========================================================= */
-/* 2. NAVIGATION EN HAUT (Barre Fixe, Centrée, Profil à Droite) */
+/* 2. ANCIENNE NAVIGATION (Non Fixe, Simple) */
 /* ========================================================= */
 
 #navbar {
-    position: fixed; 
-    top: 0; 
-    left: 0;
-    width: 100%; 
-    z-index: 2000; 
-    
     background-color: #3A3A39; 
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
-    padding: 10px 20px; 
-    
-    display: flex; 
-    justify-content: space-between; 
+    padding: 10px;
+    margin-bottom: 20px;
+    display: flex; /* Utilisation de flex pour aligner les éléments */
+    justify-content: space-around; /* Espacement simple des éléments du menu */
     align-items: center;
-}
-
-.nav-links {
-    display: flex;
-    justify-content: center;
-    flex-grow: 1; 
+    border-radius: 5px;
 }
 
 #navbar a {
@@ -70,18 +53,16 @@ h2 {
     display: inline-flex; 
     align-items: center;
     font-size: 1em;
-    color: #E0E0E0; 
-    background: none; 
-    border: none;
-}
-
-#navbar a:hover {
-    color: #00FF00; 
 }
 
 #navbar a i {
     margin-right: 5px;
-    color: #F39C12; 
+    color: #F39C12; /* Icônes en couleur orange */
+}
+
+/* Style de l'icône de profil (remplace l'image) */
+.profile-link {
+    margin-left: auto; /* Pousse l'élément le plus à droite */
 }
 
 .profile-link i {
@@ -90,48 +71,56 @@ h2 {
     margin: 0;
 }
 
+/* Cache le menu hamburger car on affiche tous les liens */
 .menu-toggle {
-    display: none; 
+    display: none !important; 
+}
+.nav-links {
+    display: flex;
 }
 
+
 /* ========================================================= */
-/* 3. STYLES DES CARTES ET CONTENEURS (Centrage universel) */
+/* 3. STYLES DES CARTES ET FORMULAIRES */
 /* ========================================================= */
 
-.main-content-container {
-    width: 100%;
-    max-width: 1150px; 
+/* Conteneur principal pour centrer le contenu */
+.main-container {
+    max-width: 900px;
+    margin: 0 auto; /* Centrage horizontal du contenu */
     padding: 20px;
 }
 
-.auth-card, .user-card, .game-selection-card {
+/* Styles des cartes (Accueil, Connexion) */
+.auth-card, .game-selection-card {
     background-color: #3A3A39; 
     padding: 30px;
     border-radius: 10px;
     max-width: 400px; 
-    margin: 40px auto; 
+    margin: 40px auto; /* Centrage du bloc */
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
     border: 1px solid #555; 
 }
 
+/* Groupe de cartes pour l'accueil/jeux */
 .card-group {
     display: flex;
     justify-content: center;
     gap: 20px;
     margin-top: 40px;
-    max-width: 900px; 
-    margin-left: auto;
-    margin-right: auto;
+    flex-wrap: wrap; /* Pour gérer le responsive simple */
 }
 
 .action-card {
-    flex: 1;
+    flex: 1 1 200px; /* Base pour que ça s'aligne et prenne de la place */
     padding: 15px;
     border-radius: 8px;
     background-color: #353535;
     cursor: pointer;
     text-align: center;
     transition: transform 0.2s;
+    
+    /* Gère les icônes/emojis */
     display: flex; 
     flex-direction: column;
     justify-content: space-between;
@@ -143,14 +132,7 @@ h2 {
     margin-bottom: 10px;
 }
 
-/* --- Styles des formulaires --- */
-.auth-card h2 {
-    color: #00FF00; 
-    border-bottom: 2px solid #00FF00;
-    margin-bottom: 30px;
-    padding-bottom: 5px;
-}
-
+/* --- Styles des formulaires (inchangés) --- */
 label {
     display: block;
     margin-top: 15px;
@@ -184,20 +166,20 @@ button {
     background-color: #00FF00; 
 }
 
-/* Styles du jeu (Canvas et Scoreboard) */
-#gameCanvas {
-    border: 3px solid #00FF00; 
-    background-color: #121212; 
-    box-shadow: 0 0 15px rgba(0, 255, 0, 0.7);
-}
-
+/* Styles du jeu */
 .game-container {
     display: flex;
     justify-content: center;
     gap: 20px;
     margin-top: 20px;
 }
-/* ... (Reste des styles de score, leaderboard, etc.) ... */
+
+#gameCanvas {
+    border: 3px solid #00FF00; 
+    background-color: #121212; 
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.7);
+}
+
 #score-board {
     width: 300px;
     background-color: #3A3A39; 
