@@ -33,8 +33,9 @@
             text-shadow: 0 0 5px #00ff00;
         }
         .menu-grid {
-            display: grid;
+            /* 3 colonnes au lieu de 4 */
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            display: grid; 
             gap: 20px;
             margin-top: 30px;
         }
@@ -92,7 +93,7 @@
         <a href="jeux.html">🕹️ Menu Jeux</a>
         <a href="credits.html">📝 Crédits</a>
         <a href="authentification.html">⚙️ Compte</a>
-        </div>
+    </div>
 
     <div class="main-menu-container">
         <h1>ARCADE MASTER</h1>
@@ -110,11 +111,7 @@
                 <h2>📝 Crédits</h2>
                 <p>Qui a fait ce projet ?</p>
             </a>
-            <a href="leaderboard.html" class="menu-item">
-                <h2>🏆 Classement</h2>
-                <p>Consultez les meilleurs scores mondiaux.</p>
-            </a>
-        </div>
+            </div>
     </div>
     <script src="auth.js"></script> 
 </body>
