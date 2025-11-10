@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Page des Jeux - Space Invaders Infini</title>
+    <style>
+        /* Styles de la page et du menu */
+        body { margin: 0; background-color: #222; display: flex; flex-direction: column; align-items: center; font-family: 'Arial', sans-serif; padding-top: 60px; }
+        header { background-color: #2c3e50; color: white; padding: 10px 0; position: fixed; width: 100%; top: 0; z-index: 1000; }
+        nav { max-width: 1200px; margin: 0 auto; display: flex; justify-content: flex-start; }
+        nav a { color: white; text-decoration: none; padding: 10px 15px; display: block; }
+        nav a:hover { background-color: #34495e; }
+        
+        /* Styles du jeu */
+        #gameCanvas { border: 2px solid #00ff00; background-color: #000; margin-top: 20px; }
+        #infoPanel { color: white; margin-top: 10px; font-size: 1.2em; }
+        .game-title { color: #00ff00; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    
+    <header>
+        <nav>
+            <a href="index.html">🏠 Accueil</a>
+            <a href="jeux.html">🕹️ Jouer</a>
+            <a href="credits.html">📝 Crédits</a>
+        </nav>
+    </header>
+    
+    <h1 class="game-title">SPACE INVADERS INFINI</h1>
+    
+    <div id="infoPanel">Score: <span id="scoreValue">0</span></div>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+    <script>
+        // *** LOGIQUE DU JEU SPACE INVADERS ***
+        
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreDisplay = document.getElementById('scoreValue');
+
+        const GAME_WIDTH = 800;
+        const GAME_HEIGHT = 600;
+        let score = 0;
+        let gameOver = false;
+        
+        // --- Joueur (Vaisseau) ---
+        let player = {
+            x: GAME_WIDTH / 2,
+            y: GAME_HEIGHT - 50,
+            size: 20,
+            speed: 5,
+            angle: -Math.PI / 2,
+            velX: 0,
+            velY: 0
+        };
+
+        // --- Souris (Visée) ---
+        let mouse = { x: 0, y: 0 };
+
+        // --- Lasers ---
+        let bullets = [];
+        const BULLET_SPEED = 8;
+        let lastShotTime = 0;
+        const FIRE_RATE = 200; 
+
+        // --- Ennemis ---
+        let enemies = [];
+        const ENEMY_SIZE = 30;
+        let enemySpawnInterval = 1000; 
+        let lastSpawnTime = 0;
+
+        // --- Fonctions de Dessin ---
+
+        function drawPlayer() {
+            ctx.save();
+            ctx.translate(player.x, player.y);
+            ctx.rotate(player.angle + Math.PI / 2); 
+            
+            ctx.fillStyle = '#00ff00';
+            ctx.beginPath();
+            ctx.moveTo(0, -player.size);    
+            ctx.lineTo(-player.size / 2, player.size); 
+            ctx.lineTo(player.size / 2, player.size);  
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        function drawBullets() {
+            ctx.fillStyle = '#ff0000';
+            bullets.forEach(bullet => {
+                ctx.beginPath();
+                ctx.arc(bullet.x, bullet.y, 3, 0, Math.PI * 2);
+                ctx.fill();
+            });
+        }
+
+        function drawEnemies() {
+            ctx.fillStyle = '#ff0000';
+            enemies.forEach(enemy => {
+                ctx.fillRect(enemy.x - ENEMY_SIZE / 2, enemy.y - ENEMY_SIZE / 2, ENEMY_SIZE, ENEMY_SIZE);
+            });
+        }
+        
+        function drawGameOver() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+            ctx.fillStyle = '#ff0000';
+            ctx.font = '60px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('GAME OVER', GAME_WIDTH / 2, GAME_HEIGHT / 2 - 30);
+            ctx.font = '30px Arial';
+            ctx.fillText(`Score final : ${score}`, GAME_WIDTH / 2, GAME_HEIGHT / 2 + 30);
+            ctx.fillText('Appuyez sur ESPACE pour recommencer', GAME_WIDTH / 2, GAME_HEIGHT / 2 + 80);
+        }
+
+        // --- Fonctions de Mise à Jour ---
+
+        function updatePlayer() {
+            player.x += player.velX;
+            player.y += player.velY;
+
+            if (player.x < 0) player.x = 0;
+            if (player.x > GAME_WIDTH) player.x = GAME_WIDTH;
+            if (player.y < 0) player.y = 0;
+            if (player.y > GAME_HEIGHT) player.y = GAME_HEIGHT;
+
+            const dx = mouse.x - player.x;
+            const dy = mouse.y - player.y;
+            player.angle = Math.atan2(dy, dx); 
+        }
+
+        function updateBullets() {
+            bullets.forEach((bullet, index) => {
+                bullet.x += bullet.velX;
+                bullet.y += bullet.velY;
+
+                if (bullet.x < 0 || bullet.x > GAME_WIDTH || bullet.y < 0 || bullet.y > GAME_HEIGHT) {
+                    bullets.splice(index, 1);
+                }
+            });
+        }
+
+        function updateEnemies() {
+            enemies.forEach((enemy, index) => {
+                enemy.y += enemy.speed;
+
+                if (enemy.y - ENEMY_SIZE / 2 > GAME_HEIGHT) {
+                    enemies.splice(index, 1);
+                }
+
+                const distance = Math.sqrt(Math.pow(player.x - enemy.x, 2) + Math.pow(player.y - enemy.y, 2));
+                if (distance < player.size + ENEMY_SIZE / 2) {
+                    gameOver = true;
+                }
+            });
+        }
+
+        // --- Gestion des Collisions Laser/Ennemis ---
+
+        function checkCollisions() {
+            for (let bIndex = bullets.length - 1; bIndex >= 0; bIndex--) {
+                const bullet = bullets[bIndex];
+                for (let eIndex = enemies.length - 1; eIndex >= 0; eIndex--) {
+                    const enemy = enemies[eIndex];
+                    
+                    const distance = Math.sqrt(Math.pow(bullet.x - enemy.x, 2) + Math.pow(bullet.y - enemy.y, 2));
+
+                    if (distance < ENEMY_SIZE / 2 + 5) { 
+                        enemies.splice(eIndex, 1);
+                        bullets.splice(bIndex, 1);
+                        
+                        score += 10;
+                        scoreDisplay.textContent = score;
+
+                        if (enemySpawnInterval > 300 && score % 100 === 0) {
+                            enemySpawnInterval -= 50;
+                        }
+                        break; 
+                    }
+                }
+            }
+        }
+
+        // --- Fonctions de Jeu ---
+
+        function shoot() {
+            const now = Date.now();
+            if (now - lastShotTime > FIRE_RATE) {
+                lastShotTime = now;
+
+                const velX = BULLET_SPEED * Math.cos(player.angle);
+                const velY = BULLET_SPEED * Math.sin(player.angle);
+
+                const startX = player.x + (player.size * Math.cos(player.angle) * 1.2);
+                const startY = player.y + (player.size * Math.sin(player.angle) * 1.2);
+
+                bullets.push({ x: startX, y: startY, velX, velY });
+            }
+        }
+
+        function spawnEnemy() {
+            const now = Date.now();
+            if (now - lastSpawnTime > enemySpawnInterval) {
+                lastSpawnTime = now;
+
+                const x = Math.random() * GAME_WIDTH;
+                const y = -ENEMY_SIZE;
+                
+                const speed = 1 + Math.random() * 2; 
+
+                enemies.push({ x, y, speed });
+            }
+        }
+        
+        function resetGame() {
+            score = 0;
+            scoreDisplay.textContent = 0;
+            gameOver = false;
+            enemies = [];
+            bullets = [];
+            player.x = GAME_WIDTH / 2;
+            player.y = GAME_HEIGHT - 50;
+            player.velX = 0;
+            player.velY = 0;
+            enemySpawnInterval = 1000;
+        }
+
+        // --- Boucle Principale du Jeu ---
+        function gameLoop() {
+            if (gameOver) {
+                drawGameOver();
+                return;
+            }
+
+            updatePlayer();
+            updateBullets();
+            spawnEnemy();
+            updateEnemies();
+            checkCollisions();
+            
+            ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+            drawPlayer();
+            drawBullets();
+            drawEnemies();
+
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // --- Événements (Contrôles) ---
+        let keys = {};
+        document.addEventListener('keydown', (e) => {
+            keys[e.key] = true;
+
+            if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'q') player.velX = -player.speed;
+            else if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') player.velX = player.speed;
+            else if (e.key === 'ArrowUp' || e.key.toLowerCase() === 'z') player.velY = -player.speed;
+            else if (e.key === 'ArrowDown' || e.key.toLowerCase() === 's') player.velY = player.speed;
+            
+            if (gameOver && e.key === ' ') {
+                e.preventDefault();
+                resetGame();
+                requestAnimationFrame(gameLoop);
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            keys[e.key] = false;
+
+            if ((e.key === 'ArrowLeft' || e.key.toLowerCase() === 'q') && player.velX < 0) player.velX = 0;
+            else if ((e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') && player.velX > 0) player.velX = 0;
+            else if ((e.key === 'ArrowUp' || e.key.toLowerCase() === 'z') && player.velY < 0) player.velY = 0;
+            else if ((e.key === 'ArrowDown' || e.key.toLowerCase() === 's') && player.velY > 0) player.velY = 0;
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            mouse.x = e.clientX - rect.left;
+            mouse.y = e.clientY - rect.top;
+        });
+
+        canvas.addEventListener('click', () => {
+            if (!gameOver) {
+                shoot();
+            }
+        });
+
+        resetGame();
+        requestAnimationFrame(gameLoop);
+
+    </script>
+</body>
+</html>
