@@ -78,7 +78,7 @@
                         </tr>
                     </thead>
                     <tbody id="leaderboardTable_jeu_exemple">
-                        <tr><td colspan="4" style="text-align:center;">Classement non disponible.</td></tr>
+                         <tr><td colspan="4" style="text-align:center;">Classement non disponible.</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -88,7 +88,8 @@
 
     <script src="auth.js"></script>
     <script>
-        // --- Logique du Menu Hamburger ---
+        // --- 1. Logique du Menu Hamburger (CORRIGÉ) ---
+        // Cette fonction DOIT être définie ici pour l'onclick
         function toggleMenu(x) {
             x.classList.toggle("change");
             const sidebar = document.getElementById("sidebar");
@@ -101,17 +102,20 @@
         
         const DEFAULT_PDP_URL = 'https://i.imgur.com/39hN7hG.png'; 
 
-        // Fonction générique pour rendre n'importe quel classement Top X
+        // Fonction générique pour rendre n'importe quel classement Top X (Top 10)
         function renderTopLeaderboard(gameId) {
             const leaderboardBody = document.getElementById(`leaderboardTable_${gameId}`);
-            if (!leaderboardBody) return; // Sécurité si l'ID n'existe pas
+            if (!leaderboardBody) return; 
 
+            // Vérification des fonctions essentielles
             if (typeof getLeaderboard === 'undefined' || typeof getUserData === 'undefined') {
+                console.error("Erreur: Les fonctions de auth.js ne sont pas chargées.");
                 leaderboardBody.innerHTML = '<tr><td colspan="4">Erreur: Script d\'authentification manquant.</td></tr>';
                 return;
             }
 
-            const leaderboardData = getLeaderboard(gameId, 10); // Toujours Top 10
+            // --- CORRECTION DU CLASSEMENT : S'assure de récupérer les scores à jour
+            const leaderboardData = getLeaderboard(gameId, 10); 
             leaderboardBody.innerHTML = ''; 
 
             if (leaderboardData.length === 0) {
@@ -155,17 +159,15 @@
             const container = document.getElementById('personal-rank-container');
             
             if (!currentUser || typeof getPersonalRank === 'undefined') {
-                container.style.display = 'none'; // Cacher si non connecté ou fonction manquante
+                container.style.display = 'none';
                 return;
             }
 
             const rankData = getPersonalRank(currentUser, gameId);
 
             if (rankData && rankData.rank <= 10) {
-                // Si le joueur est dans le Top 10, on ne fait rien de spécial
                 container.style.display = 'none';
             } else if (rankData) {
-                // Si le joueur est au-delà du Top 10
                 container.style.display = 'block';
                 container.innerHTML = `
                     <h3>Votre Classement Personnel (Space Invaders)</h3>
@@ -176,7 +178,6 @@
                     </p>
                 `;
             } else {
-                // Pas de score enregistré
                 container.style.display = 'block';
                 container.innerHTML = `
                     <h3>Votre Classement Personnel (Space Invaders)</h3>
@@ -184,19 +185,24 @@
                 `;
             }
         }
+        
+        // Fonction principale de rendu au chargement de la page
+        function initializeLeaderboard() {
+            // Ces fonctions viennent de auth.js et s'assurent que la nav bar est bien rendue, 
+            // y compris le lien Admin si l'utilisateur est Zelda5962.
+            if (typeof renderAuthControls === 'function') {
+                renderAuthControls();
+            }
+            
+            // Rendu des classements
+            renderTopLeaderboard('space_invaders');
+            // renderTopLeaderboard('jeu_exemple'); // Décommenter si le jeu est ajouté
+            renderPersonalRank('space_invaders');
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
-            // Un petit délai pour s'assurer que auth.js a fini de charger
-            setTimeout(() => { 
-                // Rendu du Top 10 Space Invaders
-                renderTopLeaderboard('space_invaders');
-                // Rendu du Top 10 Jeu Exemple (si vous l'ajoutez)
-                // renderTopLeaderboard('jeu_exemple'); 
-                
-                // Rendu du classement personnel (se base sur le jeu principal)
-                renderPersonalRank('space_invaders');
-                
-            }, 100); 
+            // Appel initial avec un petit délai pour s'assurer que auth.js est chargé
+            setTimeout(initializeLeaderboard, 150); 
         });
     </script>
 </body>
