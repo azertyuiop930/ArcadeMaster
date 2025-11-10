@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Page des Jeux - Space Invaders Infini</title>
+    <title>Space Invaders - ArcadeMaster</title>
     <style>
         /* Styles de la page et du menu */
         body { margin: 0; background-color: #222; display: flex; flex-direction: column; align-items: center; font-family: 'Arial', sans-serif; padding-top: 60px; }
@@ -15,25 +15,27 @@
         #gameCanvas { border: 2px solid #00ff00; background-color: #000; margin-top: 20px; }
         #infoPanel { color: white; margin-top: 10px; font-size: 1.2em; }
         .game-title { color: #00ff00; margin-top: 20px; }
+        /* Cacher la barre de défilement si le canvas est trop grand */
+        body { overflow: hidden; } 
     </style>
 </head>
 <body>
     
     <header>
         <nav>
-            <a href="index.html">🏠 Accueil</a>
-            <a href="jeux.html">🕹️ Jouer</a>
+            <a href="index.html">🏠 Menu Jeux</a>
+            <a href="space-invaders.html">🕹️ Space Invaders</a>
             <a href="credits.html">📝 Crédits</a>
         </nav>
     </header>
     
-    <h1 class="game-title">SPACE INVADERS INFINI</h1>
+    <h1 class="game-title">SPACE INVADERS [Amélioré]</h1>
     
     <div id="infoPanel">Score: <span id="scoreValue">0</span></div>
     <canvas id="gameCanvas" width="800" height="600"></canvas>
 
     <script>
-        // *** LOGIQUE DU JEU SPACE INVADERS ***
+        // *** LOGIQUE DU JEU SPACE INVADERS AMÉLIORÉ ***
         
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
@@ -60,14 +62,15 @@
 
         // --- Lasers ---
         let bullets = [];
-        const BULLET_SPEED = 8;
+        const BULLET_SPEED = 10;
         let lastShotTime = 0;
         const FIRE_RATE = 200; 
 
         // --- Ennemis ---
         let enemies = [];
         const ENEMY_SIZE = 30;
-        let enemySpawnInterval = 1000; 
+        const ENEMY_SPEED_BASE = 0.5; // Vitesse de base ralentie
+        let enemySpawnInterval = 1500; // Ralentissement du spawn
         let lastSpawnTime = 0;
 
         // --- Fonctions de Dessin ---
@@ -78,12 +81,9 @@
             ctx.rotate(player.angle + Math.PI / 2); 
             
             ctx.fillStyle = '#00ff00';
-            ctx.beginPath();
-            ctx.moveTo(0, -player.size);    
-            ctx.lineTo(-player.size / 2, player.size); 
-            ctx.lineTo(player.size / 2, player.size);  
-            ctx.closePath();
-            ctx.fill();
+            ctx.font = `${player.size * 2}px monospace`; // Utilisation d'une police
+            ctx.textAlign = 'center';
+            ctx.fillText("▲", 0, player.size * 0.7); // Dessiner le triangle (vaisseau)
 
             ctx.restore();
         }
@@ -91,16 +91,17 @@
         function drawBullets() {
             ctx.fillStyle = '#ff0000';
             bullets.forEach(bullet => {
-                ctx.beginPath();
-                ctx.arc(bullet.x, bullet.y, 3, 0, Math.PI * 2);
-                ctx.fill();
+                ctx.font = '16px monospace';
+                ctx.fillText('|', bullet.x, bullet.y); // Dessiner le laser
             });
         }
 
         function drawEnemies() {
             ctx.fillStyle = '#ff0000';
             enemies.forEach(enemy => {
-                ctx.fillRect(enemy.x - ENEMY_SIZE / 2, enemy.y - ENEMY_SIZE / 2, ENEMY_SIZE, ENEMY_SIZE);
+                ctx.font = `${ENEMY_SIZE}px monospace`;
+                ctx.textAlign = 'center';
+                ctx.fillText("❌", enemy.x, enemy.y + ENEMY_SIZE / 4); // Dessiner la croix (ennemi)
             });
         }
         
@@ -145,14 +146,23 @@
 
         function updateEnemies() {
             enemies.forEach((enemy, index) => {
-                enemy.y += enemy.speed;
+                // *** IA: Se déplace vers le joueur ***
+                const dx = player.x - enemy.x;
+                const dy = player.y - enemy.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
 
-                if (enemy.y - ENEMY_SIZE / 2 > GAME_HEIGHT) {
-                    enemies.splice(index, 1);
+                // Normaliser le mouvement (vitesse constante vers le joueur)
+                if (distance > 1) {
+                    enemy.x += (dx / distance) * enemy.speed;
+                    enemy.y += (dy / distance) * enemy.speed;
                 }
+                // *** FIN IA ***
 
-                const distance = Math.sqrt(Math.pow(player.x - enemy.x, 2) + Math.pow(player.y - enemy.y, 2));
-                if (distance < player.size + ENEMY_SIZE / 2) {
+                // Vérifier la collision avec le joueur
+                const collisionDist = player.size / 2 + ENEMY_SIZE / 2;
+                const distPlayerEnemy = Math.sqrt(Math.pow(player.x - enemy.x, 2) + Math.pow(player.y - enemy.y, 2));
+                
+                if (distPlayerEnemy < collisionDist) {
                     gameOver = true;
                 }
             });
@@ -168,15 +178,17 @@
                     
                     const distance = Math.sqrt(Math.pow(bullet.x - enemy.x, 2) + Math.pow(bullet.y - enemy.y, 2));
 
-                    if (distance < ENEMY_SIZE / 2 + 5) { 
+                    if (distance < ENEMY_SIZE / 2 + 10) { // Tolérance élargie pour le symbole
+                        
                         enemies.splice(eIndex, 1);
                         bullets.splice(bIndex, 1);
                         
                         score += 10;
                         scoreDisplay.textContent = score;
 
+                        // Augmentation de la difficulté : vitesse et fréquence
                         if (enemySpawnInterval > 300 && score % 100 === 0) {
-                            enemySpawnInterval -= 50;
+                            enemySpawnInterval = Math.max(300, enemySpawnInterval - 100);
                         }
                         break; 
                     }
@@ -206,12 +218,15 @@
             if (now - lastSpawnTime > enemySpawnInterval) {
                 lastSpawnTime = now;
 
+                // Position de spawn aléatoire sur le bord supérieur
                 const x = Math.random() * GAME_WIDTH;
                 const y = -ENEMY_SIZE;
                 
-                const speed = 1 + Math.random() * 2; 
+                // Vitesse de l'ennemi (légèrement augmentée avec le score)
+                let currentSpeed = ENEMY_SPEED_BASE + Math.floor(score / 200) * 0.1;
+                currentSpeed = Math.min(2.5, currentSpeed); // Vitesse max pour ne pas rendre ça impossible
 
-                enemies.push({ x, y, speed });
+                enemies.push({ x, y, speed: currentSpeed });
             }
         }
         
@@ -225,7 +240,7 @@
             player.y = GAME_HEIGHT - 50;
             player.velX = 0;
             player.velY = 0;
-            enemySpawnInterval = 1000;
+            enemySpawnInterval = 1500;
         }
 
         // --- Boucle Principale du Jeu ---
@@ -250,10 +265,7 @@
         }
         
         // --- Événements (Contrôles) ---
-        let keys = {};
         document.addEventListener('keydown', (e) => {
-            keys[e.key] = true;
-
             if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'q') player.velX = -player.speed;
             else if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') player.velX = player.speed;
             else if (e.key === 'ArrowUp' || e.key.toLowerCase() === 'z') player.velY = -player.speed;
@@ -267,8 +279,6 @@
         });
 
         document.addEventListener('keyup', (e) => {
-            keys[e.key] = false;
-
             if ((e.key === 'ArrowLeft' || e.key.toLowerCase() === 'q') && player.velX < 0) player.velX = 0;
             else if ((e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') && player.velX > 0) player.velX = 0;
             else if ((e.key === 'ArrowUp' || e.key.toLowerCase() === 'z') && player.velY < 0) player.velY = 0;
