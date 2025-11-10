@@ -2,122 +2,214 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>ArcadeMaster - Compte</title>
+    <title>ArcadeMaster - Connexion / Inscription</title>
     <link rel="stylesheet" href="styles.css">
     <style>
-        /* Styles spécifiques au compte - Répétés ici pour la clarté mais devraient être dans styles.css */
-        
+        /* Styles spécifiques à la page d'authentification */
         .auth-container {
-            padding-top: 50px; 
-            max-width: 600px; 
-            margin: 0 auto; 
+            max-width: 400px;
+            margin: 80px auto;
+            padding: 30px;
+            background-color: var(--color-surface);
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
             text-align: center;
         }
-
-        .profile-section {
-            display: flex;
-            align-items: center; 
-            justify-content: flex-start;
-            margin-bottom: 30px;
-            padding: 20px;
-            background: #282828;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0, 255, 0, 0.2);
+        .auth-container h1 {
+            color: var(--color-primary);
+            margin-bottom: 25px;
+            font-size: 2em;
         }
-        
-        #profile-pdp {
-            width: 80px; 
-            height: 80px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 4px solid #00ff00;
-            margin-right: 20px;
-        }
-        
-        .profile-info {
-            text-align: left;
-        }
-        
-        .profile-info h2 {
-            margin: 0 0 5px 0;
-            color: white;
-            font-size: 1.5em;
-        }
-
-        .role-tag {
-            background-color: #00ff00;
-            color: #222;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.9em;
-            font-weight: bold;
-            display: inline-block;
-        }
-
         .auth-form {
-            background: #333;
-            padding: 30px;
-            border-radius: 8px;
             display: flex;
             flex-direction: column;
             gap: 15px;
-            margin-top: 20px;
-            text-align: left;
+            padding-top: 15px;
         }
-
-        .auth-form h2 {
-            color: #00ff00; 
-            font-size: 1.3em;
-            border-bottom: 1px solid #555;
-            padding-bottom: 10px;
-            margin-top: 0;
-            margin-bottom: 20px;
-        }
-
-        .form-section {
-            border: 1px solid #444;
-            padding: 20px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-        }
-        
-        .auth-form input {
-            width: 100%;
-            box-sizing: border-box;
-            margin-bottom: 10px;
-            padding: 10px;
-            border-radius: 4px;
-            border: 1px solid #555;
-            background-color: #444;
-            color: white;
-        }
-        
-        .auth-form button {
-            width: 100%;
+        .auth-form input[type="text"],
+        .auth-form input[type="password"],
+        .auth-form input[type="url"] {
             padding: 12px;
+            border: 1px solid #555;
+            border-radius: 5px;
+            background-color: #2a2a2a;
+            color: var(--color-text);
             font-size: 1em;
-            margin-top: 5px;
-            background-color: #00ff00;
-            color: #222;
+            transition: border-color 0.2s;
+        }
+        .auth-form input:focus {
+            border-color: var(--color-primary);
+            outline: none;
+        }
+        .auth-form button {
+            padding: 12px;
+            background-color: var(--color-primary);
+            color: black;
             border: none;
-            border-radius: 4px;
+            border-radius: 5px;
+            font-size: 1.1em;
+            font-weight: bold;
             cursor: pointer;
+            transition: background-color 0.2s;
         }
-        
-        #logout-button {
-            background-color: #e74c3c; 
-            color: white;
-            margin-top: 30px;
+        .auth-form button:hover {
+            background-color: var(--color-secondary);
         }
-        
         .message {
             margin-top: 15px;
-            color: #999;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            color: white;
+            display: none; /* Caché par défaut */
+        }
+        .message.error {
+            background-color: #e74c3c;
+        }
+        .message.success {
+            background-color: #27ae60;
+        }
+        .switch-mode {
+            margin-top: 20px;
+            color: var(--color-text);
             cursor: pointer;
+            font-size: 0.9em;
             text-decoration: underline;
         }
-
+        .pdp-preview {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 10px auto;
+            border: 3px solid var(--color-primary);
+            display: block;
+        }
     </style>
+    <script>
+        function toggleMenu(x) {
+            x.classList.toggle("change");
+            const sidebar = document.getElementById("sidebar");
+            if (sidebar.style.width === "250px") {
+                sidebar.style.width = "0";
+            } else {
+                sidebar.style.width = "250px";
+            }
+        }
+        
+        // --- Fonction de bascule du formulaire ---
+        function switchAuthMode(mode) {
+            const container = document.getElementById('auth-container');
+            const formHTML = document.getElementById('form-content');
+            const isLogin = mode === 'login';
+            
+            if (isLogin) {
+                container.querySelector('h1').textContent = 'Se Connecter';
+                formHTML.innerHTML = `
+                    <form id="login-form" onsubmit="handleLogin(event)">
+                        <input type="text" id="login-username" placeholder="Nom d'utilisateur" required autocomplete="username">
+                        <input type="password" id="login-password" placeholder="Mot de passe" required autocomplete="current-password">
+                        <button type="submit">Connexion</button>
+                    </form>
+                `;
+                document.getElementById('switch-mode-button').textContent = "Pas de compte ? S'inscrire ici.";
+                document.getElementById('switch-mode-button').onclick = () => switchAuthMode('register');
+            } else {
+                container.querySelector('h1').textContent = 'Créer un Compte';
+                formHTML.innerHTML = `
+                    <form id="register-form" onsubmit="handleRegister(event)">
+                        <input type="text" id="register-username" placeholder="Nom d'utilisateur" required autocomplete="username">
+                        <input type="password" id="register-password" placeholder="Mot de passe (min 5 caractères)" required minlength="5" autocomplete="new-password">
+                        <input type="url" id="register-pdp" placeholder="URL Image de Profil (Optionnel)" oninput="previewPdp(this.value)">
+                        <img id="pdp-preview" class="pdp-preview" src="https://i.imgur.com/39hN7hG.png" alt="Aperçu PDP" style="display:none;">
+                        <button type="submit">Inscription</button>
+                    </form>
+                `;
+                document.getElementById('switch-mode-button').textContent = "Déjà un compte ? Se connecter ici.";
+                document.getElementById('switch-mode-button').onclick = () => switchAuthMode('login');
+            }
+            hideMessage();
+        }
+        
+        // --- Fonction d'aperçu PDP ---
+        function previewPdp(url) {
+            const img = document.getElementById('pdp-preview');
+            if (url) {
+                img.src = url;
+                img.style.display = 'block';
+            } else {
+                img.style.display = 'none';
+                img.src = 'https://i.imgur.com/39hN7hG.png'; 
+            }
+        }
+
+        // --- Afficher les messages (Erreur/Succès) ---
+        function showMessage(type, text) {
+            const msg = document.getElementById('message');
+            msg.className = `message ${type}`;
+            msg.textContent = text;
+            msg.style.display = 'block';
+        }
+        function hideMessage() {
+            document.getElementById('message').style.display = 'none';
+        }
+
+        // --- GESTIONNAIRE DE CONNEXION ---
+        function handleLogin(event) {
+            event.preventDefault();
+            hideMessage();
+
+            // Vérifie que les fonctions de auth.js sont chargées
+            if (typeof login !== 'function') {
+                showMessage('error', "Erreur: Le script d'authentification (auth.js) n'est pas chargé.");
+                return;
+            }
+
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            
+            if (login(username, password)) {
+                showMessage('success', `Connexion réussie ! Redirection en cours...`);
+                // Délai pour que l'utilisateur voie le message de succès
+                setTimeout(() => {
+                    window.location.href = 'index.html'; 
+                }, 1500);
+            } else {
+                showMessage('error', 'Nom d\'utilisateur ou mot de passe incorrect.');
+            }
+        }
+
+        // --- GESTIONNAIRE D'INSCRIPTION ---
+        function handleRegister(event) {
+            event.preventDefault();
+            hideMessage();
+
+            if (typeof registerUser !== 'function') {
+                 showMessage('error', "Erreur: Le script d'authentification (auth.js) n'est pas chargé.");
+                 return;
+            }
+
+            const username = document.getElementById('register-username').value;
+            const password = document.getElementById('register-password').value;
+            const pdp = document.getElementById('register-pdp').value;
+
+            // Simple validation de base
+            if (username.length < 3) {
+                 showMessage('error', 'Le nom d\'utilisateur doit contenir au moins 3 caractères.');
+                 return;
+            }
+
+            if (registerUser(username, password, pdp)) {
+                showMessage('success', `Inscription réussie pour ${username} ! Vous pouvez maintenant vous connecter.`);
+                // Basculer automatiquement vers le mode connexion
+                setTimeout(() => {
+                    switchAuthMode('login');
+                }, 1500);
+            } else {
+                showMessage('error', `Le nom d\'utilisateur "${username}" est déjà pris.`);
+            }
+        }
+    </script>
 </head>
 <body>
     
@@ -135,192 +227,46 @@
         <a href="index.html">🏠 Accueil</a>
         <a href="jeux.html">🕹️ Menu Jeux</a>
         <a href="credits.html">📝 Crédits</a>
-        <a href="classement.html">🏆 Classement</a>
-        </div>
-
-    <div class="auth-container">
-        <div id="auth-content">
-            </div>
+        <a href="authentification.html">⚙️ Compte</a>
     </div>
-    
+
+    <div class="container">
+        <div class="auth-container" id="auth-container">
+            <h1>Se Connecter</h1>
+            
+            <div id="form-content">
+                </div>
+            
+            <div id="message" class="message"></div>
+            
+            <div id="switch-mode-button" class="switch-mode">
+                Pas de compte ? S'inscrire ici.
+            </div>
+            
+        </div>
+    </div>
+
     <script src="auth.js"></script>
     <script>
-        // --- Logique du Menu Hamburger ---
-        function toggleMenu(x) {
-            x.classList.toggle("change");
-            const sidebar = document.getElementById("sidebar");
-            if (sidebar.style.width === "250px") {
-                sidebar.style.width = "0";
-            } else {
-                sidebar.style.width = "250px";
-            }
-        }
-        
-        // --- Logique de la page d'authentification ---
-        
-        const authContent = document.getElementById('auth-content');
-        const DEFAULT_PDP_URL_DISPLAY = 'https://i.imgur.com/39hN7hG.png'; 
-
-        function renderAccountPage() {
-            const currentUser = getCurrentUser();
-            
-            if (currentUser) {
-                const userData = getUserData(currentUser);
-                const pdpUrl = userData ? userData.pdp || DEFAULT_PDP_URL_DISPLAY : DEFAULT_PDP_URL_DISPLAY;
-                const roleName = isAdmin(currentUser) ? 'ADMIN' : 'Joueur';
-                
-                // Écran de gestion du compte (Connecté) - NOUVEAU DESIGN
-                authContent.innerHTML = `
-                    <h1>Espace Compte</h1>
-                    <div class="profile-section">
-                        <img src="${pdpUrl}" alt="Photo de Profil" id="profile-pdp">
-                        <div class="profile-info">
-                            <h2>${currentUser}</h2>
-                            <span class="role-tag">🛡️ ${roleName}</span>
-                        </div>
-                    </div>
-
-                    <div id="account-form" class="auth-form">
-                        
-                        <div class="form-section">
-                            <h2>🔑 Changer le Mot de Passe</h2>
-                            <input type="password" id="current-password" placeholder="Mot de passe actuel" required>
-                            <input type="password" id="new-password" placeholder="Nouveau mot de passe" required>
-                            <input type="password" id="confirm-new-password" placeholder="Confirmer le nouveau mot de passe" required>
-                            <button onclick="handleChangePassword()">Changer le Mot de Passe</button>
-                        </div>
-                        
-                        <div class="form-section">
-                            <h2>📸 Entrez l'URL de votre photo de profil</h2>
-                            <input type="text" id="pdp-url" value="${pdpUrl}" placeholder="URL de la nouvelle photo de profil (ex: https://...)">
-                            <button onclick="handleChangePDP()">Mettre à jour la Photo de Profil</button>
-                        </div>
-
-                        <button id="logout-button" onclick="logout()">Déconnexion</button>
-                    </div>
-                `;
-                
-            } else {
-                // Écran de Connexion/Inscription (Déconnecté)
-                renderAuthForm(true); 
-            }
-        }
-
-        function renderAuthForm(isLogin) {
-            authContent.innerHTML = `
-                <h1>${isLogin ? 'Connexion' : 'Inscription'}</h1>
-                <form class="auth-form" onsubmit="event.preventDefault(); ${isLogin ? 'handleLogin(event)' : 'handleRegister(event)'};">
-                    <h2>${isLogin ? 'Connectez-vous à votre compte' : 'Créez votre compte'}</h2>
-                    <input type="text" id="username" placeholder="Pseudo" required>
-                    <input type="password" id="password" placeholder="Mot de passe" required>
-                    ${isLogin ? '' : '<input type="password" id="confirm-password" placeholder="Confirmer le mot de passe" required>'}
-                    <button type="submit">${isLogin ? 'Se Connecter' : 'S\'inscrire'}</button>
-                </form>
-                <p class="message" onclick="renderAuthForm(${!isLogin})">
-                    ${isLogin ? 'Pas encore de compte ? S\'inscrire' : 'Déjà un compte ? Se connecter'}
-                </p>
-            `;
-        }
-        
-        function handleRegister(event) {
-            const username = event.target.elements['username'].value.trim();
-            const password = event.target.elements['password'].value;
-            const confirmPassword = event.target.elements['confirm-password'].value;
-            
-            if (!username || !password || !confirmPassword) return alert("Veuillez remplir tous les champs.");
-            if (password !== confirmPassword) return alert("Les mots de passe ne correspondent pas.");
-            
-            const users = loadUsers();
-            if (users[username]) return alert("Ce pseudo existe déjà. Veuillez vous connecter.");
-            
-            // Initialisation avec la PDP par défaut
-            users[username] = { 
-                password: password, 
-                games: {},
-                pdp: DEFAULT_PDP_URL_DISPLAY 
-            };
-            saveUsers(users);
-            
-            login(username);
-            alert(`Compte "${username}" créé et connecté !`);
-            window.location.href = 'index.html'; 
-        }
-
-        function handleLogin(event) {
-            const username = event.target.elements['username'].value.trim();
-            const password = event.target.elements['password'].value;
-
-            if (!username || !password) return alert("Veuillez remplir tous les champs.");
-
-            const users = loadUsers();
-            const user = users[username];
-
-            if (!user || user.password !== password) {
-                return alert("Pseudo ou mot de passe incorrect.");
-            }
-
-            login(username);
-            alert(`Bienvenue, ${username} !`);
-            window.location.href = 'index.html'; 
-        }
-        
-        function handleChangePassword() {
-            const currentUser = getCurrentUser();
-            if (!currentUser) return;
-
-            const currentPass = document.getElementById('current-password').value;
-            const newPass = document.getElementById('new-password').value;
-            const confirmNewPass = document.getElementById('confirm-new-password').value;
-
-            if (!currentPass || !newPass || !confirmNewPass) return alert("Veuillez remplir tous les champs du formulaire de mot de passe.");
-            if (newPass !== confirmNewPass) return alert("Le nouveau mot de passe et sa confirmation ne correspondent pas.");
-            if (currentPass === newPass) return alert("Le nouveau mot de passe doit être différent de l'ancien.");
-
-            const users = loadUsers();
-            const user = users[currentUser];
-
-            if (user.password !== currentPass) {
-                return alert("Mot de passe actuel incorrect.");
-            }
-
-            if (changePassword(currentUser, newPass)) {
-                alert("Mot de passe mis à jour avec succès ! Veuillez vous reconnecter.");
-                logout(); 
-            }
-        }
-        
-        function handleChangePDP() {
-            const currentUser = getCurrentUser();
-            const newUrl = document.getElementById('pdp-url').value.trim();
-            
-            if (!currentUser || !newUrl) return alert("Veuillez fournir une URL de photo de profil valide.");
-            
-            if (!newUrl.startsWith('http')) {
-                 return alert("L'URL doit commencer par 'http://' ou 'https://'.");
-            }
-            
-            if (updatePDP(currentUser, newUrl)) {
-                alert("Photo de profil mise à jour avec succès !");
-                renderAccountPage(); 
-                renderAuthControls(); 
-            }
-        }
-        
+        // Initialisation de la page en mode Connexion
         document.addEventListener('DOMContentLoaded', () => {
-             // LOGIQUE DE CHARGEMENT PLUS ROBUSTE (POUR ÉVITER LE BUG DE PAGE VIDE)
-            if (typeof getCurrentUser !== 'undefined') {
-                renderAccountPage();
-            } else {
-                setTimeout(renderAccountPage, 100); 
-            }
+             if (typeof renderAuthControls === 'function') {
+                 renderAuthControls(); // Met à jour la navbar
+             }
+             
+             const currentUser = getCurrentUser();
+             if (currentUser) {
+                 // Si l'utilisateur est déjà connecté, on affiche un message et on redirige
+                 document.getElementById('auth-container').innerHTML = 
+                    `<p class="message success" style="display:block;">Vous êtes déjà connecté(e) en tant que <strong>${currentUser}</strong>.</p>
+                     <p>Redirection vers l'accueil dans 3 secondes...</p>`;
+                 setTimeout(() => {
+                     window.location.href = 'index.html';
+                 }, 3000);
+             } else {
+                switchAuthMode('login');
+             }
         });
-        
-        // Rendre les fonctions d'auth accessibles globalement pour le formulaire
-        window.handleRegister = handleRegister;
-        window.handleLogin = handleLogin;
-        window.handleChangePassword = handleChangePassword;
-        window.renderAuthForm = renderAuthForm;
-        window.handleChangePDP = handleChangePDP;
     </script>
 </body>
 </html>
