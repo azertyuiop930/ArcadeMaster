@@ -4,25 +4,34 @@ const STORAGE_KEY = 'arcadeMasterUsers';
 
 function loadUsers() {
     const json = localStorage.getItem(STORAGE_KEY);
-    const users = json ? JSON.parse(json) : {};
+    let users = json ? JSON.parse(json) : {};
 
-    // Assure que l'Admin par défaut existe
+    // INITIALISATION FORCÉE DE L'ADMIN
     if (!users["Zelda5962"]) {
         users["Zelda5962"] = {
             password: "password", 
-            role: "admin", // <-- VÉRIFIEZ CE RÔLE
+            role: "admin", 
             pdp: "https://i.imgur.com/39hN7hG.png", 
             games: {} 
         };
-        // Si on vient de créer l'admin, on sauvegarde pour garantir sa présence
         localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
     }
     return users;
 }
 
-// ... (Les autres fonctions comme saveUsers, getUserData, getCurrentUser, login, logout restent les mêmes que dans la réponse précédente) ...
+function saveUsers(users) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
+}
 
-// Remplacer les fonctions login et logout pour être sûrs :
+function getUserData(username) {
+    const users = loadUsers();
+    return users[username] || null;
+}
+
+function getCurrentUser() {
+    return sessionStorage.getItem('currentUser');
+}
+
 function login(username, password) {
     const users = loadUsers();
     const user = users[username];
@@ -54,13 +63,11 @@ function renderAuthControls() {
     const sidebar = document.getElementById('sidebar');
     
     if (!authControls || !sidebar) {
-        console.warn("Éléments de navigation (Navbar ou Sidebar) non trouvés. Rendu Auth annulé.");
         return;
     }
 
     let authHTML = '';
     
-    // 1. Suppression de tout ancien lien Admin
     const oldAdminLink = sidebar.querySelector('a[href="admin.html"]');
     if (oldAdminLink) sidebar.removeChild(oldAdminLink);
 
@@ -77,14 +84,12 @@ function renderAuthControls() {
                 <a href="#" onclick="logout(); return false;" title="Déconnexion" style="color: #e74c3c; margin-left: 15px;">Déconnexion</a>
             `;
 
-            // 2. AJOUT DU LIEN ADMIN
-            // Le rôle doit être strictement 'admin' pour que cela s'affiche.
+            // AJOUT CRITIQUE DU LIEN ADMIN
             if (userData.role === 'admin') { 
                  const adminLinkHTML = '<a href="admin.html" style="color: #f39c12;">🛡️ Admin Panel</a>';
                  sidebar.insertAdjacentHTML('beforeend', adminLinkHTML);
             }
         } else {
-             // Si données corrompues, on déconnecte
              logout();
              return;
         }
@@ -96,4 +101,11 @@ function renderAuthControls() {
     authControls.innerHTML = authHTML;
 }
 
-// ... (Le reste du code, y compris window.onload = renderAuthControls;) ...
+// Globalisation et Exécution Sûre
+window.loadUsers = loadUsers;
+window.getUserData = getUserData;
+window.getCurrentUser = getCurrentUser;
+window.login = login;
+window.logout = logout;
+window.renderAuthControls = renderAuthControls;
+window.onload = renderAuthControls;
