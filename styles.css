@@ -1,7 +1,14 @@
 /* Fichier: styles.css */
 
 /* --- Base et Layout --- */
-body { margin: 0; font-family: 'Arial', sans-serif; background-color: #222; color: white; padding-top: 0 !important; }
+body { 
+    margin: 0; 
+    font-family: 'Arial', sans-serif; 
+    background-color: #222; 
+    color: white; 
+    /* AJUSTEMENT POUR LA NAVBAR FIXE */
+    padding-top: 55px; 
+}
 
 /* --- Menu Hamburger (Navigation) --- */
 #navbar {
@@ -10,7 +17,7 @@ body { margin: 0; font-family: 'Arial', sans-serif; background-color: #222; colo
     position: fixed;
     width: 100%;
     top: 0;
-    z-index: 2000; /* Assure que le menu est au-dessus de tout */
+    z-index: 2000; 
     box-sizing: border-box;
     display: flex;
     justify-content: space-between;
@@ -63,12 +70,17 @@ body { margin: 0; font-family: 'Arial', sans-serif; background-color: #222; colo
     color: #f1f1f1;
     background-color: #333;
 }
+/* Style spécifique pour le lien Admin dans la sidebar */
+#sidebar a.admin-link {
+    color: yellow;
+    font-weight: bold;
+}
 
 /* --- Section de Compte (à droite de la NavBar) --- */
 #auth-controls {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 15px; /* ESPACE AJUSTÉ POUR LA PDP */
 }
 #auth-controls button, #auth-controls a {
     padding: 8px 15px;
@@ -99,15 +111,22 @@ body { margin: 0; font-family: 'Arial', sans-serif; background-color: #222; colo
     padding: 5px 10px !important;
 }
 
+/* NOUVEAU: Style de la Photo de Profil dans la Navbar */
+#nav-pdp {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%; /* Rend l'image ronde */
+    object-fit: cover;
+    border: 2px solid #00ff00; /* Contour vert */
+}
+
+
 /* --- Styles de la page d'authentification --- */
 .auth-container {
     padding-top: 100px;
     max-width: 400px;
     margin: 0 auto;
     text-align: center;
-}
-.auth-container h1 {
-    color: #00ff00;
 }
 .auth-form {
     background: #333;
@@ -136,4 +155,44 @@ body { margin: 0; font-family: 'Arial', sans-serif; background-color: #222; colo
     color: #999;
     cursor: pointer;
     text-decoration: underline;
+}
+
+/* --- Styles du classement --- */
+.container { 
+    max-width: 600px; 
+    margin: 40px auto; 
+    padding: 20px; 
+    background-color: #333; 
+    border-radius: 8px; 
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.5); 
+}
+h1 { 
+    color: #00ff00; 
+    font-size: 2.5em; 
+    border-bottom: 2px solid #555; 
+    padding-bottom: 10px; 
+    margin-bottom: 20px; 
+    text-align: center; 
+}
+table { 
+    width: 100%; 
+    border-collapse: collapse; 
+    color: white; 
+}
+th, td { 
+    border: 1px solid #555; 
+    padding: 10px; 
+    text-align: left; 
+}
+th { 
+    background-color: #111; 
+    color: #00ff00; 
+}
+td:nth-child(3) { 
+    text-align: right; 
+    font-weight: bold; 
+}
+.trophy { 
+    color: gold; 
+    font-size: 1.2em; 
 }
