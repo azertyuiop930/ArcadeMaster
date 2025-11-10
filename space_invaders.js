@@ -1,6 +1,4 @@
-// =========================================================
-// 1. VARIABLES GLOBALES ET SETUP (SANS AUCUN SON)
-// =========================================================
+// --- VARIABLES GLOBALES DU JEU ---
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const scoreElement = document.getElementById('scoreValue');
@@ -21,32 +19,42 @@ let gameOver = false;
 let gameStarted = false;
 let mousePos = { x: 0, y: 0 }; 
 
+// --- VARIABLES POUR LES BONUS ---
 let powerUps = [];
 let isShieldActive = false;
 let shieldTimer = 0;
 let isShotgunActive = false; 
 let shotgunTimer = 0;
 
+// --- DÉFINITION DES ÉMOJIS ---
 const EMOJIS = {
     player: '🚀', 
     invader: '👾',
     bullet: '⚡',  
+    // Émojis pour les bonus
     shield_pu: '🛡️',
     bomb_pu: '💣',
     shotgun_pu: '🔫' 
 };
 
+// --- PARAMÈTRES D'AFFICHAGE ET JEU ---
 const EMOJI_FONT_SIZE = 30;
 const PLAYER_SIZE = 30;
 const INVADER_SIZE = 30;
 const POWERUP_SIZE = 30;
-const INVADER_SPAWN_RATE = 120;
-const POWERUP_SPAWN_CHANCE = 0.002; 
+const INVADER_SPAWN_RATE = 120; // Nouvel ennemi toutes les 2 secondes
+const POWERUP_SPAWN_CHANCE = 0.002; // ~1 chance sur 500 par frame
 
 
-// =========================================================
-// 2. FONCTIONS D'AUTHENTIFICATION/SAUVEGARDE 
-// =========================================================
+// --- FONCTION UTILITAIRE DE COLLISION (AABB) ---
+function checkCollision(objA, objB) {
+    return objA.x < objB.x + objB.width &&
+           objA.x + objA.width > objB.x &&
+           objA.y < objB.y + objB.height &&
+           objA.y + objB.height > objB.y; // Correction dans le check de hauteur
+}
+
+// --- LOGIQUE DE SAUVEGARDE ET CLASSEMENT ---
 function getHighScores() {
     const users = typeof loadUsers === 'function' ? loadUsers() : {};
     let highScores = [];
@@ -57,11 +65,10 @@ function getHighScores() {
             highScores.push({ username, score: highScore });
         }
     }
-    // Données de test si les fonctions d'auth.js ne sont pas chargées
     if (highScores.length === 0 && typeof loadUsers !== 'function') {
         highScores = [
             { username: 'Arcade_King', score: 5000 },
-            { username: 'Zelda59622', score: 2500 }, 
+            { username: 'Zelda5962', score: 2500 }, 
             { username: 'RetroPlayer', score: 1800 },
         ];
     }
@@ -70,13 +77,11 @@ function getHighScores() {
 }
 function updatePersonalHighScore(newScore) {
     const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
-    if (!currentUser || typeof loadUsers !== 'function' || typeof saveUsers !== 'function') return false;
-    
+    if (!currentUser || typeof loadUsers !== 'function') return false;
     const users = loadUsers();
     const userData = users[currentUser];
     if (!userData.games) userData.games = {};
     if (!userData.games.space_invaders) userData.games.space_invaders = { highScore: 0 };
-    
     if (newScore > userData.games.space_invaders.highScore) {
         userData.games.space_invaders.highScore = newScore;
         saveUsers(users); 
@@ -109,16 +114,7 @@ function renderScoreBoard() {
 }
 
 
-// =========================================================
-// 3. CLASSES DES ENTITÉS
-// =========================================================
-
-function checkCollision(objA, objB) {
-    return objA.x < objB.x + objB.width &&
-           objA.x + objA.width > objB.x &&
-           objA.y < objB.y + objB.height &&
-           objA.y + objB.height > objB.y;
-}
+// --- CLASSES DES ENTITÉS ---
 
 class Entity {
     constructor(x, y, width, height, emojiKey) {
@@ -145,13 +141,14 @@ class Player extends Entity {
         this.bullets = [];
         this.canShoot = true;
         this.angle = 0;
-        this.fireRateDelay = 200; 
+        this.fireRateDelay = 200; // Délai de base (200ms)
     }
 
     update(keys) {
         let dx = 0;
         let dy = 0;
         
+        // Mouvement ZQSD
         if (keys['z']) dy = -this.speed;
         if (keys['s']) dy = this.speed;
         if (keys['q']) dx = -this.speed;
@@ -171,14 +168,14 @@ class Player extends Entity {
             const centerY = this.y + this.height / 2;
             
             if (isShotgunActive) {
-                // LOGIQUE FUSIL À POMPE
-                const spreadAngle = Math.PI / 18; 
+                // LOGIQUE FUSIL À POMPE (5 tirs en éventail)
+                const spreadAngle = Math.PI / 18; // Angle d'écart (10 degrés)
                 for (let i = -2; i <= 2; i++) {
                     const angleOffset = i * spreadAngle;
                     this.bullets.push(new Bullet(centerX, centerY, this.angle + angleOffset));
                 }
             } else {
-                // LOGIQUE TIR NORMAL
+                // LOGIQUE TIR NORMAL (1 tir droit)
                 this.bullets.push(new Bullet(centerX, centerY, this.angle));
             }
             
@@ -204,12 +201,14 @@ class Player extends Entity {
         
         ctx.restore();
         
+        // Dessin du bouclier si actif
         if (isShieldActive) {
             ctx.beginPath();
             ctx.arc(centerX, centerY, PLAYER_SIZE * 1.5, 0, Math.PI * 2);
             ctx.strokeStyle = 'rgba(0, 200, 255, 0.5)';
             ctx.lineWidth = 4;
             ctx.stroke();
+            // Affiche le temps restant 
             ctx.fillStyle = 'white';
             ctx.font = '12px Arial';
             ctx.textAlign = 'center';
@@ -245,11 +244,12 @@ class PowerUp extends Entity {
         const emojiKey = `${type}_pu`;
         super(x, y, POWERUP_SIZE, POWERUP_SIZE, emojiKey);
         this.type = type;
-        this.dy = 1; 
+        this.dy = 1; // Le bonus descend lentement
     }
     
     update() {
         this.y += this.dy;
+        // Si le bonus sort de l'écran, le marquer comme mort
         if (this.y > GAME_HEIGHT) {
             this.dead = true;
         }
@@ -262,7 +262,7 @@ class Bullet extends Entity {
         super(x - 3, y - 3, 6, 6, 'bullet'); 
         this.angle = angle;
         this.speed = 10;
-        this.lifeTime = 120; 
+        this.lifeTime = 120; // 2 secondes
     }
 
     update() {
@@ -279,22 +279,22 @@ class Bullet extends Entity {
 }
 
 
-// =========================================================
-// 4. GESTION DES BONUS ET COLLISIONS
-// =========================================================
+// --- GESTION DES BONUS ---
 
 function activatePowerUp(type) {
     if (type === 'shield') {
         isShieldActive = true;
-        shieldTimer = 10 * 60; 
+        shieldTimer = 10 * 60; // 10 secondes
     } else if (type === 'bomb') {
+        // Applique la bombe
         const enemiesKilled = invaders.length;
         updateScore(enemiesKilled * 10); 
-        invaders = []; 
+        invaders = []; // Tue tous les ennemis
     } else if (type === 'shotgun') {
+        // LOGIQUE FUSIL À POMPE
         isShotgunActive = true;
-        shotgunTimer = 20 * 60; 
-        player.fireRateDelay = 150; 
+        shotgunTimer = 20 * 60; // 20 secondes
+        player.fireRateDelay = 150; // Délai plus lent (150ms)
     }
 }
 
@@ -310,15 +310,14 @@ function updatePowerUpTimers() {
         shotgunTimer--;
         if (shotgunTimer <= 0) {
             isShotgunActive = false;
-            player.fireRateDelay = 200; 
+            player.fireRateDelay = 200; // Rétablit le délai normal
         }
     }
 }
 
 function spawnPowerUp() {
     if (Math.random() < POWERUP_SPAWN_CHANCE) {
-        // Fréquence des bonus : Shield (2), Bomb (1), Shotgun (2)
-        const types = ['shield', 'shield', 'bomb', 'shotgun', 'shotgun'];
+        const types = ['shield', 'bomb', 'shotgun'];
         const type = types[Math.floor(Math.random() * types.length)];
         
         const x = Math.random() * (GAME_WIDTH - POWERUP_SIZE);
@@ -328,49 +327,8 @@ function spawnPowerUp() {
     }
 }
 
-function handleCollisions() {
-    
-    // 1. Collisions Tirs Joueur vs Envahisseurs
-    player.bullets = player.bullets.filter(bullet => {
-        invaders.forEach((invader) => {
-            if (checkCollision(bullet, invader)) {
-                invader.dead = true;
-                bullet.dead = true;
-                updateScore(invader.points);
-            }
-        });
-        return !bullet.dead;
-    });
 
-    // 2. Collisions Envahisseurs vs Joueur
-    invaders = invaders.filter(invader => {
-        if (checkCollision(invader, player)) {
-            if (isShieldActive) {
-                 invader.dead = true;
-            } else {
-                 invader.dead = true; 
-                 updateLives(-1);
-            }
-        }
-        return !invader.dead;
-    });
-    
-    // 3. Collisions Joueur vs PowerUps
-    powerUps = powerUps.filter(pu => {
-        if (checkCollision(pu, player)) {
-            activatePowerUp(pu.type);
-            return false;
-        }
-        return !pu.dead;
-    });
-    
-    player.bullets = player.bullets.filter(b => !b.dead);
-}
-
-
-// =========================================================
-// 5. LOGIQUE DU JEU PRINCIPALE
-// =========================================================
+// --- GESTION DU JEU PRINCIPALE ---
 
 let player;
 let invaders = [];
@@ -404,13 +362,57 @@ function spawnInvader() {
     invaders.push(new Invader(x, y));
 }
 
+function handleCollisions() {
+    
+    // 1. Collisions Tirs Joueur vs Envahisseurs
+    player.bullets = player.bullets.filter(bullet => {
+        invaders.forEach((invader) => {
+            if (checkCollision(bullet, invader)) {
+                invader.dead = true;
+                bullet.dead = true;
+                updateScore(invader.points);
+            }
+        });
+        return !bullet.dead;
+    });
+
+    // 2. Collisions Envahisseurs vs Joueur
+    invaders = invaders.filter(invader => {
+        if (checkCollision(invader, player)) {
+            if (isShieldActive) {
+                 invader.dead = true; // Détruit l'ennemi sans perte de vie
+            } else {
+                 invader.dead = true; 
+                 updateLives(-1); // Perte de vie
+            }
+        }
+        return !invader.dead;
+    });
+    
+    // 3. Collisions Joueur vs PowerUps
+    powerUps = powerUps.filter(pu => {
+        if (checkCollision(pu, player)) {
+            activatePowerUp(pu.type);
+            return false; // Supprimer le bonus
+        }
+        return !pu.dead; // Conserver s'il n'est pas mort (ou n'est pas sorti de l'écran)
+    });
+    
+    // 4. Nettoyage
+    player.bullets = player.bullets.filter(b => !b.dead);
+}
+
+
 function updateGame() {
     if (gameOver || !gameStarted) return;
 
+    // 1. Mise à jour des Timers des bonus
     updatePowerUpTimers();
 
+    // 2. Mise à jour du joueur (mouvement et angle)
     player.update(keys);
     
+    // 3. Gestion des ennemis (spawn et mouvement)
     invaderSpawnCounter++;
     if (invaderSpawnCounter >= INVADER_SPAWN_RATE) {
         spawnInvader();
@@ -418,11 +420,14 @@ function updateGame() {
     }
     invaders.forEach(i => i.update(player));
     
+    // 4. Spawn et mouvement des PowerUps
     spawnPowerUp();
     powerUps.forEach(pu => pu.update());
     
+    // 5. Mise à jour des tirs
     player.bullets.forEach(b => b.update());
 
+    // 6. Gestion des Collisions
     handleCollisions();
 }
 
@@ -439,6 +444,7 @@ function drawGame() {
         return;
     }
 
+    // Dessiner les entités
     powerUps.forEach(pu => pu.draw(ctx)); 
     invaders.forEach(i => i.draw(ctx));
     player.draw(ctx);
@@ -467,9 +473,7 @@ function gameLoop() {
     drawGame();
 }
 
-// =========================================================
-// 6. GESTION DES ÉVÉNEMENTS
-// =========================================================
+// --- GESTION DES ÉVÉNEMENTS ---
 
 document.addEventListener('mousemove', (e) => {
     const rect = canvas.getBoundingClientRect();
@@ -506,9 +510,7 @@ document.addEventListener('keyup', (e) => {
 });
 
 
-// =========================================================
-// 7. INITIALISATION DU JEU
-// =========================================================
+// --- INITIALISATION DU JEU ---
 
 function startGame() {
     if (gameLoopInterval) clearInterval(gameLoopInterval); 
@@ -521,6 +523,7 @@ function startGame() {
     invaders = []; 
     powerUps = []; 
     
+    // Réinitialisation des états des bonus
     isShieldActive = false;
     shieldTimer = 0;
     isShotgunActive = false;
@@ -530,7 +533,7 @@ function startGame() {
     
     scoreElement.textContent = score;
     livesElement.textContent = lives;
-    
+
     gameLoopInterval = setInterval(gameLoop, 1000 / 60); 
 }
 
