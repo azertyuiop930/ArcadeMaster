@@ -1,11 +1,11 @@
 /* ========================================================= */
-/* 1. STYLES GÉNÉRAUX ET RESET (Couleurs Grises & Ambiance Retrouvée) */
+/* 1. STYLES GÉNÉRAUX ET RESET (Couleurs finales : Noir & Gris) */
 /* ========================================================= */
 
 body {
     font-family: 'Arial', sans-serif;
-    background-color: #121212; /* Fond très sombre */
-    color: #E0E0E0; /* Texte clair */
+    background-color: #0A0A0A; /* Très noir pour le fond */
+    color: #E0E0E0; /* Texte clair (gris très clair) */
     margin: 0;
     padding: 0;
     display: flex; 
@@ -15,7 +15,7 @@ body {
 }
 
 a {
-    color: #E0E0E0; /* Liens blancs/gris clair */
+    color: #E0E0E0; 
     text-decoration: none;
     cursor: pointer;
     transition: color 0.2s;
@@ -33,38 +33,41 @@ h1 {
 }
 
 /* ========================================================= */
-/* 2. NAVIGATION EN HAUT (Menu d'Origine) */
+/* 2. NAVIGATION EN HAUT (Menu d'origine rétabli et centré) */
 /* ========================================================= */
 
-/* Conteneur principal de la navigation (centré) */
 #navbar {
     position: absolute;
     top: 15px; 
     left: 50%;
-    transform: translateX(-50%); /* Centrage horizontal */
+    transform: translateX(-50%); /* Centre la barre de navigation */
     z-index: 2000; 
-    background-color: #2D2D2D; /* Fond du menu (Gris foncé) */
-    border: 1px solid #444; 
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    
+    /* Style du conteneur de la barre */
+    background-color: #1E1E1E; /* Fond de la barre (Gris foncé, subtil) */
+    border: 1px solid #333; 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
     border-radius: 5px;
     padding: 5px 10px; 
+    
+    display: flex; /* Utilise Flexbox pour aligner les liens */
+    align-items: center;
 }
 
-/* Style des liens dans le menu */
 #navbar a {
-    margin: 0 15px; /* Espacement entre les liens */
-    padding: 5px 0;
+    /* Style des liens dans la barre */
+    margin: 0 10px; 
+    padding: 5px 8px;
     display: inline-flex; 
     align-items: center;
     font-size: 0.9em;
-    color: #E0E0E0; /* Texte des liens */
+    color: #E0E0E0; 
 }
 
 #navbar a:hover {
-    color: #00FF00; /* Vert Néon au survol */
+    color: #00FF00; 
 }
 
-/* Icônes dans les liens */
 #navbar a i {
     margin-right: 5px;
     color: #F39C12; /* Icônes en orange/jaune */
@@ -131,11 +134,11 @@ h1 {
 
 
 /* ========================================================= */
-/* 4. AUTHENTIFICATION & COMPTE UTILISATEUR (Couleurs Grises) */
+/* 4. AUTHENTIFICATION & COMPTE UTILISATEUR (Cartes Grises Moyen) */
 /* ========================================================= */
 
 .auth-card, .user-card {
-    background-color: #2D2D2D; /* Gris plus clair pour la carte */
+    background-color: #2D2D2D; /* Gris plus clair/moyen pour les cartes */
     padding: 30px;
     border-radius: 10px;
     max-width: 400px;
@@ -157,7 +160,7 @@ input[type="text"], input[type="password"] {
     margin-top: 5px;
     border: 1px solid #555;
     border-radius: 5px;
-    background-color: #121212;
+    background-color: #121212; /* Champ de saisie très foncé */
     color: #E0E0E0;
     box-sizing: border-box; 
 }
@@ -172,17 +175,15 @@ button {
     font-size: 1.1em;
     cursor: pointer;
     font-weight: bold;
-    transition: background-color 0.2s; /* Garde la transition de couleur */
+    transition: background-color 0.2s;
     color: #121212;
     background-color: #00FF00; 
 }
 
 .user-card button {
-    background-color: #E74C3C; 
+    background-color: #E74C3C; /* Rouge/Orange pour Déconnexion */
     color: white;
 }
-
-/* ... (Style du compte utilisateur) ... */
 
 .user-info p {
     color: #E0E0E0;
@@ -203,9 +204,3 @@ button {
     display: block;
     object-fit: cover;
 }
-
-/* ========================================================= */
-/* 5. ANIMATIONS RÉDUITES (Pour le jeu uniquement) */
-/* ========================================================= */
-
-/* Retire les animations de pression (transform) des menus, les gardant pour le jeu. */
