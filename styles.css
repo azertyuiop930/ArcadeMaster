@@ -8,94 +8,88 @@ body {
     color: #E0E0E0; /* Texte clair */
     margin: 0;
     padding: 0;
-    display: flex;
+    display: flex; /* Utilisation de flexbox pour la mise en page */
+    justify-content: center; /* Centrage général */
+    align-items: flex-start;
     min-height: 100vh;
 }
 
 a {
     color: #00FF00; /* Vert Néon pour les liens */
     text-decoration: none;
+    cursor: pointer;
 }
 
 a:hover {
-    color: #39FF14; /* Vert plus clair au survol */
+    color: #39FF14;
 }
 
 h1 {
     color: #00FF00;
     border-bottom: 2px solid #00FF00;
     padding-bottom: 5px;
-}
-
-/* ========================================================= */
-/* 2. MISE EN PAGE PRINCIPALE (SIDEBAR & MAIN CONTENT) */
-/* ========================================================= */
-
-#sidebar {
-    width: 250px;
-    background-color: #1E1E1E;
-    padding: 20px 0;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-#sidebar nav a {
-    display: block;
-    padding: 15px 30px;
-    margin: 5px 0;
-    color: #E0E0E0;
-    font-weight: bold;
-    border-radius: 5px;
     text-align: center;
-    transition: background-color 0.2s;
 }
 
-#sidebar nav a:hover {
-    background-color: #2D2D2D;
-    color: #00FF00;
-}
+/* ========================================================= */
+/* 2. MISE EN PAGE DU JEU (space_invaders.html) */
+/* ========================================================= */
 
-#main-content {
-    flex-grow: 1;
+/* Conteneur principal englobant le jeu et le tableau des scores */
+.main-game-area {
+    width: 100%;
+    max-width: 1150px; /* Limite la largeur totale */
+    margin-top: 50px;
     padding: 20px;
 }
 
-/* ========================================================= */
-/* 3. STYLES DU JEU (space_invaders.html) */
-/* ========================================================= */
-
 .game-container {
     display: flex;
+    justify-content: center;
     gap: 20px;
+    flex-wrap: wrap; /* Pour s'adapter aux petits écrans */
 }
 
+/* Canvas du jeu */
 #gameCanvas {
     border: 3px solid #00FF00; /* Cadre vert néon */
     background-color: black;
-    box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.7);
+    margin-bottom: 20px;
 }
 
+/* Tableau des scores et classement */
 #score-board {
     width: 300px;
     background-color: #1E1E1E;
     padding: 15px;
     border-radius: 8px;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+    border: 1px solid #F39C12; /* Bordure orange pour High Score */
 }
 
 #score-board h2 {
-    color: #F39C12; /* Jaune/Orange pour les titres de score */
+    color: #F39C12;
     margin-top: 0;
-    border-bottom: 1px solid #333;
+    border-bottom: 1px solid #F39C12;
     padding-bottom: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4em;
+}
+
+#score-board h2 i {
+    margin-right: 8px;
+    color: gold;
 }
 
 .score-details p {
     font-size: 1.1em;
     font-weight: bold;
-    color: #00FF00;
+    color: #E0E0E0;
+    display: flex;
+    justify-content: space-between;
 }
 
 /* Classement (Leaderboard) */
@@ -113,12 +107,13 @@ h1 {
     font-size: 0.95em;
 }
 
-#leaderboardList li:last-child {
-    border-bottom: none;
-}
+#leaderboardList li:nth-child(1) span:first-child { color: gold; font-weight: bold; }
+#leaderboardList li:nth-child(2) span:first-child { color: silver; }
+#leaderboardList li:nth-child(3) span:first-child { color: #CD7F32; /* Bronze */ }
+
 
 /* ========================================================= */
-/* 4. AUTHENTIFICATION & COMPTE UTILISATEUR */
+/* 3. AUTHENTIFICATION & COMPTE UTILISATEUR (auth.html) */
 /* ========================================================= */
 
 .auth-card, .user-card {
@@ -126,34 +121,36 @@ h1 {
     padding: 30px;
     border-radius: 10px;
     max-width: 400px;
-    margin: 50px auto;
+    margin: 100px auto; /* Centré verticalement et horizontalement */
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
+    border: 1px solid #444;
 }
 
 .auth-card h1, .user-card h1 {
     color: #00FF00;
     text-align: center;
-    border-bottom: 2px solid #00FF00;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
 }
 
 label {
     display: block;
     margin-top: 15px;
-    color: #F39C12; /* Jaune/Orange pour les labels */
+    color: #F39C12;
+    font-weight: bold;
 }
 
 input[type="text"], input[type="password"] {
-    width: calc(100% - 20px);
+    width: 100%;
     padding: 10px;
     margin-top: 5px;
     border: 1px solid #555;
     border-radius: 5px;
     background-color: #121212;
     color: #E0E0E0;
+    box-sizing: border-box; /* Inclusion du padding dans la largeur */
 }
 
-/* Bouton Déconnexion / Connexion */
+/* Boutons */
 button {
     width: 100%;
     padding: 12px;
@@ -164,16 +161,20 @@ button {
     cursor: pointer;
     font-weight: bold;
     transition: background-color 0.2s, box-shadow 0.2s;
-    background-color: #E74C3C; /* Couleur par défaut (Déconnexion) */
+    color: #121212;
+    box-shadow: 0 4px #00B300; 
+    background-color: #00FF00; 
+}
+
+/* Bouton de Déconnexion (rouge/orange) */
+.user-card button {
+    background-color: #E74C3C; 
     color: white;
-    box-shadow: 0 4px #C0392B; /* Ombre pour l'effet 3D */
+    box-shadow: 0 4px #C0392B; 
 }
 
-button:hover {
-    background-color: #C0392B;
-}
 
-/* Styles pour le compte utilisateur */
+/* Infos Utilisateur */
 .user-info p {
     color: #E0E0E0;
     margin: 10px 0;
@@ -184,7 +185,6 @@ button:hover {
     font-weight: bold;
 }
 
-/* Image de profil (pour l'exemple Zelda5962) */
 .profile-img {
     width: 100px;
     height: 100px;
@@ -197,41 +197,87 @@ button:hover {
 
 
 /* ========================================================= */
-/* 5. ANIMATION DE CLIC (AJOUTÉE PRÉCÉDEMMENT) */
+/* 4. NAVIGATION EN HAUT À DROITE (MENU HAMBURGER/DROPDOWN) */
 /* ========================================================= */
 
-/* Applique la transition à tous les éléments cliquables */
-#sidebar a, 
-#auth-controls button, 
-#navbar a, 
-#score-board div, 
-#score-board li,
-button {
-    transition: transform 0.05s ease-out, box-shadow 0.05s; 
+/* Conteneur du menu (Positionné Absolument en Haut à Droite) */
+#navbar {
+    position: absolute;
+    top: 10px; 
+    right: 10px; 
+    z-index: 2000; 
+}
+
+/* Le bouton 'Compte' ou l'icône Hamburger (si utilisé) */
+.hamburger-menu {
+    padding: 10px;
+    background-color: #2D2D2D;
+    border-radius: 5px;
+    color: #00FF00;
+    font-size: 1.2em;
     cursor: pointer;
-    display: inline-block; 
+    box-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+    display: flex;
+    align-items: center;
 }
 
-/* Quand l'utilisateur clique/presse l'élément (effet de "pression") */
-#sidebar a:active, 
-#auth-controls button:active,
-#navbar a:active,
-#score-board div:active,
-#score-board li:active,
-.hamburger-menu:active,
-.main-game-area button:active,
-button:active {
-    transform: scale(0.95); /* Plus prononcé pour les boutons pour l'effet pressé */
-    box-shadow: none !important; /* Enlève l'ombre pour simuler le bouton enfoncé */
+/* Conteneur du menu déroulant */
+.menu-dropdown {
+    position: absolute;
+    top: 100%; 
+    right: 0;
+    width: 150px;
+    background-color: #2D2D2D;
+    border: 1px solid #00FF00;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.7);
+    padding: 5px 0;
+    border-radius: 5px;
+    margin-top: 5px;
+    display: none; /* Masqué par défaut, affiché par JS */
 }
 
-/* Style de base pour les boutons de formulaire */
-.auth-card button {
-    background-color: #00FF00;
-    color: #121212;
-    box-shadow: 0 4px #00B300;
+.menu-dropdown.show {
+    display: block; /* Affiché via JavaScript */
 }
 
+.menu-dropdown a {
+    display: flex;
+    align-items: center;
+    padding: 8px 15px;
+    color: #E0E0E0;
+    font-size: 0.9em;
+}
+
+.menu-dropdown a i {
+    margin-right: 8px;
+    color: #F39C12;
+}
+
+
+/* ========================================================= */
+/* 5. ANIMATIONS (CLIC ET SURVOL) */
+/* ========================================================= */
+
+/* Applique la transition à tous les éléments cliquables pour l'effet de pression */
+a, button, .hamburger-menu, #score-board div, #score-board li {
+    transition: transform 0.05s ease-out, box-shadow 0.05s, background-color 0.2s; 
+    user-select: none; /* Empêche la sélection de texte au clic */
+}
+
+/* Effet de "pression" au clic (Active/Down) */
+a:active, 
+button:active, 
+.hamburger-menu:active, 
+#score-board div:active, 
+#score-board li:active {
+    transform: scale(0.97); /* Rétrécit légèrement */
+    box-shadow: none !important; 
+}
+
+/* Styles spécifiques pour les boutons enfoncés (couleur plus foncée) */
 .auth-card button:active {
-    background-color: #00B300;
+    background-color: #00B300; /* Vert foncé au clic */
+}
+.user-card button:active {
+    background-color: #C0392B; /* Rouge foncé au clic */
 }
