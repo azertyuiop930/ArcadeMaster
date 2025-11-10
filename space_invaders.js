@@ -3,6 +3,9 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const scoreElement = document.getElementById('scoreValue');
 const livesElement = document.getElementById('livesValue');
+const personalHighScoreElement = document.getElementById('personalHighScore');
+const leaderboardList = document.getElementById('leaderboardList');
+
 const GAME_WIDTH = 800;
 const GAME_HEIGHT = 600;
 
@@ -22,7 +25,6 @@ const EMOJIS = {
     invader2: '👾', 
     bullet: '⚡',  
     shield: '🧱', 
-    mystery: '🛸'  
 };
 
 // --- PARAMÈTRES D'AFFICHAGE DES ÉMOJIS ---
@@ -41,9 +43,88 @@ function checkCollision(objA, objB) {
            objA.y + objA.height > objB.y;
 }
 
+// --- LOGIQUE DE SAUVEGARDE ET CLASSEMENT ---
 
-// --- CLASSE ENTITÉ ---
+function getHighScores() {
+    // Vérifie si les fonctions de auth.js sont disponibles
+    const users = typeof loadUsers === 'function' ? loadUsers() : {};
+    let highScores = [];
 
+    for (const username in users) {
+        const userData = users[username];
+        const highScore = userData.games && userData.games.space_invaders ? userData.games.space_invaders.highScore : 0;
+        if (highScore > 0) {
+            highScores.push({ username, score: highScore });
+        }
+    }
+    
+    // Ajout de scores mock si la liste est vide ou si auth.js n'est pas chargé
+    if (highScores.length === 0 && typeof loadUsers !== 'function') {
+        highScores = [
+            { username: 'Arcade_King', score: 5000 },
+            { username: 'Zelda5962', score: 2500 }, 
+            { username: 'RetroPlayer', score: 1800 },
+        ];
+    }
+
+    highScores.sort((a, b) => b.score - a.score);
+    return highScores;
+}
+
+function updatePersonalHighScore(newScore) {
+    const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+    
+    if (!currentUser || typeof loadUsers !== 'function') return false;
+
+    const users = loadUsers();
+    const userData = users[currentUser];
+    
+    if (!userData.games) userData.games = {};
+    if (!userData.games.space_invaders) userData.games.space_invaders = { highScore: 0 };
+    
+    if (newScore > userData.games.space_invaders.highScore) {
+        userData.games.space_invaders.highScore = newScore;
+        saveUsers(users); // Sauvegarde
+        return true;
+    }
+    return false;
+}
+
+function renderScoreBoard() {
+    const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+    const highScores = getHighScores();
+    
+    let html = '';
+    let foundPersonalScore = false;
+
+    // Afficher le Top 10
+    highScores.slice(0, 10).forEach((item, index) => {
+        const isCurrentUser = item.username === currentUser;
+        const style = isCurrentUser ? 'style="color: #00ff00; font-weight: bold;"' : '';
+        html += `<li ${style}><span>${index + 1}. ${item.username}</span> <span>${item.score}</span></li>`;
+        if (isCurrentUser) foundPersonalScore = true;
+    });
+
+    leaderboardList.innerHTML = html;
+
+    // Afficher le score personnel sous le Top 10 si non inclus
+    const personalScore = highScores.find(item => item.username === currentUser);
+    const personalHighScoreValue = personalScore ? personalScore.score : 0;
+    
+    personalHighScoreElement.textContent = personalHighScoreValue;
+    
+    // Si le joueur n'est pas dans le Top 10, afficher son classement réel en bas
+    if (currentUser && !foundPersonalScore && personalScore) {
+        const userRank = highScores.findIndex(item => item.username === currentUser) + 1;
+        if (userRank > 10) {
+             leaderboardList.innerHTML += `<li style="margin-top: 10px; color: #f39c12; font-weight: bold;"><span>...</span> <span>...</span></li>`;
+             leaderboardList.innerHTML += `<li style="color: #00ff00; font-weight: bold;"><span>${userRank}. ${currentUser}</span> <span>${personalHighScoreValue}</span></li>`;
+        }
+    }
+}
+
+
+// --- CLASSES DES ENTITÉS ---
 class Entity {
     constructor(x, y, width, height, emojiKey) {
         this.x = x;
@@ -53,7 +134,6 @@ class Entity {
         this.emoji = EMOJIS[emojiKey];
         this.dead = false;
     }
-
     draw(ctx) {
         ctx.font = `${EMOJI_FONT_SIZE}px sans-serif`;
         ctx.textAlign = 'center';
@@ -71,12 +151,14 @@ class Player extends Entity {
     }
 
     update(keys) {
-        if (keys['ArrowLeft'] || keys['a']) {
+        // --- NOUVEAU: Mouvement ZQSD ---
+        if (keys['q'] || keys['ArrowLeft']) {
             this.x = Math.max(0, this.x - this.speed);
         }
-        if (keys['ArrowRight'] || keys['d']) {
+        if (keys['d'] || keys['ArrowRight']) {
             this.x = Math.min(GAME_WIDTH - this.width, this.x + this.speed);
         }
+        
         if ((keys[' '] || keys['Space']) && this.canShoot) {
             this.shoot();
             this.canShoot = false;
@@ -112,13 +194,10 @@ class Bullet extends Entity {
         this.speed = (type === 'player') ? -7 : 5; 
         this.type = type;
     }
-
     draw(ctx) {
-        // On dessine le tir comme un trait pour plus de précision
         ctx.fillStyle = this.type === 'player' ? 'yellow' : 'red';
         ctx.fillRect(this.x, this.y, this.width, this.height);
     }
-
     update() {
         this.y += this.speed;
     }
@@ -129,7 +208,6 @@ class Shield extends Entity {
         super(x, y, SHIELD_WIDTH, SHIELD_HEIGHT, 'shield');
         this.health = 3; 
     }
-    
     draw(ctx) {
         if (this.health === 3) {
             this.emoji = EMOJIS['shield'];
@@ -189,11 +267,10 @@ function updateLives(amount) {
 }
 
 function handleCollisions() {
-    // 1. Collisions Tirs Joueur (Player Bullets)
+    // 1. Collisions Tirs Joueur
     player.bullets = player.bullets.filter(bullet => {
         
-        // Collision avec les ENNEMIS
-        invaders.forEach((invader, iIndex) => {
+        invaders.forEach((invader) => {
             if (checkCollision(bullet, invader)) {
                 invader.dead = true;
                 bullet.dead = true;
@@ -201,7 +278,6 @@ function handleCollisions() {
             }
         });
         
-        // Collision avec les SHIELDS
         shields.forEach((shield) => {
             if (checkCollision(bullet, shield)) {
                 shield.health--;
@@ -209,20 +285,17 @@ function handleCollisions() {
             }
         });
         
-        // Nettoyage : Garder si non touché et encore à l'écran
         return !bullet.dead && bullet.y > 0;
     });
 
-    // 2. Collisions Tirs Ennemis (Invader Bullets)
+    // 2. Collisions Tirs Ennemis 
     invaderBullets = invaderBullets.filter(bullet => {
 
-        // Collision avec le JOUEUR
         if (checkCollision(bullet, player)) {
             bullet.dead = true;
             updateLives(-1); 
         }
         
-        // Collision avec les SHIELDS
         shields.forEach((shield) => {
             if (checkCollision(bullet, shield)) {
                 shield.health--;
@@ -230,11 +303,10 @@ function handleCollisions() {
             }
         });
 
-        // Nettoyage : Garder si non touché et encore à l'écran
         return !bullet.dead && bullet.y < GAME_HEIGHT;
     });
     
-    // 3. Nettoyage des entités (Ennemis et Shields)
+    // 3. Nettoyage des entités 
     invaders = invaders.filter(i => !i.dead);
     shields = shields.filter(s => s.health > 0);
 }
@@ -248,6 +320,7 @@ function invaderShoot() {
     }
 }
 
+
 function updateGame() {
     if (gameOver || !gameStarted) return;
 
@@ -256,10 +329,12 @@ function updateGame() {
     player.bullets.forEach(b => b.update());
     invaderBullets.forEach(b => b.update()); 
 
-    // 2. Déplacer les ennemis 
+    // 2. Déplacer les ennemis (Logique de mouvement)
     invaderMoveCounter++;
     if (invaderMoveCounter >= INVADER_MOVE_SPEED) {
         let edgeReached = false;
+        
+        // Mouvement latéral
         invaders.forEach(invader => {
             invader.move();
             if (invader.x + invader.width >= GAME_WIDTH || invader.x <= 0) {
@@ -267,12 +342,21 @@ function updateGame() {
             }
         });
 
+        // Descente si le bord est atteint
         if (edgeReached) {
             invaders.forEach(invader => {
                 invader.xDirection *= -1; 
                 invader.y += 15;          
             });
+        } 
+        
+        // Descente constante/agressive pour foncer sur le joueur
+        if (Math.random() < 0.2) { 
+             invaders.forEach(invader => {
+                invader.y += 1;          
+            });
         }
+        
         invaderMoveCounter = 0; 
     }
 
@@ -286,7 +370,8 @@ function updateGame() {
     if (invaders.length === 0) {
         gameOver = true;
     }
-    if (invaders.some(i => i.y + i.height >= GAME_HEIGHT - 70)) {
+    // Défaite si les ennemis atteignent la ligne de bouclier (ou plus bas)
+    if (invaders.some(i => i.y + i.height >= GAME_HEIGHT - 100)) { 
         gameOver = true;
     }
 }
@@ -303,7 +388,6 @@ function drawGame() {
         return;
     }
 
-    // Dessiner les entités
     player.draw(ctx);
     player.bullets.forEach(b => b.draw(ctx));
     invaders.forEach(i => i.draw(ctx));
@@ -311,6 +395,12 @@ function drawGame() {
     invaderBullets.forEach(b => b.draw(ctx)); 
 
     if (gameOver) {
+         // Sauvegarde du score si c'est un record
+         if (score > 0) {
+             updatePersonalHighScore(score);
+             renderScoreBoard(); // Mise à jour du classement après la partie
+         }
+         
          ctx.fillStyle = 'red';
          ctx.font = '50px Arial';
          ctx.textAlign = 'center';
@@ -319,6 +409,7 @@ function drawGame() {
          ctx.fillText(message, GAME_WIDTH / 2, GAME_HEIGHT / 2);
          ctx.font = '20px Arial';
          ctx.fillText(`Score final: ${score}`, GAME_WIDTH / 2, GAME_HEIGHT / 2 + 50);
+         ctx.fillText(`Appuyez sur Entrée pour rejouer`, GAME_WIDTH / 2, GAME_HEIGHT / 2 + 90);
     }
 }
 
@@ -327,11 +418,18 @@ function gameLoop() {
     drawGame();
 }
 
-// --- GESTION DES ÉVÉNEMENTS ---
+// --- GESTION DES ÉVÉNEMENTS (ZQSD) ---
 
 document.addEventListener('keydown', (e) => {
-    keys[e.key] = true; 
-    keys[e.code] = true; 
+    // Utilisation des touches Q/D pour gauche/droite
+    if (e.key === 'q' || e.key === 'Q' || e.key === 'ArrowLeft') {
+         keys['q'] = true;
+    }
+    if (e.key === 'd' || e.key === 'D' || e.key === 'ArrowRight') {
+         keys['d'] = true;
+    }
+    
+    keys[e.code] = true; // Capture de l'espace pour le tir
 
     if (e.code === 'Space' && !gameOver) {
         if (!gameStarted) {
@@ -345,7 +443,12 @@ document.addEventListener('keydown', (e) => {
 });
 
 document.addEventListener('keyup', (e) => {
-    keys[e.key] = false;
+    if (e.key === 'q' || e.key === 'Q' || e.key === 'ArrowLeft') {
+         keys['q'] = false;
+    }
+    if (e.key === 'd' || e.key === 'D' || e.key === 'ArrowRight') {
+         keys['d'] = false;
+    }
     keys[e.code] = false;
 });
 
@@ -370,4 +473,7 @@ function startGame() {
     gameLoopInterval = setInterval(gameLoop, 1000 / 60); 
 }
 
-drawGame();
+document.addEventListener('DOMContentLoaded', () => {
+    renderScoreBoard(); 
+    drawGame(); 
+});
