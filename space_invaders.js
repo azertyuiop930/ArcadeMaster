@@ -1,43 +1,5 @@
 // =========================================================
-// 1. CLASSE AUDIO ET DÉCLARATION DES SONS
-// =========================================================
-class Sound {
-    constructor(src, volume = 0.3) {
-        this.sound = document.createElement("audio");
-        this.sound.src = src;
-        this.sound.setAttribute("preload", "auto");
-        this.sound.setAttribute("controls", "none");
-        this.sound.style.display = "none";
-        document.body.appendChild(this.sound);
-        this.sound.volume = volume;
-    }
-
-    play() {
-        this.sound.currentTime = 0; 
-        this.sound.play().catch(e => {});
-    }
-    
-    loop() {
-        this.sound.loop = true;
-        this.play();
-    }
-    
-    stop() {
-        this.sound.pause();
-        this.sound.currentTime = 0;
-    }
-}
-
-// DÉCLARATION DES SONS (utilise vos fichiers : shoot.mp3, shotgun_shoot.mp3, bonus_ramassé.mp3, background_music.mp3)
-const sfxNormalShoot = new Sound("shoot.mp3", 0.2); 
-const sfxShotgunShoot = new Sound("shotgun_shoot.mp3", 0.4); 
-const sfxExplosion = new Sound("bonus_ramassé.mp3", 0.5); // Utilisé pour l'explosion
-const sfxPickup = new Sound("bonus_ramassé.mp3", 0.5);   // Utilisé pour le ramassage de bonus
-const bgMusic = new Sound("background_music.mp3", 0.15); 
-
-
-// =========================================================
-// 2. VARIABLES GLOBALES ET SETUP
+// 1. VARIABLES GLOBALES ET SETUP (SANS AUCUN SON)
 // =========================================================
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -83,10 +45,9 @@ const POWERUP_SPAWN_CHANCE = 0.002;
 
 
 // =========================================================
-// 3. FONCTIONS D'AUTHENTIFICATION/SAUVEGARDE (NÉCESSAIRE POUR LES SCORES)
+// 2. FONCTIONS D'AUTHENTIFICATION/SAUVEGARDE 
 // =========================================================
 function getHighScores() {
-    // Vérifie si les fonctions d'auth.js sont disponibles
     const users = typeof loadUsers === 'function' ? loadUsers() : {};
     let highScores = [];
     for (const username in users) {
@@ -108,7 +69,6 @@ function getHighScores() {
     return highScores;
 }
 function updatePersonalHighScore(newScore) {
-    // Vérifie si les fonctions d'auth.js sont disponibles
     const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
     if (!currentUser || typeof loadUsers !== 'function' || typeof saveUsers !== 'function') return false;
     
@@ -150,7 +110,7 @@ function renderScoreBoard() {
 
 
 // =========================================================
-// 4. CLASSES DES ENTITÉS
+// 3. CLASSES DES ENTITÉS
 // =========================================================
 
 function checkCollision(objA, objB) {
@@ -217,11 +177,9 @@ class Player extends Entity {
                     const angleOffset = i * spreadAngle;
                     this.bullets.push(new Bullet(centerX, centerY, this.angle + angleOffset));
                 }
-                sfxShotgunShoot.play(); // DÉCLENCHEMENT SON FUSIL À POMPE
             } else {
                 // LOGIQUE TIR NORMAL
                 this.bullets.push(new Bullet(centerX, centerY, this.angle));
-                sfxNormalShoot.play(); // DÉCLENCHEMENT SON TIR NORMAL
             }
             
             this.canShoot = false;
@@ -322,12 +280,10 @@ class Bullet extends Entity {
 
 
 // =========================================================
-// 5. GESTION DES BONUS ET COLLISIONS
+// 4. GESTION DES BONUS ET COLLISIONS
 // =========================================================
 
 function activatePowerUp(type) {
-    sfxPickup.play(); // DÉCLENCHEMENT SON RAMASSAGE
-    
     if (type === 'shield') {
         isShieldActive = true;
         shieldTimer = 10 * 60; 
@@ -335,7 +291,6 @@ function activatePowerUp(type) {
         const enemiesKilled = invaders.length;
         updateScore(enemiesKilled * 10); 
         invaders = []; 
-        sfxExplosion.play(); // DÉCLENCHEMENT SON EXPLOSION (bombe)
     } else if (type === 'shotgun') {
         isShotgunActive = true;
         shotgunTimer = 20 * 60; 
@@ -381,7 +336,6 @@ function handleCollisions() {
                 invader.dead = true;
                 bullet.dead = true;
                 updateScore(invader.points);
-                sfxExplosion.play(); // DÉCLENCHEMENT SON EXPLOSION (tir)
             }
         });
         return !bullet.dead;
@@ -392,7 +346,6 @@ function handleCollisions() {
         if (checkCollision(invader, player)) {
             if (isShieldActive) {
                  invader.dead = true;
-                 sfxExplosion.play(); 
             } else {
                  invader.dead = true; 
                  updateLives(-1);
@@ -415,7 +368,7 @@ function handleCollisions() {
 
 
 // =========================================================
-// 6. LOGIQUE DU JEU PRINCIPALE
+// 5. LOGIQUE DU JEU PRINCIPALE
 // =========================================================
 
 let player;
@@ -434,7 +387,6 @@ function updateLives(amount) {
     livesElement.textContent = lives;
     if (lives <= 0) {
         gameOver = true;
-        bgMusic.stop(); // ARRÊT MUSIQUE
     }
 }
 
@@ -515,7 +467,7 @@ function gameLoop() {
 }
 
 // =========================================================
-// 7. GESTION DES ÉVÉNEMENTS
+// 6. GESTION DES ÉVÉNEMENTS
 // =========================================================
 
 document.addEventListener('mousemove', (e) => {
@@ -554,7 +506,7 @@ document.addEventListener('keyup', (e) => {
 
 
 // =========================================================
-// 8. INITIALISATION DU JEU
+// 7. INITIALISATION DU JEU
 // =========================================================
 
 function startGame() {
@@ -578,8 +530,6 @@ function startGame() {
     scoreElement.textContent = score;
     livesElement.textContent = lives;
     
-    bgMusic.loop(); // LANCE LA MUSIQUE EN BOUCLE
-
     gameLoopInterval = setInterval(gameLoop, 1000 / 60); 
 }
 
