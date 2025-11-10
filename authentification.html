@@ -5,21 +5,19 @@
     <title>ArcadeMaster - Compte</title>
     <link rel="stylesheet" href="styles.css">
     <style>
-        /* Styles spécifiques au compte */
-
-        /* Centrage et taille du conteneur principal */
+        /* Styles spécifiques au compte - Répétés ici pour la clarté mais devraient être dans styles.css */
+        
         .auth-container {
-            padding-top: 50px; /* Moins de padding pour mieux centrer */
-            max-width: 600px; /* Conteneur plus large pour le nouveau design */
-            margin: 0 auto;
+            padding-top: 50px; 
+            max-width: 600px; 
+            margin: 0 auto; 
             text-align: center;
         }
 
-        /* --- Section Profil (Haut de page) --- */
         .profile-section {
             display: flex;
-            align-items: center; /* Aligner verticalement */
-            justify-content: flex-start; /* Aligner à gauche du conteneur */
+            align-items: center; 
+            justify-content: flex-start;
             margin-bottom: 30px;
             padding: 20px;
             background: #282828;
@@ -28,12 +26,12 @@
         }
         
         #profile-pdp {
-            width: 80px; /* PDP légèrement plus petite */
+            width: 80px; 
             height: 80px;
             border-radius: 50%;
             object-fit: cover;
             border: 4px solid #00ff00;
-            margin-right: 20px; /* Espace entre la PDP et le texte */
+            margin-right: 20px;
         }
         
         .profile-info {
@@ -56,7 +54,6 @@
             display: inline-block;
         }
 
-        /* --- Formulaires de gestion de compte (Bas) --- */
         .auth-form {
             background: #333;
             padding: 30px;
@@ -65,11 +62,11 @@
             flex-direction: column;
             gap: 15px;
             margin-top: 20px;
-            text-align: left; /* Aligner le texte des formulaires à gauche */
+            text-align: left;
         }
 
         .auth-form h2 {
-            color: #00ff00; /* Vert pour les titres de section */
+            color: #00ff00; 
             font-size: 1.3em;
             border-bottom: 1px solid #555;
             padding-bottom: 10px;
@@ -84,11 +81,15 @@
             margin-bottom: 20px;
         }
         
-        /* Styles pour les champs d'input */
         .auth-form input {
             width: 100%;
             box-sizing: border-box;
             margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #555;
+            background-color: #444;
+            color: white;
         }
         
         .auth-form button {
@@ -96,6 +97,11 @@
             padding: 12px;
             font-size: 1em;
             margin-top: 5px;
+            background-color: #00ff00;
+            color: #222;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
         }
         
         #logout-button {
@@ -103,6 +109,14 @@
             color: white;
             margin-top: 30px;
         }
+        
+        .message {
+            margin-top: 15px;
+            color: #999;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
     </style>
 </head>
 <body>
@@ -145,7 +159,6 @@
         // --- Logique de la page d'authentification ---
         
         const authContent = document.getElementById('auth-content');
-        // Assurez-vous que cette URL est la même que dans auth.js
         const DEFAULT_PDP_URL_DISPLAY = 'https://i.imgur.com/39hN7hG.png'; 
 
         function renderAccountPage() {
@@ -189,7 +202,7 @@
                 
             } else {
                 // Écran de Connexion/Inscription (Déconnecté)
-                renderAuthForm(true); // Afficher la connexion par défaut
+                renderAuthForm(true); 
             }
         }
 
@@ -230,7 +243,7 @@
             
             login(username);
             alert(`Compte "${username}" créé et connecté !`);
-            window.location.href = 'index.html'; // Rediriger vers l'accueil après l'inscription
+            window.location.href = 'index.html'; 
         }
 
         function handleLogin(event) {
@@ -248,7 +261,7 @@
 
             login(username);
             alert(`Bienvenue, ${username} !`);
-            window.location.href = 'index.html'; // Rediriger vers l'accueil après connexion
+            window.location.href = 'index.html'; 
         }
         
         function handleChangePassword() {
@@ -272,7 +285,7 @@
 
             if (changePassword(currentUser, newPass)) {
                 alert("Mot de passe mis à jour avec succès ! Veuillez vous reconnecter.");
-                logout(); // Déconnecter l'utilisateur pour forcer la reconnexion avec le nouveau MDP
+                logout(); 
             }
         }
         
@@ -288,17 +301,16 @@
             
             if (updatePDP(currentUser, newUrl)) {
                 alert("Photo de profil mise à jour avec succès !");
-                renderAccountPage(); // Recharge la page pour afficher la nouvelle PDP
-                renderAuthControls(); // Met à jour la navbar
+                renderAccountPage(); 
+                renderAuthControls(); 
             }
         }
         
         document.addEventListener('DOMContentLoaded', () => {
-             // Assurez-vous que les fonctions d'auth sont disponibles
+             // LOGIQUE DE CHARGEMENT PLUS ROBUSTE (POUR ÉVITER LE BUG DE PAGE VIDE)
             if (typeof getCurrentUser !== 'undefined') {
                 renderAccountPage();
             } else {
-                // Délai de sécurité au cas où auth.js ne serait pas chargé instantanément
                 setTimeout(renderAccountPage, 100); 
             }
         });
