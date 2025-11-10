@@ -2,326 +2,92 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>ArcadeMaster - Compte</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arcade Master - Compte</title>
+    
     <link rel="stylesheet" href="styles.css">
-    <style>
-        /* Styles pour les conteneurs */
-        .auth-container { max-width: 450px; margin: 80px auto; padding: 30px; background-color: var(--color-surface); border-radius: 10px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); text-align: center; }
-        .auth-container h1 { color: var(--color-primary); margin-bottom: 25px; font-size: 2em; }
-        .auth-form { display: flex; flex-direction: column; gap: 15px; padding-top: 15px; }
-
-        /* Styles pour les cases (inputs) */
-        .auth-form input[type="text"], .auth-form input[type="password"], .auth-form input[type="url"] { padding: 15px; border: 2px solid #555; border-radius: 8px; background-color: #1c1c1c; color: #00ff00; font-size: 1.1em; transition: border-color 0.2s, box-shadow 0.2s; }
-        .auth-form input:focus { border-color: #00ff00; box-shadow: 0 0 10px rgba(0, 255, 0, 0.5); outline: none; }
-        
-        /* Styles pour les boutons */
-        .auth-form button, .action-button { padding: 15px; background-color: #00ff00; color: black; border: none; border-radius: 8px; font-size: 1.2em; font-weight: bold; cursor: pointer; transition: background-color 0.2s, transform 0.1s; margin-top: 5px; }
-        .auth-form button:hover, .action-button:hover { background-color: #00cc00; transform: translateY(-2px); }
-        .edit-button { background-color: #f39c12; }
-        .edit-button:hover { background-color: #e67e22; }
-
-        /* Styles pour les messages et le PDP */
-        /* IMPORTANT : Le message doit être à l'intérieur du conteneur pour être trouvé */
-        .message { margin-top: 15px; padding: 10px; border-radius: 5px; font-weight: bold; color: white; display: none; }
-        .message.error { background-color: #e74c3c; }
-        .message.success { background-color: #27ae60; }
-        .switch-mode { margin-top: 20px; color: var(--color-text); cursor: pointer; font-size: 0.9em; text-decoration: underline; }
-        .pdp-preview { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin: 10px auto 20px auto; border: 3px solid var(--color-primary); display: block; }
-
-        /* Styles du panneau de compte */
-        .account-panel { text-align: left; color: var(--color-text); }
-        .account-panel h1 { border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 20px; }
-        .account-info p { font-size: 1.1em; margin-bottom: 15px; }
-        .account-info strong { color: #f39c12; display: inline-block; width: 150px; }
-        .account-actions { display: flex; gap: 10px; margin-top: 20px;}
-        .account-panel .action-button { width: 100%; }
-        .account-panel .logout-button { background-color: #e74c3c; margin-top: 10px; }
-        .account-panel .logout-button:hover { background-color: #c0392b; }
-
-        /* Style spécifique pour le formulaire de modification */
-        .edit-form-group { margin-bottom: 20px; border-top: 1px dashed #333; padding-top: 15px;}
-        .edit-form-group p { font-style: italic; font-size: 0.9em; color: #aaa; margin-top: 5px;}
-    </style>
-    <script src="auth.js"></script>
-    <script>
-        function toggleMenu(x) {
-            x.classList.toggle("change");
-            const sidebar = document.getElementById("sidebar");
-            if (sidebar.style.width === "250px") {
-                sidebar.style.width = "0";
-            } else {
-                sidebar.style.width = "250px";
-            }
-        }
-        
-        function showMessage(type, text) {
-            const msg = document.getElementById('message');
-            // Assurez-vous que le message est visible même dans le formulaire de modification
-            if (msg) {
-                msg.className = `message ${type}`;
-                msg.textContent = text;
-                msg.style.display = 'block';
-            } else {
-                console.error("Élément #message non trouvé pour afficher le message.");
-            }
-        }
-        function hideMessage() {
-            const msg = document.getElementById('message');
-            if (msg) msg.style.display = 'none';
-        }
-
-        // Fonction de bascule du formulaire (login/register)
-        function switchAuthMode(mode) {
-             const container = document.getElementById('auth-container');
-            const formContent = document.getElementById('form-content');
-            const switchButton = document.getElementById('switch-mode-button');
-            const h1Element = container ? container.querySelector('h1') : null;
-            const isLogin = mode === 'login';
-
-            if (!container || !formContent || !switchButton || !h1Element) {
-                return;
-            }
-            
-            // Afficher les éléments spécifiques à la connexion/inscription
-            formContent.style.display = 'block';
-            switchButton.style.display = 'block';
-            hideMessage(); // Cacher l'ancien message
-
-            if (isLogin) {
-                h1Element.textContent = 'Se Connecter';
-                formContent.innerHTML = `
-                    <form id="login-form" onsubmit="handleLogin(event)" class="auth-form">
-                        <input type="text" id="login-username" placeholder="Nom d'utilisateur" required autocomplete="username">
-                        <input type="password" id="login-password" placeholder="Mot de passe" required autocomplete="current-password">
-                        <button type="submit">Connexion</button>
-                    </form>
-                `;
-                switchButton.textContent = "Pas de compte ? S'inscrire ici.";
-                switchButton.onclick = () => switchAuthMode('register');
-            } else {
-                h1Element.textContent = 'Créer un Compte';
-                formContent.innerHTML = `
-                    <form id="register-form" onsubmit="handleRegister(event)" class="auth-form">
-                        <input type="text" id="register-username" placeholder="Nom d'utilisateur" required autocomplete="username">
-                        <input type="password" id="register-password" placeholder="Mot de passe (min 5 caractères)" required minlength="5" autocomplete="new-password">
-                        <input type="url" id="register-pdp" placeholder="URL Image de Profil (Optionnel)" oninput="previewPdp(this.value)">
-                        <img id="pdp-preview" class="pdp-preview" src="https://i.imgur.com/39hN7hG.png" alt="Aperçu PDP" style="display:none;">
-                        <button type="submit">Inscription</button>
-                    </form>
-                `;
-                switchButton.textContent = "Déjà un compte ? Se connecter ici.";
-                switchButton.onclick = () => switchAuthMode('login');
-            }
-        }
-
-        function previewPdp(url) {
-            const img = document.getElementById('pdp-preview');
-            if (url) {
-                img.src = url;
-                img.style.display = 'block';
-            } else {
-                img.style.display = 'none';
-                img.src = 'https://i.imgur.com/39hN7hG.png'; 
-            }
-        }
-        
-        function previewPdpEdit(url) {
-            const img = document.getElementById('edit-pdp-preview');
-            const defaultUrl = 'https://i.imgur.com/39hN7hG.png';
-            if (img) { // Vérification de l'existence de l'élément (important pour la prévisualisation)
-                if (url) {
-                    img.src = url;
-                    img.style.display = 'block';
-                } else {
-                    img.src = defaultUrl;
-                }
-            }
-        }
-
-        // Nouvelle fonction pour afficher le formulaire de modification
-        function showEditForm(userData) {
-            const authContainer = document.getElementById('auth-container');
-            const currentPdp = userData.pdp && userData.pdp !== 'https://i.imgur.com/39hN7hG.png' ? userData.pdp : '';
-            
-            // S'assurer que le conteneur a le message
-            authContainer.innerHTML = `
-                <div class="account-panel">
-                    <h1 style="text-align: center;">Modifier Mon Compte</h1>
-                    <img id="edit-pdp-preview" src="${userData.pdp}" alt="Photo de profil" class="pdp-preview">
-                    
-                    <div id="message" class="message"></div> <form id="edit-form" onsubmit="handleAccountUpdate(event)" class="auth-form">
-                        
-                        <div class="edit-form-group">
-                            <label for="edit-password" style="font-weight: bold;">Nouveau Mot de Passe (min 5 caractères)</label>
-                            <input type="password" id="edit-password" placeholder="Laissez vide pour garder l'ancien Mdp" minlength="5" autocomplete="new-password">
-                            <p>Vous devrez vous reconnecter après avoir changé votre mot de passe.</p>
-                        </div>
-
-                        <div class="edit-form-group">
-                            <label for="edit-pdp" style="font-weight: bold;">Nouvelle URL de PDP</label>
-                            <input type="url" id="edit-pdp" placeholder="URL Image de Profil" value="${currentPdp}" oninput="previewPdpEdit(this.value)">
-                            <p>Laissez vide pour utiliser l'image par défaut.</p>
-                        </div>
-                        
-                        <button type="submit" class="action-button">Sauvegarder les Modifications</button>
-                        <button type="button" class="action-button edit-button" onclick="window.location.reload()">Annuler / Retour</button>
-                    </form>
-                </div>
-            `;
-            hideMessage(); // Assurez-vous qu'il est caché au chargement
-        }
-
-        function handleAccountUpdate(event) {
-            event.preventDefault();
-            hideMessage();
-
-            if (typeof updateUserData !== 'function') {
-                 showMessage('error', "Erreur: Le script d'authentification (auth.js) n'est pas complètement chargé.");
-                 return; 
-            }
-
-            const currentUser = getCurrentUser();
-            const newPassword = document.getElementById('edit-password').value;
-            const newPdp = document.getElementById('edit-pdp').value;
-            
-            if (newPassword && newPassword.length < 5) {
-                showMessage('error', 'Le nouveau mot de passe doit contenir au moins 5 caractères.');
-                return;
-            }
-
-            if (updateUserData(currentUser, newPassword, newPdp)) {
-                showMessage('success', 'Compte mis à jour avec succès !');
-                
-                if (newPassword) {
-                    // Si le mot de passe a changé, déconnexion forcée
-                    setTimeout(() => { logout(); }, 1500); 
-                } else {
-                    // Sinon, rafraîchissement simple pour voir les changements de PDP
-                    setTimeout(() => { window.location.reload(); }, 1500);
-                }
-            } else {
-                showMessage('error', "Aucune modification effectuée ou erreur lors de la sauvegarde.");
-            }
-        }
-
-        // Fonctions d'authentification (non modifiées)
-        function handleLogin(event) {
-            event.preventDefault();
-            hideMessage();
-            if (typeof login !== 'function') { showMessage('error', "Erreur: Le script d'authentification (auth.js) n'est pas chargé."); return; }
-            const username = document.getElementById('login-username').value;
-            const password = document.getElementById('login-password').value;
-            
-            if (login(username, password)) {
-                showMessage('success', `Connexion réussie ! Redirection en cours...`);
-                setTimeout(() => {
-                    window.location.href = 'index.html'; 
-                }, 1000);
-            } else {
-                showMessage('error', 'Nom d\'utilisateur ou mot de passe incorrect.');
-            }
-        }
-
-        function handleRegister(event) {
-            event.preventDefault();
-            hideMessage();
-            if (typeof registerUser !== 'function') { showMessage('error', "Erreur: Le script d'authentification (auth.js) n'est pas chargé."); return; }
-            const username = document.getElementById('register-username').value;
-            const password = document.getElementById('register-password').value;
-            const pdp = document.getElementById('register-pdp').value;
-
-            if (username.length < 3) { showMessage('error', 'Le nom d\'utilisateur doit contenir au moins 3 caractères.'); return; }
-
-            if (registerUser(username, password, pdp)) {
-                showMessage('success', `Inscription réussie ! Veuillez vous connecter.`);
-                setTimeout(() => {
-                    switchAuthMode('login');
-                }, 1500);
-            } else {
-                showMessage('error', `Le nom d\'utilisateur "${username}" est déjà pris.`);
-            }
-        }
-    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-    
-    <div id="navbar">
-        <div class="hamburger-menu" onclick="toggleMenu(this)">
-            <div class="bar"></div>
-            <div class="bar"></div>
-            <div class="bar"></div>
-        </div>
-        <div id="auth-controls">
+    <div class="main-container">
+
+        <nav id="navbar">
+            <div class="nav-links">
+                <a href="/ArcadeMaster/"><i class="fa-solid fa-house"></i> Accueil</a>
+                <a href="jeux.html"><i class="fa-solid fa-gamepad"></i> Menu Jeux</a>
+                <a href="credits.html"><i class="fa-solid fa-book"></i> Crédits</a>
             </div>
-    </div>
-
-    <div id="sidebar">
-        <a href="index.html">🏠 Accueil</a>
-        <a href="jeux.html">🕹️ Menu Jeux</a>
-        <a href="credits.html">📝 Crédits</a>
-        <a href="authentification.html">⚙️ Compte</a>
-    </div>
-
-    <div class="container">
-        <div class="auth-container" id="auth-container">
-            <h1>Authentification</h1> 
             
-            <div id="message" class="message"></div> <div id="form-content"></div> 
+            <a href="authentification.html" class="profile-link">
+                 <i class="fa-solid fa-user-gear"></i>
+            </a>
+        </nav>
+
+        <div class="auth-card">
             
-            <div id="switch-mode-button" class="switch-mode"></div>
+            <h2 style="text-align: center;">Se Connecter</h2>
+            
+            <form id="loginForm">
+                <label for="loginUsername">Nom d'utilisateur</label>
+                <input type="text" id="loginUsername" name="username" required>
+                
+                <label for="loginPassword">Mot de passe</label>
+                <input type="password" id="loginPassword" name="password" required>
+                
+                <button type="submit">Connexion</button>
+            </form>
+            
+            <p style="text-align: center; margin-top: 20px;">
+                Pas de compte ? <a href="#" id="showRegister">S'inscrire ici.</a>
+            </p>
+
+        </div>
+        
+        <div class="auth-card" id="registerArea" style="display: none; margin-top: 20px;">
+            <h2 style="text-align: center;">S'inscrire</h2>
+            
+            <form id="registerForm">
+                <label for="registerUsername">Nom d'utilisateur</label>
+                <input type="text" id="registerUsername" name="username" required>
+                
+                <label for="registerPassword">Mot de passe</label>
+                <input type="password" id="registerPassword" name="password" required>
+                
+                <button type="submit">Inscription</button>
+            </form>
+            
+            <p style="text-align: center; margin-top: 20px;">
+                Déjà un compte ? <a href="#" id="showLogin">Se connecter.</a>
+            </p>
         </div>
     </div>
-
+    
+    <script src="auth.js"></script>
     <script>
-        // Initialisation de la page
-        document.addEventListener('DOMContentLoaded', () => { 
-             if (typeof renderAuthControls === 'function') {
-                 renderAuthControls(); // Met à jour la navbar
-             }
-             
-             const currentUser = getCurrentUser();
-             const authContainer = document.getElementById('auth-container');
-             const formContent = document.getElementById('form-content');
-             const switchButton = document.getElementById('switch-mode-button');
-             const message = document.getElementById('message');
+        // Script pour gérer le switch entre Connexion et Inscription
+        document.addEventListener('DOMContentLoaded', () => {
+            const loginCard = document.getElementById('loginForm').parentNode;
+            const registerCard = document.getElementById('registerArea');
+            const showRegisterLink = document.getElementById('showRegister');
+            const showLoginLink = document.getElementById('showLogin');
 
-             if (currentUser) {
-                 const userData = getUserData(currentUser);
-                 
-                 // AFFICHAGE DU PANNEAU COMPTE (avec bouton Modifier)
-                 if (userData) {
-                     const pdpUrl = userData.pdp ? userData.pdp : 'https://i.imgur.com/39hN7hG.png';
-                     
-                     // S'assurer que les éléments de connexion ne sont pas visibles
-                     formContent.style.display = 'none';
-                     switchButton.style.display = 'none';
-                     message.style.display = 'none'; // Cacher le message de connexion
+            if (showRegisterLink) {
+                showRegisterLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    loginCard.style.display = 'none';
+                    registerCard.style.display = 'block';
+                });
+            }
 
-                     // Injection directe du panneau de compte
-                     authContainer.innerHTML = `
-                        <div class="account-panel">
-                            <h1 style="text-align: center;">Mon Compte Utilisateur</h1>
-                            <img src="${pdpUrl}" alt="Photo de profil" class="pdp-preview">
-                            <div class="account-info">
-                                <p><strong>Nom d'utilisateur :</strong> ${currentUser}</p>
-                                <p><strong>Rôle :</strong> <span>${userData.role === 'admin' ? '👑 ADMINISTRATEUR' : 'Joueur Standard'}</span></p>
-                                <p><strong>Statut :</strong> <span style="color: #00ff00;">Connecté</span></p>
-                                <p><strong>Meilleur score Invaders :</strong> <span>${userData.games.space_invaders ? userData.games.space_invaders.highScore : '0'}</span></p>
-                            </div>
-                            <div class="account-actions">
-                                <button class="action-button edit-button" onclick='showEditForm(${JSON.stringify(userData)})'>Modifier Profil</button>
-                                <button class="action-button logout-button" onclick="logout()">Déconnexion</button>
-                            </div>
-                        </div>
-                     `;
-                 } else {
-                     switchAuthMode('login');
-                 }
-             } else {
-                 // S'il n'est pas connecté, afficher le formulaire de connexion/inscription
-                switchAuthMode('login'); 
-             }
+            if (showLoginLink) {
+                showLoginLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    registerCard.style.display = 'none';
+                    loginCard.style.display = 'block';
+                });
+            }
         });
     </script>
+
 </body>
 </html>
