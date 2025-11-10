@@ -1,10 +1,10 @@
 // Fichier: auth.js
-// Gère l'authentification, la sauvegarde locale et le classement.
+// Gère l'authentification, la sauvegarde locale, le classement, et l'UI.
 
-const AUTH_SECTION = document.getElementById('auth-section');
+const AUTH_CONTROLS = document.getElementById('auth-controls');
 const STORAGE_KEY = 'arcadeMasterUsers';
 
-// --- Fonctions de base de données (LocalStorage) ---
+// --- Fonctions de base de données (Inchangées) ---
 
 function loadUsers() {
     const usersJson = localStorage.getItem(STORAGE_KEY);
@@ -23,15 +23,30 @@ function getCurrentUser() {
 
 function login(username) {
     localStorage.setItem('currentUser', username);
-    renderAuthUI();
+    renderAuthControls();
 }
 
 function logout() {
     localStorage.removeItem('currentUser');
-    renderAuthUI();
+    renderAuthControls();
+    if (window.location.pathname.endsWith('authentification.html')) {
+        window.location.reload(); // Recharger pour montrer l'écran de connexion
+    }
 }
 
-// --- Sauvegarde des Scores/Progression ---
+// --- Gestion du mot de passe ---
+
+function changePassword(username, newPassword) {
+    const users = loadUsers();
+    if (users[username]) {
+        users[username].password = newPassword;
+        saveUsers(users);
+        return true;
+    }
+    return false;
+}
+
+// --- Sauvegarde des Scores/Progression (Inchangée) ---
 
 function saveGameData(username, game, data) {
     const users = loadUsers();
@@ -43,22 +58,19 @@ function saveGameData(username, game, data) {
         users[username].games[game] = {};
     }
 
-    // Gestion du meilleur score pour Space Invaders
     if (game === 'space_invaders' && data.score !== undefined) {
         const currentBest = users[username].games[game].highScore || 0;
         if (data.score > currentBest) {
             users[username].games[game].highScore = data.score;
-            console.log(`Nouveau meilleur score pour ${username}: ${data.score}`);
         }
     } else {
-        // Pour les autres jeux/données
         users[username].games[game] = { ...users[username].games[game], ...data };
     }
     
     saveUsers(users);
 }
 
-// --- Fonction de Classement ---
+// --- Fonction de Classement (Inchangée) ---
 
 function getLeaderboard(game = 'space_invaders', limit = 10) {
     const users = loadUsers();
@@ -74,93 +86,45 @@ function getLeaderboard(game = 'space_invaders', limit = 10) {
         }
     }
 
-    // Trier les scores par ordre décroissant
     scores.sort((a, b) => b.score - a.score);
-
-    // Retourner seulement la limite demandée
     return scores.slice(0, limit);
 }
 
 // --- Rendu de l'interface utilisateur (UI) ---
 
-function renderAuthUI() {
+function renderAuthControls() {
     const currentUser = getCurrentUser();
     
-    if (!AUTH_SECTION) return; 
+    if (!AUTH_CONTROLS) return; 
     
-    AUTH_SECTION.innerHTML = ''; 
+    AUTH_CONTROLS.innerHTML = ''; 
 
     if (currentUser) {
-        // Utilisateur connecté
-        AUTH_SECTION.innerHTML = `
-            <div style="display:flex; align-items:center; gap: 10px; flex-wrap: wrap; justify-content: flex-end;">
-                Connecté: <span id="user-info" style="color:#00ff00; font-weight:bold;">${currentUser}</span> 
-                <button onclick="logout()">Déconnexion</button>
-                ${currentUser === 'admin' ? '<a href="admin.html" style="color:yellow; text-decoration:none;">ADMIN</a>' : ''}
-            </div>
+        // Utilisateur connecté : Montrer le nom et le bouton Compte
+        AUTH_CONTROLS.innerHTML = `
+            <span id="user-info-display">${currentUser}</span> 
+            <a href="authentification.html" id="account-button">⚙️ Compte</a>
+            ${currentUser === 'admin' ? '<a href="admin.html" class="nav-link" style="color:yellow;">ADMIN</a>' : ''}
         `;
     } else {
-        // Utilisateur déconnecté (Formulaires)
-        AUTH_SECTION.innerHTML = `
-            <form onsubmit="event.preventDefault(); handleRegister(event);" style="display:flex; gap: 10px;">
-                <input type="text" id="reg-username" placeholder="Pseudo (Créer Compte)" required>
-                <input type="password" id="reg-password" placeholder="Mot de passe" required>
-                <button type="submit">Créer</button>
-            </form>
-            <form onsubmit="event.preventDefault(); handleLogin(event);" style="display:flex; gap: 10px; margin-top: 5px;">
-                <input type="text" id="login-username" placeholder="Pseudo (Connexion)" required>
-                <input type="password" id="login-password" placeholder="Mot de passe" required>
-                <button type="submit">Connexion</button>
-            </form>
+        // Utilisateur déconnecté : Montrer le bouton S'inscrire/Se Connecter
+        AUTH_CONTROLS.innerHTML = `
+            <button id="login-button" onclick="window.location.href='authentification.html'">
+                S'inscrire / Se Connecter
+            </button>
         `;
     }
 }
-
-function handleRegister(event) {
-    const username = event.target.elements['reg-username'].value.trim();
-    const password = event.target.elements['reg-password'].value;
-    
-    if (!username || !password) return alert("Veuillez remplir tous les champs.");
-    
-    const users = loadUsers();
-    if (users[username]) {
-        return alert("Ce pseudo existe déjà. Veuillez vous connecter.");
-    }
-    
-    users[username] = { password: password, games: {} };
-    saveUsers(users);
-    
-    login(username);
-    alert(`Compte "${username}" créé et connecté !`);
-}
-
-function handleLogin(event) {
-    const username = event.target.elements['login-username'].value.trim();
-    const password = event.target.elements['login-password'].value;
-
-    if (!username || !password) return alert("Veuillez remplir tous les champs.");
-
-    const users = loadUsers();
-    const user = users[username];
-
-    if (!user || user.password !== password) {
-        return alert("Pseudo ou mot de passe incorrect.");
-    }
-
-    login(username);
-    alert(`Bienvenue, ${username} !`);
-}
-
 
 // --- Initialisation ---
 
-document.addEventListener('DOMContentLoaded', renderAuthUI);
+document.addEventListener('DOMContentLoaded', renderAuthControls);
 
 // Rendre les fonctions importantes accessibles globalement
 window.saveGameData = saveGameData;
 window.getCurrentUser = getCurrentUser; 
 window.logout = logout;
-window.handleRegister = handleRegister;
-window.handleLogin = handleLogin;
 window.loadUsers = loadUsers; 
-window.getLeaderboard = getLeaderboard; // Nouvelle fonction accessible
+window.getLeaderboard = getLeaderboard; 
+window.changePassword = changePassword;
+window.login = login;
