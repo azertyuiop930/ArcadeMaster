@@ -1,6 +1,6 @@
 const STORAGE_KEY = 'arcadeMasterUsers';
 
-// --- Fonctions de base (Identiques) ---
+// --- Fonctions de base ---
 
 function loadUsers() {
     const json = localStorage.getItem(STORAGE_KEY);
@@ -34,7 +34,23 @@ function setCurrentUser(username) {
     sessionStorage.setItem('currentUser', username);
 }
 
-// --- Focntion login (CORRIGÉE) ---
+function registerUser(username, password, pdpURL = 'https://i.imgur.com/39hN7hG.png') {
+    const users = loadUsers();
+    if (users[username]) {
+        return false; 
+    }
+
+    users[username] = {
+        password: password,
+        role: "user",
+        pdp: pdpURL,
+        games: {}
+    };
+    saveUsers(users);
+    return true;
+}
+
+// --- Focntion login (CLÉ : Assure le rendu après connexion) ---
 
 function login(username, password) {
     const users = loadUsers();
@@ -43,7 +59,7 @@ function login(username, password) {
     if (user && user.password === password) {
         setCurrentUser(username);
         
-        // CORRECTION MAJEURE: Forcer la mise à jour de l'interface
+        // CORRECTION : Forcer la mise à jour de l'interface immédiatement.
         if (typeof renderAuthControls === 'function') {
              renderAuthControls();
         }
@@ -57,11 +73,10 @@ function logout() {
     if (typeof renderAuthControls === 'function') {
         renderAuthControls();
     }
-    // Rediriger vers l'accueil pour forcer la réinitialisation de la page
     window.location.href = 'index.html'; 
 }
 
-// --- Fonctions de jeu (Identiques) ---
+// --- Fonctions de jeu et Admin (Inchgés) ---
 
 function saveGameData(username, gameId, data) {
     const users = loadUsers();
@@ -103,14 +118,18 @@ function deleteUser(username) {
 }
 
 
-// --- Fonction de Rendu (Identique, mais vérifiée) ---
+// --- Fonction de Rendu (Doit trouver les éléments) ---
 
 function renderAuthControls() {
     const currentUser = getCurrentUser();
     const authControls = document.getElementById('auth-controls');
     const sidebar = document.getElementById('sidebar');
     
-    if (!authControls || !sidebar) return;
+    // Vérification essentielle
+    if (!authControls || !sidebar) {
+        console.warn("Éléments Navbar ou Sidebar non trouvés. Rendu Auth annulé.");
+        return;
+    }
 
     let authHTML = '';
     
@@ -142,11 +161,12 @@ function renderAuthControls() {
     authControls.innerHTML = authHTML;
 }
 
-// Globalisation et exécution
+// Globalisation des fonctions
 window.loadUsers = loadUsers;
 window.saveUsers = saveUsers;
 window.getUserData = getUserData;
 window.getCurrentUser = getCurrentUser;
+window.registerUser = registerUser; // Ajouté pour être sûr
 window.login = login;
 window.logout = logout;
 window.renderAuthControls = renderAuthControls;
@@ -155,4 +175,5 @@ window.getFullLeaderboard = getFullLeaderboard;
 window.deleteUser = deleteUser;
 
 
-document.addEventListener('DOMContentLoaded', renderAuthControls);
+// CORRECTION MAJEURE: Utilisation de window.onload pour une exécution plus tardive et sûre.
+window.onload = renderAuthControls;
