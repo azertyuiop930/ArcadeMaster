@@ -5,12 +5,12 @@
     <title>ArcadeMaster - Compte</title>
     <link rel="stylesheet" href="styles.css">
     <style>
-        /* Styles de la page */
+        /* Styles pour les conteneurs */
         .auth-container { max-width: 450px; margin: 80px auto; padding: 30px; background-color: var(--color-surface); border-radius: 10px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); text-align: center; }
         .auth-container h1 { color: var(--color-primary); margin-bottom: 25px; font-size: 2em; }
         .auth-form { display: flex; flex-direction: column; gap: 15px; padding-top: 15px; }
 
-        /* Styles pour les cases */
+        /* Styles pour les cases (inputs) */
         .auth-form input[type="text"], .auth-form input[type="password"], .auth-form input[type="url"] { padding: 15px; border: 2px solid #555; border-radius: 8px; background-color: #1c1c1c; color: #00ff00; font-size: 1.1em; transition: border-color 0.2s, box-shadow 0.2s; }
         .auth-form input:focus { border-color: #00ff00; box-shadow: 0 0 10px rgba(0, 255, 0, 0.5); outline: none; }
         
@@ -18,6 +18,7 @@
         .auth-form button, .logout-button { padding: 15px; background-color: #00ff00; color: black; border: none; border-radius: 8px; font-size: 1.2em; font-weight: bold; cursor: pointer; transition: background-color 0.2s, transform 0.1s; }
         .auth-form button:hover { background-color: #00cc00; transform: translateY(-2px); }
 
+        /* Styles pour les messages et le PDP */
         .message { margin-top: 15px; padding: 10px; border-radius: 5px; font-weight: bold; color: white; display: none; }
         .message.error { background-color: #e74c3c; }
         .message.success { background-color: #27ae60; }
@@ -43,28 +44,33 @@
             }
         }
         
+        // Fonction de bascule du formulaire
         function switchAuthMode(mode) {
             const container = document.getElementById('auth-container');
-            const formHTML = document.getElementById('form-content');
+            const formContent = document.getElementById('form-content');
+            const switchButton = document.getElementById('switch-mode-button');
+            const h1Element = container.querySelector('h1');
             const isLogin = mode === 'login';
-            
-            // On s'assure que h1 et formHTML existent avant de continuer
-            if (!container || !formHTML) return;
 
+            if (!container || !formContent || !switchButton || !h1Element) {
+                console.error("Éléments d'authentification manquants pour switchAuthMode.");
+                return;
+            }
+            
             if (isLogin) {
-                container.querySelector('h1').textContent = 'Se Connecter';
-                formHTML.innerHTML = `
+                h1Element.textContent = 'Se Connecter';
+                formContent.innerHTML = `
                     <form id="login-form" onsubmit="handleLogin(event)" class="auth-form">
                         <input type="text" id="login-username" placeholder="Nom d'utilisateur" required autocomplete="username">
                         <input type="password" id="login-password" placeholder="Mot de passe" required autocomplete="current-password">
                         <button type="submit">Connexion</button>
                     </form>
                 `;
-                document.getElementById('switch-mode-button').textContent = "Pas de compte ? S'inscrire ici.";
-                document.getElementById('switch-mode-button').onclick = () => switchAuthMode('register');
+                switchButton.textContent = "Pas de compte ? S'inscrire ici.";
+                switchButton.onclick = () => switchAuthMode('register');
             } else {
-                container.querySelector('h1').textContent = 'Créer un Compte';
-                formHTML.innerHTML = `
+                h1Element.textContent = 'Créer un Compte';
+                formContent.innerHTML = `
                     <form id="register-form" onsubmit="handleRegister(event)" class="auth-form">
                         <input type="text" id="register-username" placeholder="Nom d'utilisateur" required autocomplete="username">
                         <input type="password" id="register-password" placeholder="Mot de passe (min 5 caractères)" required minlength="5" autocomplete="new-password">
@@ -73,8 +79,8 @@
                         <button type="submit">Inscription</button>
                     </form>
                 `;
-                document.getElementById('switch-mode-button').textContent = "Déjà un compte ? Se connecter ici.";
-                document.getElementById('switch-mode-button').onclick = () => switchAuthMode('login');
+                switchButton.textContent = "Déjà un compte ? Se connecter ici.";
+                switchButton.onclick = () => switchAuthMode('login');
             }
             hideMessage();
         }
@@ -161,11 +167,13 @@
         <div class="auth-container" id="auth-container">
             <h1>Authentification</h1> 
             
-            <div id="form-content"></div> 
+            <div id="form-content">
+                </div>
             
             <div id="message" class="message"></div>
             
-            <div id="switch-mode-button" class="switch-mode"></div>
+            <div id="switch-mode-button" class="switch-mode">
+                </div>
         </div>
     </div>
 
@@ -182,28 +190,31 @@
 
              if (currentUser) {
                  const userData = getUserData(currentUser);
-                 const pdpUrl = userData && userData.pdp ? userData.pdp : 'https://i.imgur.com/39hN7hG.png';
                  
                  // AFFICHAGE DU PANNEAU COMPTE
-                 authContainer.innerHTML = `
-                    <div class="account-panel">
-                        <h1 style="text-align: center;">Mon Compte Utilisateur</h1>
-                        <img src="${pdpUrl}" alt="Photo de profil" class="pdp-preview">
-                        <div class="account-info">
-                            <p><strong>Nom d'utilisateur :</strong> ${currentUser}</p>
-                            <p><strong>Rôle :</strong> <span>${userData.role === 'admin' ? '👑 ADMINISTRATEUR' : 'Joueur Standard'}</span></p>
-                            <p><strong>Statut :</strong> <span style="color: #00ff00;">Connecté</span></p>
-                            <p><strong>Meilleur score Invaders :</strong> <span>${userData.games.space_invaders ? userData.games.space_invaders.highScore : '0'}</span></p>
+                 if (userData) {
+                     const pdpUrl = userData.pdp ? userData.pdp : 'https://i.imgur.com/39hN7hG.png';
+                 
+                     authContainer.innerHTML = `
+                        <div class="account-panel">
+                            <h1 style="text-align: center;">Mon Compte Utilisateur</h1>
+                            <img src="${pdpUrl}" alt="Photo de profil" class="pdp-preview">
+                            <div class="account-info">
+                                <p><strong>Nom d'utilisateur :</strong> ${currentUser}</p>
+                                <p><strong>Rôle :</strong> <span>${userData.role === 'admin' ? '👑 ADMINISTRATEUR' : 'Joueur Standard'}</span></p>
+                                <p><strong>Statut :</strong> <span style="color: #00ff00;">Connecté</span></p>
+                                <p><strong>Meilleur score Invaders :</strong> <span>${userData.games.space_invaders ? userData.games.space_invaders.highScore : '0'}</span></p>
+                            </div>
+                            <button class="logout-button" onclick="logout()">Déconnexion</button>
                         </div>
-                        <button class="logout-button" onclick="logout()">Déconnexion</button>
-                    </div>
-                 `;
-             } else {
-                 // S'il n'est pas connecté, le conteneur doit exister pour que switchAuthMode le remplisse
-                 if (authContainer) {
-                    // Pour garantir que les éléments existent pour switchAuthMode, on fait le rendu du formulaire par défaut.
-                    switchAuthMode('login'); 
+                     `;
+                 } else {
+                     // Si la session est là mais les données locales sont parties
+                     switchAuthMode('login');
                  }
+             } else {
+                 // S'il n'est pas connecté (CAS NORMAL), on appelle switchAuthMode pour injecter le formulaire.
+                switchAuthMode('login'); 
              }
         };
     </script>
