@@ -71,13 +71,13 @@
         }
         
         const leaderboardBody = document.getElementById('leaderboardTable');
-        const DEFAULT_PDP_URL = 'https://i.imgur.com/39hN7hG.png'; // Doit correspondre à auth.js dans l'autre fichier
+        const DEFAULT_PDP_URL = 'https://i.imgur.com/39hN7hG.png'; 
 
         function renderLeaderboard() {
             // S'assurer que les fonctions existent (elles viennent de auth.js)
             if (typeof getLeaderboard === 'undefined' || typeof getUserData === 'undefined') {
-                console.error("Erreur : Les fonctions getLeaderboard ou getUserData ne sont pas définies. Vérifiez auth.js.");
-                leaderboardBody.innerHTML = '<tr><td colspan="4">Erreur de chargement du classement.</td></tr>';
+                console.error("Erreur critique: Les fonctions getLeaderboard ou getUserData ne sont pas définies. Vérifiez auth.js.");
+                leaderboardBody.innerHTML = '<tr><td colspan="4">Erreur de chargement du classement (auth.js manquant ou corrompu).</td></tr>';
                 return;
             }
 
@@ -90,7 +90,12 @@
                 
                 // Obtenir les données complètes de l'utilisateur pour la PDP
                 const userData = getUserData(entry.username);
-                const pdpUrl = userData ? userData.pdp || DEFAULT_PDP_URL : DEFAULT_PDP_URL;
+                // Si userData est null ou pdp n'existe pas, utilise DEFAULT_PDP_URL
+                const pdpUrl = userData && userData.pdp ? userData.pdp : DEFAULT_PDP_URL;
+
+                // --- DEBOGAGE PDP ---
+                console.log(`Utilisateur: ${entry.username}, PDP URL: ${pdpUrl}`);
+                // --- FIN DEBOGAGE ---
 
                 if (rank === 1) {
                     trophy = '<span class="trophy">🥇</span>';
