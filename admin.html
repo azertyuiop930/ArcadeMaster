@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="styles.css">
     
     <script>
-        // --- Fonction du Menu Hamburger (CORRIGÉE: Utilise la largeur) ---
+        // --- Fonction du Menu Hamburger (UNIFORME ET ESSENTIELLE) ---
         function toggleMenu(x) {
             x.classList.toggle("change");
             const sidebar = document.getElementById("sidebar");
@@ -23,9 +23,7 @@
     
     <div id="navbar">
         <div class="hamburger-menu" onclick="toggleMenu(this)">
-            <div class="bar"></div>
-            <div class="bar"></div>
-            <div class="bar"></div>
+            <div class="bar"></div><div class="bar"></div><div class="bar"></div>
         </div>
         <div id="auth-controls">
             </div>
@@ -57,12 +55,16 @@
         function deleteUser(username) {
             if (confirm(`Êtes-vous sûr de vouloir supprimer l'utilisateur "${username}" ? Cette action est irréversible.`)) {
                 
-                // Suppression du compte
+                // Vérification de l'existence des fonctions d'Auth (sécurité)
+                if (typeof loadUsers === 'undefined' || typeof saveUsers === 'undefined') {
+                    alert("Erreur: Les fonctions de gestion d'utilisateurs ne sont pas disponibles.");
+                    return;
+                }
+                
                 const users = loadUsers(); 
                 delete users[username];
                 saveUsers(users);
                 
-                // Si l'utilisateur supprimé était l'administrateur courant, déconnectez-le
                 if (getCurrentUser() === username) {
                     logout();
                 } else {
@@ -72,6 +74,7 @@
         }
 
         function renderUserList() {
+            // Vérification de sécurité et de chargement
             if (typeof loadUsers === 'undefined' || typeof getCurrentUser === 'undefined' || typeof isAdmin === 'undefined') {
                 document.getElementById('user-list').innerHTML = '<p style="color:red; text-align:center;">Erreur : auth.js n\'est pas chargé correctement.</p>';
                 return;
@@ -79,7 +82,7 @@
 
             const currentUser = getCurrentUser();
             if (!currentUser || !isAdmin(currentUser)) {
-                // Redirection si l'utilisateur n'est pas admin (sécurité basique côté client)
+                // Redirection si l'utilisateur n'est pas admin (si la navigation directe a été tentée)
                 window.location.href = 'index.html';
                 return;
             }
@@ -111,15 +114,14 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            // Assurez-vous que l'authentification est rendue en premier
+            // S'assure que la navbar est rendue
             if (typeof renderAuthControls === 'function') {
                 renderAuthControls();
             }
-            // Ensuite, chargez la liste des utilisateurs si l'utilisateur est admin
+            // Charge la liste des utilisateurs après un court délai
             setTimeout(renderUserList, 200);
         });
 
-        // Rendre la fonction de suppression accessible
         window.deleteUser = deleteUser;
     </script>
 </body>
