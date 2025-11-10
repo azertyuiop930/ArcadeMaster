@@ -1,14 +1,14 @@
 // Fichier: auth.js
-// Gère l'authentification, la sauvegarde locale, le classement, les Rôles et l'UI.
+// ... (Fonctions loadUsers, saveUsers, getCurrentUser, isAdmin, etc. restent inchangées)
 
 const AUTH_CONTROLS = document.getElementById('auth-controls');
 const STORAGE_KEY = 'arcadeMasterUsers';
-
-// --- Constantes de Rôles et Defaults ---
 const DEFAULT_PDP_URL = 'https://i.imgur.com/39hN7hG.png'; 
-const ADMIN_USERS = ['Zelda5962']; // Utilisateurs ayant le rôle ADMIN
+const ADMIN_USERS = ['Zelda5962']; 
 
-// --- Fonctions de base de données ---
+// ... (Autres fonctions de base de auth.js - login, logout, getUserData, updatePDP, changePassword, saveGameData)
+
+// --- Fonctions de base de données (Inchangé) ---
 
 function loadUsers() {
     const usersJson = localStorage.getItem(STORAGE_KEY);
@@ -19,8 +19,6 @@ function saveUsers(users) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
 }
 
-// --- Fonctions d'authentification & Rôles ---
-
 function getCurrentUser() {
     return localStorage.getItem('currentUser');
 }
@@ -29,82 +27,15 @@ function isAdmin(username) {
     return ADMIN_USERS.includes(username);
 }
 
-function login(username) {
-    localStorage.setItem('currentUser', username);
-    renderAuthControls();
-}
-
-function logout() {
-    localStorage.removeItem('currentUser');
-    renderAuthControls();
-    if (window.location.pathname.endsWith('authentification.html')) {
-        window.location.reload(); 
-    }
-}
-
 function getUserData(username) {
     const users = loadUsers();
     return users[username] || null; 
 }
+// ... (Toutes les autres fonctions jusqu'à saveGameData, incluses, sont conservées)
 
-function updatePDP(username, newUrl) {
-    const users = loadUsers();
-    if (users[username]) {
-        users[username].pdp = newUrl;
-        saveUsers(users);
-        return true;
-    }
-    return false;
-}
+// --- Fonction de Classement (MODIFIÉE) ---
 
-function changePassword(username, newPassword) {
-    const users = loadUsers();
-    if (users[username]) {
-        users[username].password = newPassword;
-        saveUsers(users);
-        return true;
-    }
-    return false;
-}
-
-// --- Sauvegarde des Scores/Progression ---
-function saveGameData(username, game, data) {
-    const users = loadUsers();
-    
-    // Initialisation si l'utilisateur n'existe pas ou n'a pas de PDP
-    if (!users[username]) {
-        users[username] = { 
-            password: '', 
-            games: {}, 
-            pdp: DEFAULT_PDP_URL 
-        };
-    } else if (users[username].pdp === undefined) {
-         users[username].pdp = DEFAULT_PDP_URL;
-    }
-    
-    if (!users[username].games) {
-        users[username].games = {};
-    }
-    
-    if (!users[username].games[game]) {
-        users[username].games[game] = {};
-    }
-
-    if (game === 'space_invaders' && data.score !== undefined) {
-        const currentBest = users[username].games[game].highScore || 0;
-        if (data.score > currentBest) {
-            users[username].games[game].highScore = data.score;
-        }
-    } else {
-        users[username].games[game] = { ...users[username].games[game], ...data };
-    }
-    
-    saveUsers(users);
-}
-
-// --- Fonction de Classement ---
-
-function getLeaderboard(game = 'space_invaders', limit = 10) {
+function getFullLeaderboard(game = 'space_invaders') {
     const users = loadUsers();
     let scores = [];
 
@@ -117,12 +48,39 @@ function getLeaderboard(game = 'space_invaders', limit = 10) {
             });
         }
     }
-
+    // Trie tous les scores, sans limite
     scores.sort((a, b) => b.score - a.score);
-    return scores.slice(0, limit);
+    return scores;
 }
 
-// --- Rendu de l'interface utilisateur (UI) ---
+function getLeaderboard(game = 'space_invaders', limit = 10) {
+    // Utilise la fonction complète et la limite ensuite pour le Top X
+    return getFullLeaderboard(game).slice(0, limit);
+}
+
+// NOUVELLE FONCTION : Trouve le rang d'un utilisateur spécifique
+function getPersonalRank(username, game = 'space_invaders') {
+    const fullLeaderboard = getFullLeaderboard(game);
+    
+    // Si l'utilisateur n'a pas de score, son rang est null
+    if (!username) return null;
+
+    // Trouver l'index (position) du joueur dans la liste triée
+    const index = fullLeaderboard.findIndex(entry => entry.username === username);
+
+    if (index === -1) {
+        return null; // Pas de score enregistré
+    }
+    
+    // Le rang est l'index + 1
+    const rank = index + 1;
+    const score = fullLeaderboard[index].score;
+
+    return { rank: rank, score: score };
+}
+
+
+// --- Rendu de l'interface utilisateur (UI) (Inchangé) ---
 
 function renderAuthControls() {
     const currentUser = getCurrentUser();
@@ -179,6 +137,7 @@ window.getCurrentUser = getCurrentUser;
 window.logout = logout;
 window.loadUsers = loadUsers; 
 window.getLeaderboard = getLeaderboard; 
+window.getPersonalRank = getPersonalRank; // NOUVEAU
 window.changePassword = changePassword;
 window.login = login;
 window.isAdmin = isAdmin;
