@@ -1,10 +1,10 @@
 /* ========================================================= */
-/* 1. STYLES GÉNÉRAUX ET RESET (Couleurs Grises de Base) */
+/* 1. STYLES GÉNÉRAUX ET RESET (Couleurs Grises & Ambiance Retrouvée) */
 /* ========================================================= */
 
 body {
     font-family: 'Arial', sans-serif;
-    background-color: #121212; /* Fond très sombre, quasi noir */
+    background-color: #121212; /* Fond très sombre */
     color: #E0E0E0; /* Texte clair */
     margin: 0;
     padding: 0;
@@ -15,14 +15,14 @@ body {
 }
 
 a {
-    color: #00FF00; /* Vert Néon pour les liens */
+    color: #E0E0E0; /* Liens blancs/gris clair */
     text-decoration: none;
     cursor: pointer;
     transition: color 0.2s;
 }
 
 a:hover {
-    color: #39FF14;
+    color: #00FF00; /* Vert néon au survol */
 }
 
 h1 {
@@ -33,48 +33,42 @@ h1 {
 }
 
 /* ========================================================= */
-/* 2. NAVIGATION EN HAUT (Menu Centré/Déroulant) */
+/* 2. NAVIGATION EN HAUT (Menu d'Origine) */
 /* ========================================================= */
 
-/* Conteneur du menu (pour qu'il soit centré en haut) */
+/* Conteneur principal de la navigation (centré) */
 #navbar {
     position: absolute;
     top: 15px; 
     left: 50%;
-    transform: translateX(-50%); /* Centrage horizontal parfait */
+    transform: translateX(-50%); /* Centrage horizontal */
     z-index: 2000; 
-    /* Conteneur pour le menu déroulant vu dans l'image */
-    background-color: #2D2D2D; /* Fond du menu déroulant */
+    background-color: #2D2D2D; /* Fond du menu (Gris foncé) */
     border: 1px solid #444; 
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
     border-radius: 5px;
     padding: 5px 10px; 
 }
 
-/* Les liens du menu */
+/* Style des liens dans le menu */
 #navbar a {
-    color: #E0E0E0; /* Liens blancs/gris clair */
-    margin: 0 10px;
+    margin: 0 15px; /* Espacement entre les liens */
     padding: 5px 0;
-    display: inline-flex; /* Permet aux icônes et texte d'être alignés */
+    display: inline-flex; 
     align-items: center;
     font-size: 0.9em;
+    color: #E0E0E0; /* Texte des liens */
 }
 
 #navbar a:hover {
-    color: #00FF00; /* Vert néon au survol */
+    color: #00FF00; /* Vert Néon au survol */
 }
 
+/* Icônes dans les liens */
 #navbar a i {
     margin-right: 5px;
     color: #F39C12; /* Icônes en orange/jaune */
 }
-
-/* Le menu "hamburger" ou l'élément cliquable principal (si utilisé) */
-.hamburger-menu {
-    /* Si vous n'utilisez plus l'icône, mais le menu déroulant directement, ce style n'est pas utilisé */
-}
-
 
 /* ========================================================= */
 /* 3. STYLES DU JEU (space_invaders.html) */
@@ -83,7 +77,7 @@ h1 {
 .main-game-area {
     width: 100%;
     max-width: 1150px; 
-    margin-top: 80px; /* Espace pour le menu du haut */
+    margin-top: 80px; 
     padding: 20px;
 }
 
@@ -112,8 +106,6 @@ h1 {
     color: #F39C12; 
     border-bottom: 1px solid #F39C12;
 }
-
-/* ... (Le reste des styles de score, vies et classement) ... */
 
 .score-details p {
     font-size: 1.1em;
@@ -149,7 +141,14 @@ h1 {
     max-width: 400px;
     margin: 100px auto; 
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
-    border: 1px solid #393939; /* Bordure subtile */
+    border: 1px solid #393939; 
+}
+
+label {
+    display: block;
+    margin-top: 15px;
+    color: #F39C12;
+    font-weight: bold;
 }
 
 input[type="text"], input[type="password"] {
@@ -173,41 +172,40 @@ button {
     font-size: 1.1em;
     cursor: pointer;
     font-weight: bold;
-    transition: transform 0.05s, box-shadow 0.05s, background-color 0.2s;
+    transition: background-color 0.2s; /* Garde la transition de couleur */
     color: #121212;
-    box-shadow: 0 4px #00B300; 
     background-color: #00FF00; 
 }
 
 .user-card button {
     background-color: #E74C3C; 
     color: white;
-    box-shadow: 0 4px #C0392B; 
 }
 
-/* ... (Le reste des styles de compte utilisateur) ... */
+/* ... (Style du compte utilisateur) ... */
+
+.user-info p {
+    color: #E0E0E0;
+    margin: 10px 0;
+}
+
+.user-info span {
+    color: #00FF00;
+    font-weight: bold;
+}
+
+.profile-img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 3px solid #00FF00;
+    margin: 0 auto 20px auto;
+    display: block;
+    object-fit: cover;
+}
 
 /* ========================================================= */
-/* 5. ANIMATIONS (CLIC ET SURVOL) */
+/* 5. ANIMATIONS RÉDUITES (Pour le jeu uniquement) */
 /* ========================================================= */
 
-a, button, .hamburger-menu, #score-board div, #score-board li {
-    transition: transform 0.05s ease-out, box-shadow 0.05s, background-color 0.2s; 
-    user-select: none; 
-}
-
-a:active, 
-button:active, 
-.hamburger-menu:active, 
-#score-board div:active, 
-#score-board li:active {
-    transform: scale(0.97); 
-    box-shadow: none !important; 
-}
-
-.auth-card button:active {
-    background-color: #00B300; 
-}
-.user-card button:active {
-    background-color: #C0392B; 
-}
+/* Retire les animations de pression (transform) des menus, les gardant pour le jeu. */
