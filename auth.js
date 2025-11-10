@@ -1,114 +1,151 @@
-// =========================================================
-// 1. GESTION DES UTILISATEURS ET AUTHENTIFICATION
-// =========================================================
+// --- FONCTIONS DE BASE DE L'AUTHENTIFICATION ---
 
-// Sauvegarde l'objet utilisateurs dans le localStorage
-function saveUsers(users) {
-    localStorage.setItem('gameUsers', JSON.stringify(users));
-}
+// Initialisation des utilisateurs mock si aucune donnée n'existe
+const mockUsers = {
+    'admin': { 
+        password: 'password', 
+        pdp: 'https://i.imgur.com/39hN7hG.png', 
+        role: 'admin', 
+        games: { 
+            space_invaders: { highScore: 8000 } 
+        } 
+    },
+    'joueur': { 
+        password: 'pass', 
+        pdp: '', 
+        role: 'user', 
+        games: { 
+            space_invaders: { highScore: 2500 } 
+        } 
+    }
+};
 
-// Charge l'objet utilisateurs depuis le localStorage
 function loadUsers() {
-    const usersJson = localStorage.getItem('gameUsers');
-    return usersJson ? JSON.parse(usersJson) : {};
+    const usersData = localStorage.getItem('arcadeMasterUsers');
+    if (!usersData) {
+        // Initialiser avec les données mock si localStorage est vide
+        localStorage.setItem('arcadeMasterUsers', JSON.stringify(mockUsers));
+        return mockUsers;
+    }
+    return JSON.parse(usersData);
 }
 
-// Récupère l'utilisateur actuellement connecté
+function saveUsers(users) {
+    localStorage.setItem('arcadeMasterUsers', JSON.stringify(users));
+}
+
 function getCurrentUser() {
     return localStorage.getItem('currentUser');
 }
 
-// Déconnexion de l'utilisateur
-function logout() {
-    localStorage.removeItem('currentUser');
-    alert("Déconnexion réussie.");
-    // Redirige vers la page d'authentification
-    window.location.href = 'authentification.html'; 
-}
-
-// Fonction de Connexion
 function login(username, password) {
     const users = loadUsers();
     if (users[username] && users[username].password === password) {
         localStorage.setItem('currentUser', username);
-        alert(`Bienvenue, ${username}!`);
-        
-        // Redirection corrigée vers la racine du dépôt GitHub (/ArcadeMaster/)
-        window.location.href = '/ArcadeMaster/'; 
-        
         return true;
-    } else {
-        alert("Nom d'utilisateur ou mot de passe incorrect.");
-        return false;
     }
+    return false;
 }
 
-// Fonction d'Inscription
-function register(username, password) {
+function logout() {
+    localStorage.removeItem('currentUser');
+    window.location.href = 'index.html'; // Redirige vers l'accueil
+}
+
+function registerUser(username, password, pdpUrl) {
     const users = loadUsers();
     if (users[username]) {
-        alert("Ce nom d'utilisateur est déjà pris.");
-        return false;
+        return false; // Utilisateur déjà existant
     }
+    
+    const finalPdp = pdpUrl && pdpUrl.startsWith('http') ? pdpUrl : 'https://i.imgur.com/39hN7hG.png';
 
     users[username] = {
         password: password,
-        role: "Joueur Standard",
-        games: {
-            space_invaders: {
-                highScore: 0
-            }
-        }
+        pdp: finalPdp,
+        role: 'user',
+        games: { space_invaders: { highScore: 0 } } // Initialisation du score
     };
     saveUsers(users);
-    localStorage.setItem('currentUser', username);
-    alert(`Compte créé et connecté. Bienvenue, ${username}!`);
-    
-    // Redirection corrigée vers la racine du dépôt GitHub (/ArcadeMaster/)
-    window.location.href = '/ArcadeMaster/';
-    
     return true;
 }
 
-// Exportation des fonctions pour qu'elles soient utilisables dans d'autres scripts
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { saveUsers, loadUsers, getCurrentUser };
+function getUserData(username) {
+    const users = loadUsers();
+    return users[username] || null;
 }
 
+// --- FONCTION DE MISE À JOUR DU PROFIL (Utilisée dans authentification.html) ---
+function updateUserData(username, newPassword, newPdp) {
+    const users = loadUsers();
+    const userData = users[username];
+    let changed = false;
 
-// =========================================================
-// 2. LOGIQUE D'INITIALISATION ET ÉVÉNEMENTS DOM
-// =========================================================
+    if (!userData) return false;
 
-document.addEventListener('DOMContentLoaded', () => {
-    
-    // --- GESTION DES FORMULAIRES ET DÉCONNEXION ---
-    const loginForm = document.getElementById('loginForm');
-    const registerForm = document.getElementById('registerForm');
-    const logoutButton = document.getElementById('logoutButton');
-
-    // Gère l'envoi du formulaire de connexion
-    if (loginForm) {
-        loginForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const username = e.target.username.value;
-            const password = e.target.password.value;
-            login(username, password);
-        });
-    }
-
-    // Gère l'envoi du formulaire d'inscription
-    if (registerForm) {
-        registerForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const username = e.target.username.value;
-            const password = e.target.password.value;
-            register(username, password);
-        });
+    if (newPassword) {
+        userData.password = newPassword;
+        changed = true;
     }
     
-    // Gère le bouton de déconnexion
-    if (logoutButton) {
-        logoutButton.addEventListener('click', logout);
+    // Mettre à jour l'image de profil si l'URL est fournie ou vidée
+    if (newPdp !== undefined) {
+        const finalPdp = newPdp.trim().startsWith('http') ? newPdp.trim() : 'https://i.imgur.com/39hN7hG.png';
+        if (userData.pdp !== finalPdp) {
+             userData.pdp = finalPdp;
+             changed = true;
+        }
     }
-});
+
+    if (changed) {
+        saveUsers(users);
+        if (newPassword) {
+            // Déconnexion forcée après changement de mot de passe
+            localStorage.removeItem('currentUser'); 
+        }
+        return true;
+    }
+    return false;
+}
+
+// --- RENDU DE LA NAVBAR (Affichage de Connexion/Compte) ---
+
+function renderAuthControls() {
+    const authControls = document.getElementById('auth-controls');
+    const sidebar = document.getElementById('sidebar');
+    const user = getCurrentUser();
+    
+    if (authControls) {
+        if (user) {
+            const userData = getUserData(user);
+            const pdpUrl = userData && userData.pdp ? userData.pdp : 'https://i.imgur.com/39hN7hG.png';
+
+            authControls.innerHTML = `
+                <a href="authentification.html" class="user-link">
+                    <img src="${pdpUrl}" alt="PDP" style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover;">
+                    <span>${user}</span>
+                </a>
+                <button onclick="logout()">Déconnexion</button>
+            `;
+            
+            // Ajout du lien Admin dans la sidebar si l'utilisateur est admin
+            if (sidebar && userData && userData.role === 'admin' && !document.getElementById('admin-link')) {
+                 const adminLink = document.createElement('a');
+                 adminLink.href = 'admin.html'; // Assurez-vous d'avoir une page admin.html
+                 adminLink.textContent = '⚙️ Admin';
+                 adminLink.id = 'admin-link';
+                 sidebar.appendChild(adminLink);
+            }
+
+        } else {
+            authControls.innerHTML = `
+                <a href="authentification.html">Connexion / Inscription</a>
+            `;
+            // Suppression du lien Admin si l'utilisateur n'est pas connecté ou est déconnecté
+            const adminLink = document.getElementById('admin-link');
+            if (adminLink) {
+                 sidebar.removeChild(adminLink);
+            }
+        }
+    }
+}
