@@ -34,28 +34,33 @@ h1 {
 }
 
 /* ========================================================= */
-/* 2. NAVIGATION EN HAUT (Barre Horizontale Discrète) */
+/* 2. NAVIGATION EN HAUT (Barre Horizontale Discrète et Profil à Droite) */
 /* ========================================================= */
 
 #navbar {
-    position: fixed; /* Reste en haut */
+    position: fixed; 
     top: 0; 
     left: 0;
     width: 100%; 
     z-index: 2000; 
     
-    /* Fond de la barre (un peu plus foncé que le fond principal: #3A3A39) */
     background-color: #3A3A39; 
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
-    padding: 10px 0; 
+    padding: 10px 20px; /* Ajout d'un padding horizontal pour l'alignement */
     
     display: flex; 
-    justify-content: center; /* Centre le contenu (les liens) */
+    justify-content: space-between; /* Pour pousser le profil à droite */
     align-items: center;
 }
 
+/* Conteneur des liens pour le centrage des liens principaux */
+.nav-links {
+    display: flex;
+    justify-content: center;
+    flex-grow: 1; /* Permet aux liens de prendre l'espace central */
+}
+
 #navbar a {
-    /* Style des liens : enlève tout aspect de bouton */
     margin: 0 15px; 
     padding: 5px 8px;
     display: inline-flex; 
@@ -75,8 +80,39 @@ h1 {
     color: #F39C12; 
 }
 
+/* Style de l'image de profil dans la navigation */
+.profile-img-nav {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 2px solid #00FF00;
+    object-fit: cover;
+}
+
+/* Menu Hamburger (caché sur PC) */
+.menu-toggle {
+    font-size: 1.5em;
+    color: #E0E0E0;
+    cursor: pointer;
+    display: none; /* Rendre invisible sur grand écran */
+}
+
+/* Ajout d'une règle simple pour faire apparaître le menu hamburger sur mobile */
+@media (max-width: 768px) {
+    .nav-links {
+        display: none; /* Cache les liens sur mobile */
+    }
+    .menu-toggle {
+        display: block; /* Affiche le menu hamburger sur mobile */
+    }
+    #navbar {
+        justify-content: space-between;
+    }
+}
+
+
 /* ========================================================= */
-/* 3. STYLES DES JEUX ET DES CARTES */
+/* 3. STYLES DES JEUX ET DES CARTES (Restent inchangés) */
 /* ========================================================= */
 
 .main-game-area {
@@ -90,10 +126,11 @@ h1 {
     justify-content: center;
     gap: 20px;
 }
+/* ... (Le reste des styles des cartes/jeux est identique à la version précédente) ... */
 
 #gameCanvas {
     border: 3px solid #00FF00; 
-    background-color: #121212; /* Canvas noir */
+    background-color: #121212; 
     box-shadow: 0 0 15px rgba(0, 255, 0, 0.7);
 }
 
@@ -133,8 +170,6 @@ h1 {
     font-size: 0.95em;
 }
 
-
-/* Cartes d'Authentification et Compte */
 .auth-card, .user-card {
     background-color: #3A3A39; 
     padding: 30px;
@@ -163,7 +198,6 @@ input[type="text"], input[type="password"] {
     box-sizing: border-box; 
 }
 
-/* Boutons */
 button {
     width: 100%;
     padding: 12px;
