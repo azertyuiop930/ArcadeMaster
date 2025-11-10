@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="styles.css">
     
     <script>
-        // --- Fonction du Menu Hamburger (UNIFORME ET ESSENTIELLE) ---
+        // Fonction du Menu Hamburger (UNIFORME ET ESSENTIELLE)
         function toggleMenu(x) {
             x.classList.toggle("change");
             const sidebar = document.getElementById("sidebar");
@@ -18,12 +18,60 @@
             }
         }
     </script>
+    <style>
+        /* Styles spécifiques à la page admin */
+        #admin-panel {
+            padding: 20px;
+            max-width: 800px;
+            margin: 20px auto;
+            background-color: var(--color-surface);
+            border-radius: 8px;
+        }
+        #user-list {
+            list-style: none;
+            padding: 0;
+        }
+        #user-list li {
+            background-color: #333;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .admin-controls button {
+            margin-left: 10px;
+            padding: 5px 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+        }
+        .admin-controls .promote {
+            background-color: #2ecc71;
+            color: white;
+        }
+        .admin-controls .demote {
+            background-color: #e67e22;
+            color: white;
+        }
+        .admin-controls .delete {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .admin-status {
+            font-weight: bold;
+            color: var(--color-primary);
+        }
+    </style>
 </head>
 <body>
     
     <div id="navbar">
         <div class="hamburger-menu" onclick="toggleMenu(this)">
-            <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
         </div>
         <div id="auth-controls">
             </div>
@@ -33,96 +81,35 @@
         <a href="index.html">🏠 Accueil</a>
         <a href="jeux.html">🕹️ Menu Jeux</a>
         <a href="credits.html">📝 Crédits</a>
-        <a href="classement.html">🏆 Classement</a>
         </div>
 
     <div class="container">
-        <h1>🛡️ Panneau d'Administration</h1>
-        <p style="text-align: center; color: #f39c12;">Cette page n'est visible que par les administrateurs.</p>
-
-        <div class="admin-list-container">
-            <h2>Gestion des Utilisateurs</h2>
-            <div id="user-list">
-                <p style="text-align: center;">Chargement des données...</p>
-            </div>
+        <div id="admin-panel">
+            <h1>Panneau d'Administration</h1>
+            <p id="admin-message" style="color: #e74c3c;"></p>
+            
+            <section id="user-management">
+                <h2>Gestion des Utilisateurs</h2>
+                <ul id="user-list">
+                    </ul>
+            </section>
         </div>
     </div>
 
     <script src="auth.js"></script>
     <script>
-        const DEFAULT_PDP_URL = 'https://i.imgur.com/39hN7hG.png'; 
-
-        function deleteUser(username) {
-            if (confirm(`Êtes-vous sûr de vouloir supprimer l'utilisateur "${username}" ? Cette action est irréversible.`)) {
-                
-                // Vérification de l'existence des fonctions d'Auth (sécurité)
-                if (typeof loadUsers === 'undefined' || typeof saveUsers === 'undefined') {
-                    alert("Erreur: Les fonctions de gestion d'utilisateurs ne sont pas disponibles.");
-                    return;
-                }
-                
-                const users = loadUsers(); 
-                delete users[username];
-                saveUsers(users);
-                
-                if (getCurrentUser() === username) {
-                    logout();
-                } else {
-                    renderUserList(); // Rafraîchit la liste
-                }
-            }
-        }
-
-        function renderUserList() {
-            // Vérification de sécurité et de chargement
-            if (typeof loadUsers === 'undefined' || typeof getCurrentUser === 'undefined' || typeof isAdmin === 'undefined') {
-                document.getElementById('user-list').innerHTML = '<p style="color:red; text-align:center;">Erreur : auth.js n\'est pas chargé correctement.</p>';
-                return;
-            }
-
-            const currentUser = getCurrentUser();
-            if (!currentUser || !isAdmin(currentUser)) {
-                // Redirection si l'utilisateur n'est pas admin (si la navigation directe a été tentée)
-                window.location.href = 'index.html';
-                return;
-            }
-
-            const users = loadUsers();
-            const userListContainer = document.getElementById('user-list');
-            userListContainer.innerHTML = ''; 
-
-            for (const username in users) {
-                const userData = users[username];
-                const pdpUrl = userData.pdp || DEFAULT_PDP_URL;
-                const isAdminUser = isAdmin(username);
-
-                const div = document.createElement('div');
-                div.classList.add('admin-list-item');
-                div.innerHTML = `
-                    <div class="user-details">
-                        <img src="${pdpUrl}" alt="PDP" class="user-pdp-admin">
-                        <span>${username}</span>
-                        ${isAdminUser ? '<span class="admin-tag">(ADMIN)</span>' : ''}
-                    </div>
-                    ${username !== currentUser && !isAdminUser 
-                        ? `<button class="delete-button" onclick="deleteUser('${username}')">Supprimer</button>` 
-                        : (username === currentUser ? '<span style="color:#aaa;">(Vous)</span>' : '<span style="color:#f39c12;">(Admin)</span>')
-                    }
-                `;
-                userListContainer.appendChild(div);
-            }
-        }
-
+        // Le code d'initialisation de la page admin se trouve dans auth.js
         document.addEventListener('DOMContentLoaded', () => {
-            // S'assure que la navbar est rendue
-            if (typeof renderAuthControls === 'function') {
-                renderAuthControls();
+            renderAuthControls();
+            
+            // On s'assure que seules les fonctions d'admin sont appelées ici
+            if (typeof renderAdminPanel === 'function') {
+                renderAdminPanel();
+            } else {
+                 document.getElementById('admin-message').textContent = "Accès refusé. Vous devez être administrateur pour voir cette page.";
+                 document.getElementById('admin-panel').style.display = 'none';
             }
-            // Charge la liste des utilisateurs après un court délai
-            setTimeout(renderUserList, 200);
         });
-
-        window.deleteUser = deleteUser;
     </script>
 </body>
 </html>
