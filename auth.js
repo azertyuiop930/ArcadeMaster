@@ -6,15 +6,18 @@ const STORAGE_KEY = 'arcadeMasterUsers';
  */
 function loadUsers() {
     const json = localStorage.getItem(STORAGE_KEY);
-    return json ? JSON.parse(json) : {
-        // Utilisateur par défaut (Admin) pour le démarrage
-        "Zelda5962": {
+    const users = json ? JSON.parse(json) : {};
+
+    // S'assurer que l'utilisateur admin par défaut existe toujours au premier chargement
+    if (!users["Zelda5962"]) {
+        users["Zelda5962"] = {
             password: "password", // Mot de passe par défaut. À CHANGER POUR LA PRODUCTION!
             role: "admin",
             pdp: "https://i.imgur.com/39hN7hG.png", // Exemple d'URL PDP
             games: {} // Stockage des données de jeu
-        }
-    };
+        };
+    }
+    return users;
 }
 
 /**
@@ -84,7 +87,6 @@ function login(username, password) {
     const users = loadUsers();
     const user = users[username];
 
-    // NOTE: En production, le mot de passe doit être haché et vérifié
     if (user && user.password === password) {
         setCurrentUser(username);
         return true;
@@ -97,16 +99,11 @@ function login(username, password) {
  */
 function logout() {
     sessionStorage.removeItem('currentUser');
-    // Rafraîchir l'interface après déconnexion
     if (typeof renderAuthControls === 'function') {
         renderAuthControls();
     }
-    // Rediriger vers l'accueil si on est sur une page sensible
-    if (window.location.pathname.includes('admin.html') || window.location.pathname.includes('authentification.html')) {
-         window.location.href = 'index.html';
-    } else {
-         window.location.reload();
-    }
+    // Rediriger vers l'accueil
+    window.location.href = 'index.html'; 
 }
 
 
@@ -116,9 +113,6 @@ function logout() {
 
 /**
  * Sauvegarde les données d'une partie et met à jour le meilleur score si nécessaire.
- * @param {string} username Nom d'utilisateur.
- * @param {string} gameId ID du jeu (ex: 'space_invaders').
- * @param {Object} data Données du jeu (doit contenir 'score').
  */
 function saveGameData(username, gameId, data) {
     const users = loadUsers();
@@ -132,7 +126,6 @@ function saveGameData(username, gameId, data) {
         };
     }
 
-    // Mise à jour du meilleur score
     if (data.score > user.games[gameId].highScore) {
         user.games[gameId].highScore = data.score;
     }
@@ -142,8 +135,6 @@ function saveGameData(username, gameId, data) {
 
 /**
  * Récupère le classement complet pour un jeu donné, trié par score.
- * @param {string} gameId ID du jeu.
- * @returns {Array} Liste des objets {username, score}, triée.
  */
 function getFullLeaderboard(gameId) {
     const users = loadUsers();
@@ -159,7 +150,6 @@ function getFullLeaderboard(gameId) {
         }
     }
 
-    // Tri par score décroissant
     leaderboard.sort((a, b) => b.score - a.score);
 
     return leaderboard;
@@ -172,7 +162,6 @@ function getFullLeaderboard(gameId) {
 
 /**
  * Supprime un utilisateur.
- * @param {string} username Le nom d'utilisateur à supprimer.
  */
 function deleteUser(username) {
     const currentUser = getCurrentUser();
@@ -185,7 +174,6 @@ function deleteUser(username) {
     if (confirm(`Êtes-vous sûr de vouloir supprimer l'utilisateur "${username}" ? Cette action est irréversible.`)) {
         const users = loadUsers();
         
-        // Vérification de sécurité supplémentaire (empêcher de supprimer un autre admin par défaut)
         if (users[username] && users[username].role === 'admin') {
              alert("Impossible de supprimer un autre compte administrateur.");
              return;
@@ -194,7 +182,6 @@ function deleteUser(username) {
         delete users[username];
         saveUsers(users);
         
-        // Si la fonction existe (dans admin.html) on rafraichit l'affichage
         if (typeof renderAdminPanel === 'function') {
             renderAdminPanel();
         } else {
@@ -205,12 +192,9 @@ function deleteUser(username) {
 
 
 // ------------------------------------------------------------------
-// FONCTIONS DE RENDU (Pour la Navbar et la Sidebar)
+// FONCTIONS DE RENDU
 // ------------------------------------------------------------------
 
-/**
- * Met à jour les contrôles d'authentification (Connexion/Déconnexion/Compte) dans la navbar.
- */
 function renderAuthControls() {
     const currentUser = getCurrentUser();
     const authControls = document.getElementById('auth-controls');
@@ -219,7 +203,6 @@ function renderAuthControls() {
     if (!authControls || !sidebar) return;
 
     let authHTML = '';
-    let adminLink = '';
     
     if (currentUser) {
         const userData = getUserData(currentUser);
@@ -236,35 +219,25 @@ function renderAuthControls() {
             </a>
         `;
 
-        // Si l'utilisateur est admin, ajouter le lien admin à la sidebar
+        // Gestion du lien Admin dans la sidebar
+        const oldAdminLink = sidebar.querySelector('a[href="admin.html"]');
+        if (oldAdminLink) sidebar.removeChild(oldAdminLink);
+
         if (userData.role === 'admin') {
-             adminLink = '<a href="admin.html" style="color: #f39c12;">🛡️ Admin Panel</a>';
+             const adminLinkHTML = '<a href="admin.html" style="color: #f39c12;">🛡️ Admin Panel</a>';
+             sidebar.insertAdjacentHTML('beforeend', adminLinkHTML);
         }
 
     } else {
-        authHTML = `
-            <a href="authentification.html" style="color: white;">Connexion / Inscription</a>
-        `;
+        authHTML = `<a href="authentification.html" style="color: white;">Connexion / Inscription</a>`;
+        const oldAdminLink = sidebar.querySelector('a[href="admin.html"]');
+        if (oldAdminLink) sidebar.removeChild(oldAdminLink);
     }
 
     authControls.innerHTML = authHTML;
-
-    // Mise à jour de la sidebar (Assure que le lien Admin est présent/absent)
-    // On retire l'ancien lien Admin s'il existe
-    const oldAdminLink = sidebar.querySelector('a[href="admin.html"]');
-    if (oldAdminLink) {
-        sidebar.removeChild(oldAdminLink);
-    }
-    
-    // Ajout du nouveau lien Admin si nécessaire
-    if (adminLink) {
-        sidebar.insertAdjacentHTML('beforeend', adminLink);
-    }
-    
-    // Assure que l'ordre par défaut des liens est respecté (si le lien Admin existe, il est en dernier)
 }
 
-// Globalisation des fonctions essentielles pour les autres fichiers HTML
+// Globalisation des fonctions
 window.loadUsers = loadUsers;
 window.saveUsers = saveUsers;
 window.getUserData = getUserData;
@@ -278,5 +251,4 @@ window.getFullLeaderboard = getFullLeaderboard;
 window.deleteUser = deleteUser;
 
 
-// Exécution du rendu lors du chargement de la page
 document.addEventListener('DOMContentLoaded', renderAuthControls);
