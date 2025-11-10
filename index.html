@@ -5,6 +5,63 @@
     <title>ArcadeMaster - Accueil</title>
     <link rel="stylesheet" href="styles.css">
     
+    <style>
+        /* Styles spécifiques pour l'accueil */
+        .main-menu-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* 2 colonnes */
+            gap: 20px;
+            max-width: 600px;
+            margin-top: 50px;
+        }
+        
+        .menu-button {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 20px;
+            background-color: var(--color-surface);
+            color: var(--color-text);
+            text-decoration: none;
+            border-radius: 10px;
+            font-size: 1.2em;
+            text-align: center;
+            transition: transform 0.2s, background-color 0.2s;
+            border: 2px solid var(--color-primary);
+        }
+
+        .menu-button:hover {
+            background-color: #3a3a3a;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 255, 0, 0.2);
+        }
+        
+        .menu-button span {
+            display: block;
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+        
+        /* Styles spécifiques aux boutons */
+        .menu-button.play {
+            border-color: #00ff00; /* Vert */
+        }
+        .menu-button.credits {
+            border-color: #f39c12; /* Jaune/Orange */
+        }
+        .menu-button.account {
+            border-color: #3498db; /* Bleu */
+        }
+        /* Style pour l'élément qui n'est pas un bouton (le texte de bienvenue) */
+        .home-welcome {
+            grid-column: 1 / -1; /* Prend toute la largeur */
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--color-text);
+        }
+    </style>
+
     <script>
         // --- Fonction du Menu Hamburger (UNIFORME ET ESSENTIELLE) ---
         function toggleMenu(x) {
@@ -35,19 +92,43 @@
         <a href="index.html">🏠 Accueil</a>
         <a href="jeux.html">🕹️ Menu Jeux</a>
         <a href="credits.html">📝 Crédits</a>
+        <a href="authentification.html">⚙️ Compte</a>
         </div>
 
-    <div class="container home-content">
+    <div class="container">
         <h1>Bienvenue sur ArcadeMaster</h1>
-        <p>Le meilleur endroit pour jouer à vos classiques d'arcade !</p>
         
-        <a href="jeux.html" class="home-button">Démarrer une Partie</a>
+        <div class="main-menu-grid">
+            
+            <div class="home-welcome">
+                <p>Le meilleur endroit pour jouer à vos classiques d'arcade. Choisissez une option ci-dessous :</p>
+            </div>
+            
+            <a href="jeux.html" class="menu-button play">
+                <span>🕹️</span>
+                Jouer aux Jeux
+            </a>
+            
+            <a href="authentification.html" class="menu-button account">
+                <span>⚙️</span>
+                Mon Compte
+            </a>
+            
+            <a href="credits.html" class="menu-button credits" style="grid-column: 1 / -1;">
+                <span>📜</span>
+                Crédits du Projet
+            </a>
+            
+        </div>
     </div>
 
     <script src="auth.js"></script>
     <script>
-        // Le code d'initialisation dans auth.js gère déjà l'affichage de la navbar.
-        // Rien de plus n'est nécessaire ici pour le moment.
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof renderAuthControls === 'function') {
+                renderAuthControls();
+            }
+        });
     </script>
 </body>
 </html>
