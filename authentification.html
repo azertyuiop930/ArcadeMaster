@@ -33,6 +33,7 @@
         .account-panel .logout-button { background-color: #e74c3c; margin-top: 20px; width: 100%; }
         .account-panel .logout-button:hover { background-color: #c0392b; }
     </style>
+    <script src="auth.js"></script>
     <script>
         function toggleMenu(x) {
             x.classList.toggle("change");
@@ -49,11 +50,12 @@
             const container = document.getElementById('auth-container');
             const formContent = document.getElementById('form-content');
             const switchButton = document.getElementById('switch-mode-button');
-            const h1Element = container.querySelector('h1');
+            const h1Element = container ? container.querySelector('h1') : null;
             const isLogin = mode === 'login';
 
+            // Vérification de l'existence des éléments
             if (!container || !formContent || !switchButton || !h1Element) {
-                console.error("Éléments d'authentification manquants pour switchAuthMode.");
+                console.error("Éléments d'authentification manquants. Attente du chargement.");
                 return;
             }
             
@@ -177,10 +179,10 @@
         </div>
     </div>
 
-    <script src="auth.js"></script>
     <script>
         // Initialisation de la page
-        window.onload = () => { 
+        document.addEventListener('DOMContentLoaded', () => { 
+             // On utilise DOMContentLoaded pour s'assurer que les balises HTML sont bien créées
              if (typeof renderAuthControls === 'function') {
                  renderAuthControls(); // Met à jour la navbar
              }
@@ -209,14 +211,13 @@
                         </div>
                      `;
                  } else {
-                     // Si la session est là mais les données locales sont parties
                      switchAuthMode('login');
                  }
              } else {
-                 // S'il n'est pas connecté (CAS NORMAL), on appelle switchAuthMode pour injecter le formulaire.
+                 // S'il n'est pas connecté, afficher le formulaire
                 switchAuthMode('login'); 
              }
-        };
+        });
     </script>
 </body>
 </html>
