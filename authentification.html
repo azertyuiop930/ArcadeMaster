@@ -5,86 +5,18 @@
     <title>ArcadeMaster - Connexion / Inscription</title>
     <link rel="stylesheet" href="styles.css">
     <style>
-        /* Styles spécifiques à la page d'authentification */
-        .auth-container {
-            max-width: 400px;
-            margin: 80px auto;
-            padding: 30px;
-            background-color: var(--color-surface);
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-            text-align: center;
-        }
-        .auth-container h1 {
-            color: var(--color-primary);
-            margin-bottom: 25px;
-            font-size: 2em;
-        }
-        .auth-form {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            padding-top: 15px;
-        }
-        .auth-form input[type="text"],
-        .auth-form input[type="password"],
-        .auth-form input[type="url"] {
-            padding: 12px;
-            border: 1px solid #555;
-            border-radius: 5px;
-            background-color: #2a2a2a;
-            color: var(--color-text);
-            font-size: 1em;
-            transition: border-color 0.2s;
-        }
-        .auth-form input:focus {
-            border-color: var(--color-primary);
-            outline: none;
-        }
-        .auth-form button {
-            padding: 12px;
-            background-color: var(--color-primary);
-            color: black;
-            border: none;
-            border-radius: 5px;
-            font-size: 1.1em;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        .auth-form button:hover {
-            background-color: var(--color-secondary);
-        }
-        .message {
-            margin-top: 15px;
-            padding: 10px;
-            border-radius: 5px;
-            font-weight: bold;
-            color: white;
-            display: none; /* Caché par défaut */
-        }
-        .message.error {
-            background-color: #e74c3c;
-        }
-        .message.success {
-            background-color: #27ae60;
-        }
-        .switch-mode {
-            margin-top: 20px;
-            color: var(--color-text);
-            cursor: pointer;
-            font-size: 0.9em;
-            text-decoration: underline;
-        }
-        .pdp-preview {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin: 10px auto;
-            border: 3px solid var(--color-primary);
-            display: block;
-        }
+        .auth-container { max-width: 400px; margin: 80px auto; padding: 30px; background-color: var(--color-surface); border-radius: 10px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); text-align: center; }
+        .auth-container h1 { color: var(--color-primary); margin-bottom: 25px; font-size: 2em; }
+        .auth-form { display: flex; flex-direction: column; gap: 15px; padding-top: 15px; }
+        .auth-form input[type="text"], .auth-form input[type="password"], .auth-form input[type="url"] { padding: 12px; border: 1px solid #555; border-radius: 5px; background-color: #2a2a2a; color: var(--color-text); font-size: 1em; transition: border-color 0.2s; }
+        .auth-form input:focus { border-color: var(--color-primary); outline: none; }
+        .auth-form button { padding: 12px; background-color: var(--color-primary); color: black; border: none; border-radius: 5px; font-size: 1.1em; font-weight: bold; cursor: pointer; transition: background-color 0.2s; }
+        .auth-form button:hover { background-color: var(--color-secondary); }
+        .message { margin-top: 15px; padding: 10px; border-radius: 5px; font-weight: bold; color: white; display: none; }
+        .message.error { background-color: #e74c3c; }
+        .message.success { background-color: #27ae60; }
+        .switch-mode { margin-top: 20px; color: var(--color-text); cursor: pointer; font-size: 0.9em; text-decoration: underline; }
+        .pdp-preview { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin: 10px auto; border: 3px solid var(--color-primary); display: block; }
     </style>
     <script>
         function toggleMenu(x) {
@@ -97,7 +29,6 @@
             }
         }
         
-        // --- Fonction de bascule du formulaire ---
         function switchAuthMode(mode) {
             const container = document.getElementById('auth-container');
             const formHTML = document.getElementById('form-content');
@@ -131,7 +62,6 @@
             hideMessage();
         }
         
-        // --- Fonction d'aperçu PDP ---
         function previewPdp(url) {
             const img = document.getElementById('pdp-preview');
             if (url) {
@@ -143,7 +73,6 @@
             }
         }
 
-        // --- Afficher les messages (Erreur/Succès) ---
         function showMessage(type, text) {
             const msg = document.getElementById('message');
             msg.className = `message ${type}`;
@@ -154,12 +83,11 @@
             document.getElementById('message').style.display = 'none';
         }
 
-        // --- GESTIONNAIRE DE CONNEXION ---
+        // --- GESTIONNAIRE DE CONNEXION (CLÉ : La redirection est ici) ---
         function handleLogin(event) {
             event.preventDefault();
             hideMessage();
 
-            // Vérifie que les fonctions de auth.js sont chargées
             if (typeof login !== 'function') {
                 showMessage('error', "Erreur: Le script d'authentification (auth.js) n'est pas chargé.");
                 return;
@@ -170,16 +98,15 @@
             
             if (login(username, password)) {
                 showMessage('success', `Connexion réussie ! Redirection en cours...`);
-                // Délai pour que l'utilisateur voie le message de succès
                 setTimeout(() => {
+                    // C'est cette redirection qui forcera le chargement de index.html et donc window.onload
                     window.location.href = 'index.html'; 
-                }, 1500);
+                }, 1000); // Réduit à 1 seconde pour une meilleure fluidité
             } else {
                 showMessage('error', 'Nom d\'utilisateur ou mot de passe incorrect.');
             }
         }
 
-        // --- GESTIONNAIRE D'INSCRIPTION ---
         function handleRegister(event) {
             event.preventDefault();
             hideMessage();
@@ -193,15 +120,13 @@
             const password = document.getElementById('register-password').value;
             const pdp = document.getElementById('register-pdp').value;
 
-            // Simple validation de base
             if (username.length < 3) {
                  showMessage('error', 'Le nom d\'utilisateur doit contenir au moins 3 caractères.');
                  return;
             }
 
             if (registerUser(username, password, pdp)) {
-                showMessage('success', `Inscription réussie pour ${username} ! Vous pouvez maintenant vous connecter.`);
-                // Basculer automatiquement vers le mode connexion
+                showMessage('success', `Inscription réussie ! Veuillez vous connecter.`);
                 setTimeout(() => {
                     switchAuthMode('login');
                 }, 1500);
@@ -249,24 +174,23 @@
     <script src="auth.js"></script>
     <script>
         // Initialisation de la page en mode Connexion
-        document.addEventListener('DOMContentLoaded', () => {
+        window.onload = () => { // Utilisation de window.onload ici aussi pour synchronisation
              if (typeof renderAuthControls === 'function') {
-                 renderAuthControls(); // Met à jour la navbar
+                 renderAuthControls();
              }
              
              const currentUser = getCurrentUser();
              if (currentUser) {
-                 // Si l'utilisateur est déjà connecté, on affiche un message et on redirige
                  document.getElementById('auth-container').innerHTML = 
                     `<p class="message success" style="display:block;">Vous êtes déjà connecté(e) en tant que <strong>${currentUser}</strong>.</p>
-                     <p>Redirection vers l'accueil dans 3 secondes...</p>`;
+                     <p>Redirection vers l'accueil...</p>`;
                  setTimeout(() => {
                      window.location.href = 'index.html';
-                 }, 3000);
+                 }, 1000);
              } else {
                 switchAuthMode('login');
              }
-        });
+        };
     </script>
 </body>
 </html>
