@@ -6,20 +6,21 @@
     <link rel="stylesheet" href="styles.css">
     
     <script>
-        // --- Correction Menu Hamburger (Définie tôt pour garantir l'accessibilité) ---
+        // --- Fonction du Menu Hamburger (Simplifiée pour la compatibilité) ---
         function toggleMenu(x) {
             x.classList.toggle("change");
             const sidebar = document.getElementById("sidebar");
-            if (sidebar.style.width === "250px") {
-                sidebar.style.width = "0";
+            // Utilisez "block" / "none" pour une compatibilité maximale
+            if (sidebar.style.display === "block") { 
+                sidebar.style.display = "none";
             } else {
-                sidebar.style.width = "250px";
+                sidebar.style.display = "block";
             }
         }
     </script>
 
     <style>
-        /* Styles spécifiques pour le classement */
+        /* Styles spécifiques pour le classement (peuvent être déplacés dans styles.css) */
         
         .leaderboard-table th:nth-child(4), 
         .leaderboard-table td:nth-child(4) { 
@@ -74,7 +75,7 @@
                         </tr>
                     </thead>
                     <tbody id="leaderboardTable_space_invaders">
-                        <tr><td colspan="4" style="text-align:center;">Chargement en cours...</td></tr>
+                        <tr><td colspan="4" style="text-align:center;">Vérification du script...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -103,18 +104,16 @@
     <script>
         const DEFAULT_PDP_URL = 'https://i.imgur.com/39hN7hG.png'; 
 
-        // Fonction générique pour rendre n'importe quel classement Top X
         function renderTopLeaderboard(gameId) {
             const leaderboardBody = document.getElementById(`leaderboardTable_${gameId}`);
             if (!leaderboardBody) return;
 
-            // VÉRIFICATION DE SÉCURITÉ : Assurez-vous que les fonctions d'AUTH sont là
             if (typeof getLeaderboard === 'undefined' || typeof getUserData === 'undefined') {
-                leaderboardBody.innerHTML = '<tr><td colspan="4">Erreur: Script d\'authentification (auth.js) manquant ou fonctions non disponibles.</td></tr>';
+                leaderboardBody.innerHTML = '<tr><td colspan="4">Erreur: auth.js ne semble pas chargé.</td></tr>';
                 return;
             }
 
-            const leaderboardData = getLeaderboard(gameId, 10); // Top 10
+            const leaderboardData = getLeaderboard(gameId, 10); 
             leaderboardBody.innerHTML = ''; 
 
             if (leaderboardData.length === 0) {
@@ -139,7 +138,6 @@
 
                 const row = leaderboardBody.insertRow();
                 
-                // Rng, Joueur, PDP, Score
                 row.insertCell().innerHTML = `${trophy} ${rank}`;
                 row.insertCell().textContent = entry.username;
                 row.insertCell().innerHTML = `<div class="user-display"><img src="${pdpUrl}" alt="PDP" class="leaderboard-pdp"></div>`;
@@ -147,11 +145,8 @@
             });
         }
         
-        // Fonction pour afficher le classement personnel du joueur
         function renderPersonalRank(gameId) {
-            
             if (typeof getCurrentUser === 'undefined' || typeof getPersonalRank === 'undefined') {
-                 // Si les fonctions sont manquantes, on ne fait rien
                  document.getElementById('personal-rank-container').style.display = 'none';
                  return;
             }
@@ -188,18 +183,15 @@
         }
 
         function initializeLeaderboard() {
-            // S'assurer que la navbar est rendue (Admin Link/PDP)
             if (typeof renderAuthControls === 'function') {
                 renderAuthControls();
             }
             
-            // Rendu des classements
             renderTopLeaderboard('space_invaders');
             renderPersonalRank('space_invaders');
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            // Utiliser un délai pour s'assurer que auth.js a fini d'être chargé et exécuté
             setTimeout(initializeLeaderboard, 150); 
         });
     </script>
