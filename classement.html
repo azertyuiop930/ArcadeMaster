@@ -8,15 +8,15 @@
         /* Styles spécifiques pour le classement */
         
         /* Ajuster la colonne score/pdp */
-        #leaderboardTable th:nth-child(4), 
-        #leaderboardTable td:nth-child(4) { 
+        .leaderboard-table th:nth-child(4), 
+        .leaderboard-table td:nth-child(4) { 
             text-align: right; 
             font-weight: bold; 
         }
         
         /* Centrer la colonne Rang */
-        #leaderboardTable th:nth-child(1),
-        #leaderboardTable td:nth-child(1) {
+        .leaderboard-table th:nth-child(1),
+        .leaderboard-table td:nth-child(1) {
              text-align: center;
              width: 50px;
         }
@@ -44,12 +44,15 @@
 
     <div class="container">
         <h1>🏆 Classements</h1>
+        
+        <div id="personal-rank-container" style="margin-bottom: 30px; text-align: center; padding: 15px; background: #3a3a3a; border-radius: 8px; display:none;">
+            </div>
 
         <div class="leaderboard-grid">
             
             <div class="leaderboard-box">
-                <h2>Space Invaders</h2>
-                <table>
+                <h2>Space Invaders (Top 10)</h2>
+                <table class="leaderboard-table">
                     <thead>
                         <tr>
                             <th>Rng</th>
@@ -58,12 +61,29 @@
                             <th>Score</th>
                         </tr>
                     </thead>
-                    <tbody id="leaderboardTable">
+                    <tbody id="leaderboardTable_space_invaders">
                         </tbody>
                 </table>
             </div>
 
+            <div class="leaderboard-box">
+                <h2>Jeu Exemple (Top 10)</h2>
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th>Rng</th>
+                            <th>Joueur</th>
+                            <th>PDP</th> 
+                            <th>Score</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboardTable_jeu_exemple">
+                        <tr><td colspan="4" style="text-align:center;">Classement non disponible.</td></tr>
+                    </tbody>
+                </table>
             </div>
+            
+        </div>
     </div>
 
     <script src="auth.js"></script>
@@ -79,21 +99,23 @@
             }
         }
         
-        const leaderboardBody = document.getElementById('leaderboardTable');
         const DEFAULT_PDP_URL = 'https://i.imgur.com/39hN7hG.png'; 
 
-        function renderLeaderboard() {
+        // Fonction générique pour rendre n'importe quel classement Top X
+        function renderTopLeaderboard(gameId) {
+            const leaderboardBody = document.getElementById(`leaderboardTable_${gameId}`);
+            if (!leaderboardBody) return; // Sécurité si l'ID n'existe pas
+
             if (typeof getLeaderboard === 'undefined' || typeof getUserData === 'undefined') {
-                leaderboardBody.innerHTML = '<tr><td colspan="4">Erreur: Script d\'authentification (auth.js) manquant.</td></tr>';
+                leaderboardBody.innerHTML = '<tr><td colspan="4">Erreur: Script d\'authentification manquant.</td></tr>';
                 return;
             }
 
-            // Nous rendons le classement pour 'space_invaders'
-            const leaderboardData = getLeaderboard('space_invaders', 10);
+            const leaderboardData = getLeaderboard(gameId, 10); // Toujours Top 10
             leaderboardBody.innerHTML = ''; 
 
             if (leaderboardData.length === 0) {
-                 leaderboardBody.innerHTML = '<tr><td colspan="4">Aucun score enregistré pour ce jeu.</td></tr>';
+                 leaderboardBody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Aucun score enregistré.</td></tr>';
                  return;
             }
 
@@ -101,7 +123,6 @@
                 const rank = index + 1;
                 let trophy = '';
                 
-                // Récupération sécurisée de la PDP
                 const userData = getUserData(entry.username);
                 const pdpUrl = userData && userData.pdp ? userData.pdp : DEFAULT_PDP_URL;
 
@@ -115,27 +136,67 @@
 
                 const row = leaderboardBody.insertRow();
                 
-                // Cellule 1: Rang
                 row.insertCell().innerHTML = `${trophy} ${rank}`;
-                
-                // Cellule 2: Joueur (Nom)
                 row.insertCell().textContent = entry.username;
                 
-                // Cellule 3: PDP (Photo de Profil)
                 row.insertCell().innerHTML = `
                     <div class="user-display">
                         <img src="${pdpUrl}" alt="PDP" class="leaderboard-pdp">
                     </div>
                 `;
                 
-                // Cellule 4: Score
                 row.insertCell().textContent = entry.score;
             });
+        }
+        
+        // Fonction pour afficher le classement personnel du joueur
+        function renderPersonalRank(gameId) {
+            const currentUser = getCurrentUser();
+            const container = document.getElementById('personal-rank-container');
+            
+            if (!currentUser || typeof getPersonalRank === 'undefined') {
+                container.style.display = 'none'; // Cacher si non connecté ou fonction manquante
+                return;
+            }
+
+            const rankData = getPersonalRank(currentUser, gameId);
+
+            if (rankData && rankData.rank <= 10) {
+                // Si le joueur est dans le Top 10, on ne fait rien de spécial
+                container.style.display = 'none';
+            } else if (rankData) {
+                // Si le joueur est au-delà du Top 10
+                container.style.display = 'block';
+                container.innerHTML = `
+                    <h3>Votre Classement Personnel (Space Invaders)</h3>
+                    <p style="font-size: 1.2em;">
+                        Vous êtes actuellement au rang 
+                        <strong style="color: #00ff00;">#${rankData.rank}</strong> 
+                        avec un score de <strong>${rankData.score}</strong>.
+                    </p>
+                `;
+            } else {
+                // Pas de score enregistré
+                container.style.display = 'block';
+                container.innerHTML = `
+                    <h3>Votre Classement Personnel (Space Invaders)</h3>
+                    <p>Vous n'avez pas encore enregistré de score pour ce jeu. Jouez pour apparaître dans le classement !</p>
+                `;
+            }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
             // Un petit délai pour s'assurer que auth.js a fini de charger
-            setTimeout(renderLeaderboard, 100); 
+            setTimeout(() => { 
+                // Rendu du Top 10 Space Invaders
+                renderTopLeaderboard('space_invaders');
+                // Rendu du Top 10 Jeu Exemple (si vous l'ajoutez)
+                // renderTopLeaderboard('jeu_exemple'); 
+                
+                // Rendu du classement personnel (se base sur le jeu principal)
+                renderPersonalRank('space_invaders');
+                
+            }, 100); 
         });
     </script>
 </body>
