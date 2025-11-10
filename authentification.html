@@ -4,6 +4,46 @@
     <meta charset="UTF-8">
     <title>ArcadeMaster - Compte</title>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Styles spécifiques au compte */
+        .profile-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #282828;
+            border-radius: 8px;
+        }
+        #profile-pdp {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #00ff00;
+            margin-bottom: 10px;
+        }
+        .role-tag {
+            background-color: #00ff00;
+            color: #222;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        .auth-form h2 {
+            margin-top: 0;
+            color: #ccc;
+            border-bottom: 1px dashed #555;
+            padding-bottom: 10px;
+        }
+        #pdp-form {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #555;
+        }
+    </style>
 </head>
 <body>
     
@@ -45,20 +85,37 @@
         // --- Logique de la page d'authentification ---
         
         const authContent = document.getElementById('auth-content');
+        const DEFAULT_PDP_URL_DISPLAY = 'https://i.imgur.com/39hN7hG.png'; // Doit correspondre à auth.js
 
         function renderAccountPage() {
             const currentUser = getCurrentUser();
             
             if (currentUser) {
+                const userData = getUserData(currentUser);
+                const pdpUrl = userData ? userData.pdp || DEFAULT_PDP_URL_DISPLAY : DEFAULT_PDP_URL_DISPLAY;
+                const roleTag = isAdmin(currentUser) ? '<span class="role-tag">🛡️ ADMIN</span>' : '<span class="role-tag">Joueur</span>';
+                
                 // Écran de gestion du compte (Connecté)
                 authContent.innerHTML = `
                     <h1>Espace Compte</h1>
-                    <p>Connecté en tant que: <strong style="color: #00ff00;">${currentUser}</strong></p>
+                    <div class="profile-section">
+                        <img src="${pdpUrl}" alt="Photo de Profil" id="profile-pdp">
+                        <p>Connecté en tant que: <strong style="color: #00ff00;">${currentUser}</strong></p>
+                        ${roleTag}
+                    </div>
+
                     <div id="account-form" class="auth-form">
                         <h2>Changer le Mot de Passe</h2>
                         <input type="password" id="current-password" placeholder="Mot de passe actuel" required>
                         <input type="password" id="new-password" placeholder="Nouveau mot de passe" required>
                         <button onclick="handleChangePassword()">Changer le Mot de Passe</button>
+                        
+                        <div id="pdp-form">
+                            <h2>Changer la Photo de Profil (URL)</h2>
+                            <input type="text" id="pdp-url" value="${pdpUrl}" placeholder="URL de la nouvelle photo" required>
+                            <button onclick="handleChangePDP()">Mettre à jour la PDP</button>
+                        </div>
+
                         <button style="background-color: #e74c3c;" onclick="logout()">Déconnexion</button>
                     </div>
                 `;
@@ -95,12 +152,17 @@
             const users = loadUsers();
             if (users[username]) return alert("Ce pseudo existe déjà. Veuillez vous connecter.");
             
-            users[username] = { password: password, games: {} };
+            // Initialisation avec la PDP par défaut
+            users[username] = { 
+                password: password, 
+                games: {},
+                pdp: DEFAULT_PDP_URL_DISPLAY 
+            };
             saveUsers(users);
             
             login(username);
             alert(`Compte "${username}" créé et connecté !`);
-            renderAccountPage(); 
+            window.location.href = 'index.html'; // Rediriger vers l'accueil après l'inscription
         }
 
         function handleLogin(event) {
@@ -145,11 +207,25 @@
             }
         }
         
+        function handleChangePDP() {
+            const currentUser = getCurrentUser();
+            const newUrl = document.getElementById('pdp-url').value.trim();
+            
+            if (!currentUser || !newUrl) return alert("Veuillez fournir une URL de photo de profil valide.");
+            
+            if (updatePDP(currentUser, newUrl)) {
+                alert("Photo de profil mise à jour avec succès !");
+                renderAccountPage(); // Recharge la page pour afficher la nouvelle PDP
+                renderAuthControls(); // Met à jour la navbar
+            }
+        }
+        
         document.addEventListener('DOMContentLoaded', () => {
-             // S'assurer que auth.js est chargé avant de lancer la page de compte
+             // Assurez-vous que les fonctions d'auth sont disponibles
             if (typeof getCurrentUser !== 'undefined') {
                 renderAccountPage();
             } else {
+                // Délai de sécurité au cas où auth.js ne serait pas chargé instantanément
                 setTimeout(renderAccountPage, 100); 
             }
         });
@@ -159,7 +235,7 @@
         window.handleLogin = handleLogin;
         window.handleChangePassword = handleChangePassword;
         window.renderAuthForm = renderAuthForm;
-
+        window.handleChangePDP = handleChangePDP;
     </script>
 </body>
 </html>
