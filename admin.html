@@ -2,20 +2,58 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>ArcadeMaster - Panneau Admin</title>
-    <link rel="stylesheet" href="styles.css"> 
+    <title>ArcadeMaster - Administration</title>
+    <link rel="stylesheet" href="styles.css">
     <style>
-        /* Conserver les styles spécifiques à l'admin */
-        body { padding-top: 60px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-        .container { max-width: 1000px; margin: 40px auto; padding: 20px; background-color: #333; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 255, 0, 0.5); }
-        h1 { color: #ff0000; font-size: 2em; border-bottom: 2px solid #555; padding-bottom: 10px; margin-bottom: 20px; }
-
-        table { width: 100%; border-collapse: collapse; color: white; }
-        th, td { border: 1px solid #555; padding: 10px; text-align: left; }
-        th { background-color: #111; color: #00ff00; }
-        .error { color: #ff0000; font-weight: bold; }
-        .delete-btn { background-color: #e74c3c; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 4px; }
-        .delete-btn:hover { background-color: #c0392b; }
+        /* Styles spécifiques au panneau Admin */
+        .admin-container {
+            padding-top: 100px;
+            max-width: 800px; /* Conteneur plus large */
+            margin: 0 auto;
+            text-align: center;
+        }
+        h1 {
+            color: #00ff00;
+            border-bottom: 2px solid #555;
+            padding-bottom: 10px;
+        }
+        #user-list {
+            list-style: none;
+            padding: 0;
+        }
+        #user-list li {
+            background: #333;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px; /* Espace entre la PDP et le texte */
+        }
+        .user-name {
+            font-weight: bold;
+            color: white;
+        }
+        .admin-role {
+            color: yellow;
+            font-size: 0.9em;
+            margin-left: 10px;
+        }
+        .admin-actions button {
+            background-color: #e74c3c;
+            color: white;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        /* La classe .leaderboard-pdp est définie dans styles.css et est utilisée ici */
     </style>
 </head>
 <body>
@@ -34,18 +72,19 @@
         <a href="index.html">🏠 Accueil</a>
         <a href="jeux.html">🕹️ Menu Jeux</a>
         <a href="credits.html">📝 Crédits</a>
-        <a href="classement.html">🏆 Classement</a>
-    </div>
-
-    <div class="container">
-        <h1 id="admin-title">Panneau d'Administration</h1>
-        <div id="content">
-            <p class="error">Chargement des données...</p>
+        <a href="authentification.html">⚙️ Compte</a>
         </div>
+
+    <div class="admin-container">
+        <h1>🛡️ Panneau d'Administration</h1>
+        <p id="admin-status"></p>
+        <ul id="user-list">
+            </ul>
     </div>
     
     <script src="auth.js"></script>
     <script>
+        // --- Logique du Menu Hamburger ---
         function toggleMenu(x) {
             x.classList.toggle("change");
             const sidebar = document.getElementById("sidebar");
@@ -55,74 +94,98 @@
                 sidebar.style.width = "250px";
             }
         }
+        
+        const userList = document.getElementById('user-list');
+        const adminStatus = document.getElementById('admin-status');
+        const DEFAULT_PDP_URL = 'https://i.imgur.com/39hN7hG.png'; // Doit correspondre à auth.js
 
-        function deleteUser(usernameToDelete) {
-            const currentUser = getCurrentUser();
-            
-            if (usernameToDelete === currentUser) {
-                return alert("Interdit de supprimer son propre compte en étant connecté.");
-            }
-            if (!confirm(`Êtes-vous sûr de vouloir supprimer l'utilisateur : ${usernameToDelete} ? Cette action est irréversible.`)) {
-                return;
-            }
+        function deleteUser(username) {
+            if (confirm(`Êtes-vous sûr de vouloir supprimer l'utilisateur : ${username} ? Cette action est irréversible.`)) {
+                
+                if (typeof loadUsers === 'undefined') {
+                    alert("Erreur: Les fonctions d'authentification ne sont pas chargées.");
+                    return;
+                }
+                
+                const users = loadUsers();
+                
+                // Empêcher la suppression de l'utilisateur admin actuel
+                if (username === getCurrentUser()) {
+                     alert("Erreur: Vous ne pouvez pas supprimer votre propre compte depuis le panneau d'administration.");
+                     return;
+                }
 
-            const users = loadUsers();
-            if (users[usernameToDelete]) {
-                delete users[usernameToDelete];
-                saveUsers(users);
-                alert(`Compte ${usernameToDelete} supprimé avec succès.`);
-                renderAdminPanel(); // Recharger le panneau
+                if (users[username]) {
+                    delete users[username];
+                    saveUsers(users);
+                    alert(`Utilisateur ${username} supprimé.`);
+                    renderAdminUsers(); // Recharger la liste
+                }
             }
         }
         
-        function renderAdminPanel() {
-            const contentDiv = document.getElementById('content');
-            const currentUser = getCurrentUser();
-
-            // Vérification de l'accès via la fonction isAdmin() de auth.js
-            if (!isAdmin(currentUser)) { 
-                contentDiv.innerHTML = '<p class="error">Accès refusé. Vous devez être administrateur pour accéder à cette page.</p>';
-                document.getElementById('admin-title').textContent = "Accès Restreint";
-                return;
+        function renderAdminUsers() {
+            // Vérification de chargement des fonctions
+            if (typeof getCurrentUser === 'undefined' || typeof isAdmin === 'undefined' || typeof loadUsers === 'undefined') {
+                 adminStatus.textContent = "Erreur de chargement. Vérifiez que auth.js est correctement lié.";
+                 return;
             }
-
-            const users = loadUsers(); 
-            const userKeys = Object.keys(users);
-
-            if (userKeys.length === 0) {
-                contentDiv.innerHTML = '<p>Aucun compte utilisateur enregistré.</p>';
-                return;
-            }
-
-            let tableHTML = '<table><thead><tr><th>Pseudo</th><th>Mot de passe</th><th>Données de Jeu</th><th>Action</th></tr></thead><tbody>';
             
-            userKeys.forEach(username => {
+            const currentUser = getCurrentUser();
+            
+            if (!currentUser) {
+                adminStatus.textContent = "Accès refusé. Veuillez vous connecter.";
+                userList.innerHTML = '';
+                return;
+            }
+            
+            // Vérification de l'accès Admin
+            if (!isAdmin(currentUser)) {
+                adminStatus.textContent = "Accès refusé. Vous n'avez pas les droits d'administrateur.";
+                userList.innerHTML = '';
+                return;
+            }
+            
+            adminStatus.textContent = `Bienvenue, Administrateur ${currentUser}.`;
+
+            const users = loadUsers();
+            userList.innerHTML = '';
+
+            for (const username in users) {
                 const user = users[username];
-                const gameData = JSON.stringify(user.games);
                 
-                // Le bouton de suppression est grisé si l'utilisateur est Zelda5962 (l'admin)
-                const deleteButton = isAdmin(username)
-                    ? '---'
-                    : `<button class="delete-btn" onclick="deleteUser('${username}')">Supprimer</button>`;
-
-                tableHTML += `
-                    <tr>
-                        <td>${username}</td>
-                        <td>${user.password}</td>
-                        <td><pre style="white-space: pre-wrap; margin: 0; max-height: 100px; overflow-y: auto;">${gameData}</pre></td>
-                        <td>${deleteButton}</td>
-                    </tr>
+                // Obtenir l'URL de la PDP
+                const pdpUrl = user.pdp || DEFAULT_PDP_URL;
+                
+                // Déterminer le rôle
+                const role = isAdmin(username) ? '<span class="admin-role">(ADMIN)</span>' : '';
+                
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `
+                    <div class="user-info">
+                        <img src="${pdpUrl}" alt="PDP" class="leaderboard-pdp">
+                        <span class="user-name">${username}</span>
+                        ${role}
+                    </div>
+                    <div class="admin-actions">
+                        <button onclick="deleteUser('${username}')">Supprimer</button>
+                    </div>
                 `;
-            });
-
-            tableHTML += '</tbody></table>';
-            contentDiv.innerHTML = tableHTML;
+                userList.appendChild(listItem);
+            }
         }
 
-        document.addEventListener('DOMContentLoaded', renderAdminPanel);
-
-        // Rendre la fonction accessible globalement pour le bouton
-        window.deleteUser = deleteUser; 
+        // Lancement de la vérification Admin et du rendu
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof loadUsers !== 'undefined') {
+                renderAdminUsers();
+            } else {
+                setTimeout(renderAdminUsers, 200);
+            }
+        });
+        
+        // Rendre la fonction accessible globalement pour les boutons de suppression
+        window.deleteUser = deleteUser;
     </script>
 </body>
 </html>
