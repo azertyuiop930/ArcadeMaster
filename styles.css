@@ -8,12 +8,11 @@ body {
     color: #E0E0E0; 
     margin: 0;
     padding: 0;
-    /* Utilisé uniquement pour centrer le contenu principal, pas la nav */
     display: flex; 
     justify-content: center; 
     align-items: flex-start;
     min-height: 100vh;
-    padding-top: 60px; /* Ajoute de l'espace pour la barre de nav fixe */
+    padding-top: 60px; /* Espace pour la barre de navigation fixe */
 }
 
 a {
@@ -35,30 +34,29 @@ h1 {
 }
 
 /* ========================================================= */
-/* 2. NAVIGATION EN HAUT (Corrigée : Barre Horizontale Discrète) */
+/* 2. NAVIGATION EN HAUT (Barre Horizontale Discrète) */
 /* ========================================================= */
 
 #navbar {
-    position: fixed; /* Reste en haut lors du défilement */
+    position: fixed; /* Reste en haut */
     top: 0; 
     left: 0;
-    width: 100%; /* S'étend sur toute la largeur */
+    width: 100%; 
     z-index: 2000; 
     
-    /* Couleur et bordure */
-    background-color: #3A3A39; /* Couleur de fond de la barre (un peu plus foncé) */
+    /* Fond de la barre (un peu plus foncé que le fond principal: #3A3A39) */
+    background-color: #3A3A39; 
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
-    padding: 10px 0; /* Padding vertical et horizontal */
+    padding: 10px 0; 
     
-    /* Centrage des liens à l'intérieur de la barre */
     display: flex; 
-    justify-content: center; /* Centre le contenu (les liens) horizontalement */
+    justify-content: center; /* Centre le contenu (les liens) */
     align-items: center;
 }
 
 #navbar a {
     /* Style des liens : enlève tout aspect de bouton */
-    margin: 0 15px; /* Espace entre les liens */
+    margin: 0 15px; 
     padding: 5px 8px;
     display: inline-flex; 
     align-items: center;
@@ -78,13 +76,12 @@ h1 {
 }
 
 /* ========================================================= */
-/* 3. STYLES DES JEUX ET DES CARTES (Adaptés aux nouvelles couleurs) */
+/* 3. STYLES DES JEUX ET DES CARTES */
 /* ========================================================= */
 
 .main-game-area {
     width: 100%;
     max-width: 1150px; 
-    /* margin-top: 80px; retiré car le body a déjà un padding-top */
     padding: 20px;
 }
 
@@ -96,7 +93,7 @@ h1 {
 
 #gameCanvas {
     border: 3px solid #00FF00; 
-    background-color: #121212; 
+    background-color: #121212; /* Canvas noir */
     box-shadow: 0 0 15px rgba(0, 255, 0, 0.7);
 }
 
@@ -108,7 +105,34 @@ h1 {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
     border: 1px solid #F39C12; 
 }
-/* Reste du CSS pour score-board et leaderboardList... */
+
+#score-board h2 {
+    color: #F39C12; 
+    border-bottom: 1px solid #F39C12;
+}
+
+.score-details p {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #E0E0E0;
+    display: flex;
+    justify-content: space-between;
+}
+
+#leaderboardList {
+    list-style: none;
+    padding: 0;
+    margin-top: 10px;
+}
+
+#leaderboardList li {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+    border-bottom: 1px dashed #555;
+    font-size: 0.95em;
+}
+
 
 /* Cartes d'Authentification et Compte */
 .auth-card, .user-card {
@@ -116,9 +140,65 @@ h1 {
     padding: 30px;
     border-radius: 10px;
     max-width: 400px;
-    margin: 40px auto; /* Marge ajustée */
+    margin: 40px auto; 
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
     border: 1px solid #555; 
 }
-/* Reste du CSS pour input, buttons, user-info, etc. ... */
-/* ... (Les styles d'input, de boutons, et d'info utilisateur restent inchangés de l'étape précédente) ... */
+
+label {
+    display: block;
+    margin-top: 15px;
+    color: #F39C12;
+    font-weight: bold;
+}
+
+input[type="text"], input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #777;
+    border-radius: 5px;
+    background-color: #2D2D2D; 
+    color: #E0E0E0;
+    box-sizing: border-box; 
+}
+
+/* Boutons */
+button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 30px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.1em;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s;
+    color: #121212;
+    background-color: #00FF00; 
+}
+
+.user-card button {
+    background-color: #E74C3C; 
+    color: white;
+}
+
+.user-info p {
+    color: #E0E0E0;
+    margin: 10px 0;
+}
+
+.user-info span {
+    color: #00FF00;
+    font-weight: bold;
+}
+
+.profile-img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 3px solid #00FF00;
+    margin: 0 auto 20px auto;
+    display: block;
+    object-fit: cover;
+}
