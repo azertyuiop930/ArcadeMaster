@@ -6,23 +6,46 @@
     <link rel="stylesheet" href="styles.css">
     <style>
         /* Styles spécifiques au compte */
+
+        /* Centrage et taille du conteneur principal */
+        .auth-container {
+            padding-top: 50px; /* Moins de padding pour mieux centrer */
+            max-width: 600px; /* Conteneur plus large pour le nouveau design */
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        /* --- Section Profil (Haut de page) --- */
         .profile-section {
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 20px;
-            padding: 15px;
+            align-items: center; /* Aligner verticalement */
+            justify-content: flex-start; /* Aligner à gauche du conteneur */
+            margin-bottom: 30px;
+            padding: 20px;
             background: #282828;
-            border-radius: 8px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.2);
         }
+        
         #profile-pdp {
-            width: 100px;
-            height: 100px;
+            width: 80px; /* PDP légèrement plus petite */
+            height: 80px;
             border-radius: 50%;
             object-fit: cover;
             border: 4px solid #00ff00;
-            margin-bottom: 10px;
+            margin-right: 20px; /* Espace entre la PDP et le texte */
         }
+        
+        .profile-info {
+            text-align: left;
+        }
+        
+        .profile-info h2 {
+            margin: 0 0 5px 0;
+            color: white;
+            font-size: 1.5em;
+        }
+
         .role-tag {
             background-color: #00ff00;
             color: #222;
@@ -30,18 +53,55 @@
             border-radius: 4px;
             font-size: 0.9em;
             font-weight: bold;
+            display: inline-block;
+        }
+
+        /* --- Formulaires de gestion de compte (Bas) --- */
+        .auth-form {
+            background: #333;
+            padding: 30px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+            text-align: left; /* Aligner le texte des formulaires à gauche */
+        }
+
+        .auth-form h2 {
+            color: #00ff00; /* Vert pour les titres de section */
+            font-size: 1.3em;
+            border-bottom: 1px solid #555;
+            padding-bottom: 10px;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+
+        .form-section {
+            border: 1px solid #444;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+        
+        /* Styles pour les champs d'input */
+        .auth-form input {
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+        }
+        
+        .auth-form button {
+            width: 100%;
+            padding: 12px;
+            font-size: 1em;
             margin-top: 5px;
         }
-        .auth-form h2 {
-            margin-top: 0;
-            color: #ccc;
-            border-bottom: 1px dashed #555;
-            padding-bottom: 10px;
-        }
-        #pdp-form {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #555;
+        
+        #logout-button {
+            background-color: #e74c3c; 
+            color: white;
+            margin-top: 30px;
         }
     </style>
 </head>
@@ -85,7 +145,8 @@
         // --- Logique de la page d'authentification ---
         
         const authContent = document.getElementById('auth-content');
-        const DEFAULT_PDP_URL_DISPLAY = 'https://i.imgur.com/39hN7hG.png'; // Doit correspondre à auth.js
+        // Assurez-vous que cette URL est la même que dans auth.js
+        const DEFAULT_PDP_URL_DISPLAY = 'https://i.imgur.com/39hN7hG.png'; 
 
         function renderAccountPage() {
             const currentUser = getCurrentUser();
@@ -93,30 +154,36 @@
             if (currentUser) {
                 const userData = getUserData(currentUser);
                 const pdpUrl = userData ? userData.pdp || DEFAULT_PDP_URL_DISPLAY : DEFAULT_PDP_URL_DISPLAY;
-                const roleTag = isAdmin(currentUser) ? '<span class="role-tag">🛡️ ADMIN</span>' : '<span class="role-tag">Joueur</span>';
+                const roleName = isAdmin(currentUser) ? 'ADMIN' : 'Joueur';
                 
-                // Écran de gestion du compte (Connecté)
+                // Écran de gestion du compte (Connecté) - NOUVEAU DESIGN
                 authContent.innerHTML = `
                     <h1>Espace Compte</h1>
                     <div class="profile-section">
                         <img src="${pdpUrl}" alt="Photo de Profil" id="profile-pdp">
-                        <p>Connecté en tant que: <strong style="color: #00ff00;">${currentUser}</strong></p>
-                        ${roleTag}
+                        <div class="profile-info">
+                            <h2>${currentUser}</h2>
+                            <span class="role-tag">🛡️ ${roleName}</span>
+                        </div>
                     </div>
 
                     <div id="account-form" class="auth-form">
-                        <h2>Changer le Mot de Passe</h2>
-                        <input type="password" id="current-password" placeholder="Mot de passe actuel" required>
-                        <input type="password" id="new-password" placeholder="Nouveau mot de passe" required>
-                        <button onclick="handleChangePassword()">Changer le Mot de Passe</button>
                         
-                        <div id="pdp-form">
-                            <h2>Changer la Photo de Profil (URL)</h2>
-                            <input type="text" id="pdp-url" value="${pdpUrl}" placeholder="URL de la nouvelle photo" required>
-                            <button onclick="handleChangePDP()">Mettre à jour la PDP</button>
+                        <div class="form-section">
+                            <h2>🔑 Changer le Mot de Passe</h2>
+                            <input type="password" id="current-password" placeholder="Mot de passe actuel" required>
+                            <input type="password" id="new-password" placeholder="Nouveau mot de passe" required>
+                            <input type="password" id="confirm-new-password" placeholder="Confirmer le nouveau mot de passe" required>
+                            <button onclick="handleChangePassword()">Changer le Mot de Passe</button>
+                        </div>
+                        
+                        <div class="form-section">
+                            <h2>📸 Entrez l'URL de votre photo de profil</h2>
+                            <input type="text" id="pdp-url" value="${pdpUrl}" placeholder="URL de la nouvelle photo de profil (ex: https://...)">
+                            <button onclick="handleChangePDP()">Mettre à jour la Photo de Profil</button>
                         </div>
 
-                        <button style="background-color: #e74c3c;" onclick="logout()">Déconnexion</button>
+                        <button id="logout-button" onclick="logout()">Déconnexion</button>
                     </div>
                 `;
                 
@@ -130,6 +197,7 @@
             authContent.innerHTML = `
                 <h1>${isLogin ? 'Connexion' : 'Inscription'}</h1>
                 <form class="auth-form" onsubmit="event.preventDefault(); ${isLogin ? 'handleLogin(event)' : 'handleRegister(event)'};">
+                    <h2>${isLogin ? 'Connectez-vous à votre compte' : 'Créez votre compte'}</h2>
                     <input type="text" id="username" placeholder="Pseudo" required>
                     <input type="password" id="password" placeholder="Mot de passe" required>
                     ${isLogin ? '' : '<input type="password" id="confirm-password" placeholder="Confirmer le mot de passe" required>'}
@@ -189,8 +257,10 @@
 
             const currentPass = document.getElementById('current-password').value;
             const newPass = document.getElementById('new-password').value;
+            const confirmNewPass = document.getElementById('confirm-new-password').value;
 
-            if (!currentPass || !newPass) return alert("Veuillez remplir tous les champs.");
+            if (!currentPass || !newPass || !confirmNewPass) return alert("Veuillez remplir tous les champs du formulaire de mot de passe.");
+            if (newPass !== confirmNewPass) return alert("Le nouveau mot de passe et sa confirmation ne correspondent pas.");
             if (currentPass === newPass) return alert("Le nouveau mot de passe doit être différent de l'ancien.");
 
             const users = loadUsers();
@@ -201,9 +271,8 @@
             }
 
             if (changePassword(currentUser, newPass)) {
-                alert("Mot de passe mis à jour avec succès !");
-                document.getElementById('current-password').value = '';
-                document.getElementById('new-password').value = '';
+                alert("Mot de passe mis à jour avec succès ! Veuillez vous reconnecter.");
+                logout(); // Déconnecter l'utilisateur pour forcer la reconnexion avec le nouveau MDP
             }
         }
         
@@ -212,6 +281,10 @@
             const newUrl = document.getElementById('pdp-url').value.trim();
             
             if (!currentUser || !newUrl) return alert("Veuillez fournir une URL de photo de profil valide.");
+            
+            if (!newUrl.startsWith('http')) {
+                 return alert("L'URL doit commencer par 'http://' ou 'https://'.");
+            }
             
             if (updatePDP(currentUser, newUrl)) {
                 alert("Photo de profil mise à jour avec succès !");
