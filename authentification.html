@@ -21,6 +21,7 @@
         .edit-button:hover { background-color: #e67e22; }
 
         /* Styles pour les messages et le PDP */
+        /* IMPORTANT : Le message doit être à l'intérieur du conteneur pour être trouvé */
         .message { margin-top: 15px; padding: 10px; border-radius: 5px; font-weight: bold; color: white; display: none; }
         .message.error { background-color: #e74c3c; }
         .message.success { background-color: #27ae60; }
@@ -53,9 +54,24 @@
             }
         }
         
+        function showMessage(type, text) {
+            const msg = document.getElementById('message');
+            // Assurez-vous que le message est visible même dans le formulaire de modification
+            if (msg) {
+                msg.className = `message ${type}`;
+                msg.textContent = text;
+                msg.style.display = 'block';
+            } else {
+                console.error("Élément #message non trouvé pour afficher le message.");
+            }
+        }
+        function hideMessage() {
+            const msg = document.getElementById('message');
+            if (msg) msg.style.display = 'none';
+        }
+
         // Fonction de bascule du formulaire (login/register)
         function switchAuthMode(mode) {
-            // ... (Code login/register inchangé) ...
              const container = document.getElementById('auth-container');
             const formContent = document.getElementById('form-content');
             const switchButton = document.getElementById('switch-mode-button');
@@ -66,9 +82,10 @@
                 return;
             }
             
-            // Masquer les boutons de bascule pendant le chargement du formulaire
+            // Afficher les éléments spécifiques à la connexion/inscription
             formContent.style.display = 'block';
             switchButton.style.display = 'block';
+            hideMessage(); // Cacher l'ancien message
 
             if (isLogin) {
                 h1Element.textContent = 'Se Connecter';
@@ -95,7 +112,30 @@
                 switchButton.textContent = "Déjà un compte ? Se connecter ici.";
                 switchButton.onclick = () => switchAuthMode('login');
             }
-            hideMessage();
+        }
+
+        function previewPdp(url) {
+            const img = document.getElementById('pdp-preview');
+            if (url) {
+                img.src = url;
+                img.style.display = 'block';
+            } else {
+                img.style.display = 'none';
+                img.src = 'https://i.imgur.com/39hN7hG.png'; 
+            }
+        }
+        
+        function previewPdpEdit(url) {
+            const img = document.getElementById('edit-pdp-preview');
+            const defaultUrl = 'https://i.imgur.com/39hN7hG.png';
+            if (img) { // Vérification de l'existence de l'élément (important pour la prévisualisation)
+                if (url) {
+                    img.src = url;
+                    img.style.display = 'block';
+                } else {
+                    img.src = defaultUrl;
+                }
+            }
         }
 
         // Nouvelle fonction pour afficher le formulaire de modification
@@ -103,12 +143,13 @@
             const authContainer = document.getElementById('auth-container');
             const currentPdp = userData.pdp && userData.pdp !== 'https://i.imgur.com/39hN7hG.png' ? userData.pdp : '';
             
+            // S'assurer que le conteneur a le message
             authContainer.innerHTML = `
                 <div class="account-panel">
                     <h1 style="text-align: center;">Modifier Mon Compte</h1>
                     <img id="edit-pdp-preview" src="${userData.pdp}" alt="Photo de profil" class="pdp-preview">
                     
-                    <form id="edit-form" onsubmit="handleAccountUpdate(event)" class="auth-form">
+                    <div id="message" class="message"></div> <form id="edit-form" onsubmit="handleAccountUpdate(event)" class="auth-form">
                         
                         <div class="edit-form-group">
                             <label for="edit-password" style="font-weight: bold;">Nouveau Mot de Passe (min 5 caractères)</label>
@@ -127,11 +168,17 @@
                     </form>
                 </div>
             `;
+            hideMessage(); // Assurez-vous qu'il est caché au chargement
         }
 
         function handleAccountUpdate(event) {
             event.preventDefault();
             hideMessage();
+
+            if (typeof updateUserData !== 'function') {
+                 showMessage('error', "Erreur: Le script d'authentification (auth.js) n'est pas complètement chargé.");
+                 return; 
+            }
 
             const currentUser = getCurrentUser();
             const newPassword = document.getElementById('edit-password').value;
@@ -142,57 +189,22 @@
                 return;
             }
 
-            // Appel de la nouvelle fonction dans auth.js
             if (updateUserData(currentUser, newPassword, newPdp)) {
                 showMessage('success', 'Compte mis à jour avec succès !');
                 
-                // Si le mot de passe a changé, déconnexion forcée
                 if (newPassword) {
-                    showMessage('success', 'Mot de passe changé. Déconnexion en cours...');
-                    setTimeout(() => { logout(); }, 1000); 
+                    // Si le mot de passe a changé, déconnexion forcée
+                    setTimeout(() => { logout(); }, 1500); 
                 } else {
                     // Sinon, rafraîchissement simple pour voir les changements de PDP
-                    setTimeout(() => { window.location.reload(); }, 1000);
+                    setTimeout(() => { window.location.reload(); }, 1500);
                 }
             } else {
                 showMessage('error', "Aucune modification effectuée ou erreur lors de la sauvegarde.");
             }
         }
-        
-        // Fonction de prévisualisation pour le formulaire de modification
-        function previewPdpEdit(url) {
-            const img = document.getElementById('edit-pdp-preview');
-            const defaultUrl = 'https://i.imgur.com/39hN7hG.png';
-            if (url) {
-                img.src = url;
-                img.style.display = 'block';
-            } else {
-                img.src = defaultUrl;
-            }
-        }
-        
-        // Les autres fonctions restent inchangées (previewPdp, showMessage, hideMessage, handleLogin, handleRegister)
-        function previewPdp(url) {
-            const img = document.getElementById('pdp-preview');
-            if (url) {
-                img.src = url;
-                img.style.display = 'block';
-            } else {
-                img.style.display = 'none';
-                img.src = 'https://i.imgur.com/39hN7hG.png'; 
-            }
-        }
 
-        function showMessage(type, text) {
-            const msg = document.getElementById('message');
-            msg.className = `message ${type}`;
-            msg.textContent = text;
-            msg.style.display = 'block';
-        }
-        function hideMessage() {
-            document.getElementById('message').style.display = 'none';
-        }
-
+        // Fonctions d'authentification (non modifiées)
         function handleLogin(event) {
             event.preventDefault();
             hideMessage();
@@ -251,12 +263,10 @@
     </div>
 
     <div class="container">
-        <div id="message" class="message"></div> 
-
         <div class="auth-container" id="auth-container">
             <h1>Authentification</h1> 
             
-            <div id="form-content"></div> 
+            <div id="message" class="message"></div> <div id="form-content"></div> 
             
             <div id="switch-mode-button" class="switch-mode"></div>
         </div>
@@ -273,6 +283,7 @@
              const authContainer = document.getElementById('auth-container');
              const formContent = document.getElementById('form-content');
              const switchButton = document.getElementById('switch-mode-button');
+             const message = document.getElementById('message');
 
              if (currentUser) {
                  const userData = getUserData(currentUser);
@@ -284,7 +295,9 @@
                      // S'assurer que les éléments de connexion ne sont pas visibles
                      formContent.style.display = 'none';
                      switchButton.style.display = 'none';
-                 
+                     message.style.display = 'none'; // Cacher le message de connexion
+
+                     // Injection directe du panneau de compte
                      authContainer.innerHTML = `
                         <div class="account-panel">
                             <h1 style="text-align: center;">Mon Compte Utilisateur</h1>
@@ -302,11 +315,10 @@
                         </div>
                      `;
                  } else {
-                     // Si la session est là mais les données locales sont parties
                      switchAuthMode('login');
                  }
              } else {
-                 // S'il n'est pas connecté, afficher le formulaire
+                 // S'il n'est pas connecté, afficher le formulaire de connexion/inscription
                 switchAuthMode('login'); 
              }
         });
