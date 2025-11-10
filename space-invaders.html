@@ -7,7 +7,7 @@
         /* Styles de la page et du menu */
         body { margin: 0; background-color: #222; display: flex; flex-direction: column; align-items: center; font-family: 'Arial', sans-serif; padding-top: 60px; }
         header { background-color: #2c3e50; color: white; padding: 10px 0; position: fixed; width: 100%; top: 0; z-index: 1000; }
-        nav { max-width: 1200px; margin: 0 auto; display: flex; justify-content: flex-start; }
+        nav { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; width: 100%; box-sizing: border-box; }
         nav a { color: white; text-decoration: none; padding: 10px 15px; display: block; }
         nav a:hover { background-color: #34495e; }
         
@@ -22,19 +22,27 @@
     
     <header>
         <nav>
-            <a href="index.html">🏠 Accueil</a>
-            <a href="jeux.html">🕹️ Menu Jeux</a>
-            <a href="credits.html">📝 Crédits</a>
+            <div>
+                <a href="index.html">🏠 Accueil</a>
+                <a href="jeux.html">🕹️ Menu Jeux</a>
+                <a href="credits.html">📝 Crédits</a>
+                <a href="classement.html">🏆 Classement</a>
+            </div>
+            <div id="auth-section">
+                </div>
         </nav>
     </header>
     
-    <h1 class="game-title">SPACE INVADERS [Amélioré]</h1>
+    <h1 class="game-title">SPACE INVADERS</h1>
     
     <div id="infoPanel">Score: <span id="scoreValue">0</span></div>
     <canvas id="gameCanvas" width="800" height="600"></canvas>
 
     <script>
-        // *** LOGIQUE DU JEU SPACE INVADERS AMÉLIORÉ (Identique à la version précédente) ***
+        // Vérifier si les fonctions de gestion de compte sont chargées
+        if (typeof saveGameData === 'undefined') {
+            console.error("Erreur: auth.js n'est pas chargé ou les fonctions ne sont pas globales.");
+        }
         
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
@@ -45,52 +53,57 @@
         let score = 0;
         let gameOver = false;
         
+        // --- Joueur (Vaisseau) ---
         let player = {
             x: GAME_WIDTH / 2,
             y: GAME_HEIGHT - 50,
-            size: 20,
+            size: 8, // Points pour les graphismes
             speed: 5,
             angle: -Math.PI / 2,
             velX: 0,
             velY: 0
         };
 
+        // --- Souris (Visée) ---
         let mouse = { x: 0, y: 0 };
+
+        // --- Lasers ---
         let bullets = [];
         const BULLET_SPEED = 10;
         let lastShotTime = 0;
         const FIRE_RATE = 200; 
+
+        // --- Ennemis ---
         let enemies = [];
-        const ENEMY_SIZE = 30;
-        const ENEMY_SPEED_BASE = 0.5; 
+        const ENEMY_SIZE = 10;
+        const ENEMY_SPEED_BASE = 0.5; // Vitesse de base
         let enemySpawnInterval = 1500; 
         let lastSpawnTime = 0;
 
+        // --- Fonctions de Dessin ---
+
         function drawPlayer() {
-            ctx.save();
-            ctx.translate(player.x, player.y);
-            ctx.rotate(player.angle + Math.PI / 2); 
             ctx.fillStyle = '#00ff00';
-            ctx.font = `${player.size * 2}px monospace`; 
-            ctx.textAlign = 'center';
-            ctx.fillText("▲", 0, player.size * 0.7); 
-            ctx.restore();
+            ctx.beginPath();
+            ctx.arc(player.x, player.y, player.size, 0, Math.PI * 2);
+            ctx.fill();
         }
 
         function drawBullets() {
             ctx.fillStyle = '#ff0000';
             bullets.forEach(bullet => {
-                ctx.font = '16px monospace';
-                ctx.fillText('|', bullet.x, bullet.y); 
+                ctx.beginPath();
+                ctx.arc(bullet.x, bullet.y, 2, 0, Math.PI * 2);
+                ctx.fill();
             });
         }
 
         function drawEnemies() {
             ctx.fillStyle = '#ff0000';
             enemies.forEach(enemy => {
-                ctx.font = `${ENEMY_SIZE}px monospace`;
-                ctx.textAlign = 'center';
-                ctx.fillText("❌", enemy.x, enemy.y + ENEMY_SIZE / 4); 
+                ctx.beginPath();
+                ctx.arc(enemy.x, enemy.y, ENEMY_SIZE, 0, Math.PI * 2);
+                ctx.fill();
             });
         }
         
@@ -106,13 +119,17 @@
             ctx.fillText('Appuyez sur ESPACE pour recommencer', GAME_WIDTH / 2, GAME_HEIGHT / 2 + 80);
         }
 
+        // --- Fonctions de Mise à Jour ---
+
         function updatePlayer() {
             player.x += player.velX;
             player.y += player.velY;
+
             if (player.x < 0) player.x = 0;
             if (player.x > GAME_WIDTH) player.x = GAME_WIDTH;
             if (player.y < 0) player.y = 0;
             if (player.y > GAME_HEIGHT) player.y = GAME_HEIGHT;
+            
             const dx = mouse.x - player.x;
             const dy = mouse.y - player.y;
             player.angle = Math.atan2(dy, dx); 
@@ -122,6 +139,7 @@
             bullets.forEach((bullet, index) => {
                 bullet.x += bullet.velX;
                 bullet.y += bullet.velY;
+
                 if (bullet.x < 0 || bullet.x > GAME_WIDTH || bullet.y < 0 || bullet.y > GAME_HEIGHT) {
                     bullets.splice(index, 1);
                 }
@@ -129,34 +147,63 @@
         }
 
         function updateEnemies() {
+            
+            // Calculer la vitesse bonus basée sur le score : +0.1 par 50 points
+            const scoreBonusSpeed = Math.floor(score / 50) * 0.1;
+            
             enemies.forEach((enemy, index) => {
+                
+                // Vitesse actuelle de l'ennemi (max 3.0 pour éviter l'impossible)
+                const currentSpeed = Math.min(3.0, ENEMY_SPEED_BASE + scoreBonusSpeed);
+                
+                // IA: Se déplace vers le joueur
                 const dx = player.x - enemy.x;
                 const dy = player.y - enemy.y;
                 const distance = Math.sqrt(dx * dx + dy * dy);
+
                 if (distance > 1) {
-                    enemy.x += (dx / distance) * enemy.speed;
-                    enemy.y += (dy / distance) * enemy.speed;
+                    enemy.x += (dx / distance) * currentSpeed;
+                    enemy.y += (dy / distance) * currentSpeed;
                 }
-                const collisionDist = player.size / 2 + ENEMY_SIZE / 2;
+
+                // Vérifier la collision avec le joueur
+                const collisionDist = player.size + ENEMY_SIZE; 
                 const distPlayerEnemy = Math.sqrt(Math.pow(player.x - enemy.x, 2) + Math.pow(player.y - enemy.y, 2));
+                
                 if (distPlayerEnemy < collisionDist) {
+                    // *** SAUVEGARDE DU SCORE ICI ***
+                    const user = getCurrentUser();
+                    if (user) {
+                        saveGameData(user, 'space_invaders', { score: score });
+                    } else {
+                        console.log("Score non sauvegardé: Utilisateur non connecté.");
+                    }
+                    // *****************************
+                    
                     gameOver = true;
                 }
             });
         }
+
+        // --- Gestion des Collisions Laser/Ennemis ---
 
         function checkCollisions() {
             for (let bIndex = bullets.length - 1; bIndex >= 0; bIndex--) {
                 const bullet = bullets[bIndex];
                 for (let eIndex = enemies.length - 1; eIndex >= 0; eIndex--) {
                     const enemy = enemies[eIndex];
+                    
                     const distance = Math.sqrt(Math.pow(bullet.x - enemy.x, 2) + Math.pow(bullet.y - enemy.y, 2));
-                    if (distance < ENEMY_SIZE / 2 + 10) { 
+
+                    if (distance < ENEMY_SIZE + 2) { 
+                        
                         enemies.splice(eIndex, 1);
                         bullets.splice(bIndex, 1);
+                        
                         score += 10;
                         scoreDisplay.textContent = score;
-                        if (enemySpawnInterval > 300 && score % 100 === 0) {
+
+                        if (enemySpawnInterval > 300 && score % 200 === 0) {
                             enemySpawnInterval = Math.max(300, enemySpawnInterval - 100);
                         }
                         break; 
@@ -165,14 +212,16 @@
             }
         }
 
+        // --- Fonctions de Jeu (Shoot & Spawn) ---
+
         function shoot() {
             const now = Date.now();
             if (now - lastShotTime > FIRE_RATE) {
                 lastShotTime = now;
                 const velX = BULLET_SPEED * Math.cos(player.angle);
                 const velY = BULLET_SPEED * Math.sin(player.angle);
-                const startX = player.x + (player.size * Math.cos(player.angle) * 1.2);
-                const startY = player.y + (player.size * Math.sin(player.angle) * 1.2);
+                const startX = player.x + (player.size * Math.cos(player.angle));
+                const startY = player.y + (player.size * Math.sin(player.angle));
                 bullets.push({ x: startX, y: startY, velX, velY });
             }
         }
@@ -183,9 +232,7 @@
                 lastSpawnTime = now;
                 const x = Math.random() * GAME_WIDTH;
                 const y = -ENEMY_SIZE;
-                let currentSpeed = ENEMY_SPEED_BASE + Math.floor(score / 200) * 0.1;
-                currentSpeed = Math.min(2.5, currentSpeed); 
-                enemies.push({ x, y, speed: currentSpeed });
+                enemies.push({ x, y, speed: ENEMY_SPEED_BASE }); 
             }
         }
         
@@ -202,28 +249,34 @@
             enemySpawnInterval = 1500;
         }
 
+        // --- Boucle Principale du Jeu ---
         function gameLoop() {
             if (gameOver) {
                 drawGameOver();
                 return;
             }
+
             updatePlayer();
             updateBullets();
             spawnEnemy();
             updateEnemies();
             checkCollisions();
+            
             ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
             drawPlayer();
             drawBullets();
             drawEnemies();
+
             requestAnimationFrame(gameLoop);
         }
         
+        // --- Événements (Contrôles) ---
         document.addEventListener('keydown', (e) => {
             if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'q') player.velX = -player.speed;
             else if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') player.velX = player.speed;
             else if (e.key === 'ArrowUp' || e.key.toLowerCase() === 'z') player.velY = -player.speed;
             else if (e.key === 'ArrowDown' || e.key.toLowerCase() === 's') player.velY = player.speed;
+            
             if (gameOver && e.key === ' ') {
                 e.preventDefault();
                 resetGame();
@@ -254,5 +307,6 @@
         requestAnimationFrame(gameLoop);
 
     </script>
+    <script src="auth.js"></script>
 </body>
 </html>
