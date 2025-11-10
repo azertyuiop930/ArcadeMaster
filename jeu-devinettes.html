@@ -1,1 +1,120 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Jeu de Devinettes - ArcadeMaster</title>
+    <style>
+        /* Style du jeu */
+        body { font-family: 'Arial', sans-serif; background-color: #f4f4f4; color: #333; margin: 0; text-align: center; }
+        .game-container { max-width: 400px; margin: 50px auto; padding: 30px; border: 2px solid #3498db; border-radius: 8px; background-color: white; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+        h1 { color: #3498db; margin-bottom: 20px; }
+        #message { margin-top: 15px; font-size: 1.1em; font-weight: bold; min-height: 25px; padding: 5px; }
+        input[type="number"] { padding: 10px; margin-right: 10px; border: 1px solid #ccc; border-radius: 4px; width: 100px; text-align: center; }
+        button { padding: 10px 15px; background-color: #2ecc71; color: white; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.3s; }
+        button:hover { background-color: #27ae60; }
+        .back-link { display: block; margin-top: 20px; color: #e74c3c; text-decoration: none; }
+    </style>
+</head>
+<body>
 
+    <div class="game-container">
+        <h1>Devinez le Nombre (1-100)</h1>
+        <p>J'ai choisi un nombre secret. À vous de jouer !</p>
+
+        <input type="number" id="guess-input" min="1" max="100" placeholder="Votre essai">
+        <button id="submit-guess">Deviner</button>
+
+        <p id="attempts-count">Tentatives : 0</p>
+        <p id="message"></p>
+        <button id="reset-button" style="display:none; margin-top: 15px;">Recommencer</button>
+        
+        <a href="index.html" class="back-link">← Retour à l'Arcade</a>
+    </div>
+
+    <script>
+        const inputElement = document.getElementById('guess-input');
+        const messageElement = document.getElementById('message');
+        const attemptsElement = document.getElementById('attempts-count');
+        const submitButton = document.getElementById('submit-guess');
+        const resetButton = document.getElementById('reset-button');
+        const recordKey = 'devinettes_record'; // Clé pour stocker le record dans le navigateur
+        
+        let secretNumber;
+        let attempts;
+
+        function initializeGame() {
+            // Choisir un nombre aléatoire entre 1 et 100
+            secretNumber = Math.floor(Math.random() * 100) + 1;
+            attempts = 0;
+
+            messageElement.textContent = 'Entrez votre première proposition.';
+            messageElement.style.color = 'black';
+            attemptsElement.textContent = 'Tentatives : 0';
+
+            if (inputElement) inputElement.value = '';
+            if (inputElement) inputElement.disabled = false;
+            if (submitButton) submitButton.disabled = false;
+            if (resetButton) resetButton.style.display = 'none';
+        }
+
+        function checkGuess() {
+            // Si le jeu est terminé, on ne peut plus deviner
+            if (!inputElement || !submitButton || submitButton.disabled) return;
+
+            const guess = parseInt(inputElement.value);
+
+            if (isNaN(guess) || guess < 1 || guess > 100) {
+                messageElement.textContent = 'Veuillez entrer un nombre valide entre 1 et 100.';
+                messageElement.style.color = 'gray';
+                return;
+            }
+
+            attempts++;
+            attemptsElement.textContent = `Tentatives : ${attempts}`;
+
+            if (guess === secretNumber) {
+                // Victoire
+                messageElement.textContent = `Félicitations ! Vous avez trouvé le nombre ${secretNumber} en ${attempts} tentatives.`;
+                messageElement.style.color = 'green';
+                inputElement.disabled = true;
+                submitButton.disabled = true;
+                resetButton.style.display = 'block';
+                
+                // GESTION DU RECORD LOCAL
+                let currentBest = localStorage.getItem(recordKey);
+                // Si c'est la première fois OU si le nouveau score est meilleur (moins de tentatives)
+                if (currentBest === null || attempts < parseInt(currentBest)) {
+                    localStorage.setItem(recordKey, attempts);
+                    messageElement.textContent += " C'est votre nouveau record personnel !";
+                }
+
+            } else if (guess < secretNumber) {
+                messageElement.textContent = 'C\'est plus grand !';
+                messageElement.style.color = 'orange';
+            } else {
+                messageElement.textContent = 'C\'est plus petit !';
+                messageElement.style.color = 'red';
+            }
+
+            inputElement.value = '';
+            inputElement.focus();
+        }
+
+        // Événements
+        if (submitButton) submitButton.addEventListener('click', checkGuess);
+        if (resetButton) resetButton.addEventListener('click', initializeGame);
+        if (inputElement) {
+            inputElement.addEventListener('keypress', (e) => {
+                // Si on appuie sur Entrée et que le jeu n'est pas terminé
+                if (e.key === 'Enter' && !submitButton.disabled) {
+                    checkGuess();
+                }
+            });
+        }
+        
+        // Initialiser le jeu au chargement de la page
+        initializeGame();
+    </script>
+
+</body>
+</html>
