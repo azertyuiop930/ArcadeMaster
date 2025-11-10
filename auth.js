@@ -9,10 +9,8 @@ function loadUsers() {
     let usersUpdated = false;
 
     // INITIALISATION OU CORRECTION FORCÉE DU RÔLE ADMIN
-    // S'il n'existe pas ou si le rôle n'est pas 'admin', on force l'update.
     if (!users["Zelda5962"] || users["Zelda5962"].role !== "admin") {
         users["Zelda5962"] = {
-            // Utiliser les données existantes si elles sont là, sinon les défauts
             password: users["Zelda5962"] ? users["Zelda5962"].password : "password", 
             role: "admin", // <-- Rôle critique FORCÉ
             pdp: users["Zelda5962"] ? users["Zelda5962"].pdp : "https://i.imgur.com/39hN7hG.png", 
@@ -22,7 +20,6 @@ function loadUsers() {
     }
 
     if (usersUpdated) {
-        // Sauvegarde immédiate du rôle corrigé
         localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
         console.log("Compte Admin 'Zelda5962' créé/mis à jour en rôle Admin et sauvegardé.");
     }
@@ -80,6 +77,48 @@ function registerUser(username, password, pdpURL = 'https://i.imgur.com/39hN7hG.
     return true;
 }
 
+/**
+ * Met à jour le mot de passe et/ou la PDP pour l'utilisateur actuel.
+ * @param {string} username - Nom de l'utilisateur à modifier.
+ * @param {string|null} newPassword - Nouveau mot de passe (ou null pour ne pas changer).
+ * @param {string|null} newPdp - Nouvelle URL de PDP (ou null pour ne pas changer).
+ * @returns {boolean} True si la mise à jour a réussi.
+ */
+function updateUserData(username, newPassword, newPdp) {
+    const users = loadUsers();
+    const user = users[username];
+
+    if (!user) {
+        return false;
+    }
+
+    let changed = false;
+
+    if (newPassword && newPassword.length >= 5) {
+        user.password = newPassword;
+        changed = true;
+    }
+
+    if (newPdp !== null) { // On autorise une chaîne vide pour réinitialiser
+        // Validation simple de l'URL
+        if (newPdp === "" || newPdp.startsWith('http')) { 
+            user.pdp = newPdp || 'https://i.imgur.com/39hN7hG.png'; 
+            changed = true;
+        }
+    }
+    
+    if (changed) {
+        saveUsers(users);
+        // Après la mise à jour, on rafraîchit les contrôles pour la navbar
+        if (typeof renderAuthControls === 'function') {
+            renderAuthControls();
+        }
+        return true;
+    }
+    return false;
+}
+
+
 function deleteUser(username) {
     const currentUser = getCurrentUser();
     
@@ -106,7 +145,7 @@ function deleteUser(username) {
 }
 
 // --- Fonction de rendu de l'interface (Navbar & Sidebar) ---
-
+// (Reste inchangée)
 function renderAuthControls() {
     const currentUser = getCurrentUser();
     const authControls = document.getElementById('auth-controls');
@@ -122,7 +161,6 @@ function renderAuthControls() {
     if (oldAdminLink) sidebar.removeChild(oldAdminLink);
 
     if (currentUser) {
-        // Appeler loadUsers ici garantit que l'entrée est vérifiée/corrigée
         const userData = getUserData(currentUser); 
 
         if (userData) {
@@ -135,7 +173,6 @@ function renderAuthControls() {
                 <a href="#" onclick="logout(); return false;" title="Déconnexion" style="color: #e74c3c; margin-left: 15px;">Déconnexion</a>
             `;
 
-            // C'est cette condition qui doit être remplie
             if (userData.role === 'admin') { 
                  const adminLinkHTML = '<a href="admin.html" style="color: #f39c12;">🛡️ Admin Panel</a>';
                  sidebar.insertAdjacentHTML('beforeend', adminLinkHTML);
@@ -160,6 +197,7 @@ window.getCurrentUser = getCurrentUser;
 window.registerUser = registerUser;
 window.login = login;
 window.logout = logout;
+window.updateUserData = updateUserData; // <-- NOUVELLE GLOBALISATION
 window.deleteUser = deleteUser;
 window.renderAuthControls = renderAuthControls;
 window.onload = renderAuthControls;
