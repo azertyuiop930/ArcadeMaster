@@ -2,21 +2,120 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>ArcadeMaster - Connexion / Inscription</title>
+    <title>ArcadeMaster - Compte</title>
     <link rel="stylesheet" href="styles.css">
     <style>
-        .auth-container { max-width: 400px; margin: 80px auto; padding: 30px; background-color: var(--color-surface); border-radius: 10px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); text-align: center; }
-        .auth-container h1 { color: var(--color-primary); margin-bottom: 25px; font-size: 2em; }
-        .auth-form { display: flex; flex-direction: column; gap: 15px; padding-top: 15px; }
-        .auth-form input[type="text"], .auth-form input[type="password"], .auth-form input[type="url"] { padding: 12px; border: 1px solid #555; border-radius: 5px; background-color: #2a2a2a; color: var(--color-text); font-size: 1em; transition: border-color 0.2s; }
-        .auth-form input:focus { border-color: var(--color-primary); outline: none; }
-        .auth-form button { padding: 12px; background-color: var(--color-primary); color: black; border: none; border-radius: 5px; font-size: 1.1em; font-weight: bold; cursor: pointer; transition: background-color 0.2s; }
-        .auth-form button:hover { background-color: var(--color-secondary); }
-        .message { margin-top: 15px; padding: 10px; border-radius: 5px; font-weight: bold; color: white; display: none; }
+        /* Styles de la page */
+        .auth-container {
+            max-width: 450px; /* Légèrement plus large pour le compte */
+            margin: 80px auto;
+            padding: 30px;
+            background-color: var(--color-surface);
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+        .auth-container h1 {
+            color: var(--color-primary);
+            margin-bottom: 25px;
+            font-size: 2em;
+        }
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding-top: 15px;
+        }
+
+        /* Nouveaux styles pour les cases */
+        .auth-form input[type="text"],
+        .auth-form input[type="password"],
+        .auth-form input[type="url"] {
+            padding: 15px; 
+            border: 2px solid #555;
+            border-radius: 8px; 
+            background-color: #1c1c1c; 
+            color: #00ff00; /* Texte vert fluo */
+            font-size: 1.1em;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .auth-form input:focus {
+            border-color: #00ff00; 
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5); 
+            outline: none;
+        }
+        
+        /* Nouveaux styles pour les boutons */
+        .auth-form button, .logout-button {
+            padding: 15px;
+            background-color: #00ff00; /* Bouton vert */
+            color: black;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+        .auth-form button:hover {
+            background-color: #00cc00;
+            transform: translateY(-2px);
+        }
+
+        .message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            color: white;
+            display: none;
+        }
         .message.error { background-color: #e74c3c; }
         .message.success { background-color: #27ae60; }
-        .switch-mode { margin-top: 20px; color: var(--color-text); cursor: pointer; font-size: 0.9em; text-decoration: underline; }
-        .pdp-preview { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin: 10px auto; border: 3px solid var(--color-primary); display: block; }
+        .switch-mode {
+            margin-top: 20px;
+            color: var(--color-text);
+            cursor: pointer;
+            font-size: 0.9em;
+            text-decoration: underline;
+        }
+        .pdp-preview {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 10px auto 20px auto;
+            border: 3px solid var(--color-primary);
+            display: block;
+        }
+
+        /* Styles du panneau de compte */
+        .account-panel {
+            text-align: left;
+            color: var(--color-text);
+        }
+        .account-panel h1 {
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .account-info p {
+            font-size: 1.1em;
+            margin-bottom: 15px;
+        }
+        .account-info strong {
+            color: #f39c12; /* Texte important en orange */
+            display: inline-block;
+            width: 150px;
+        }
+        .account-panel .logout-button {
+            background-color: #e74c3c;
+            margin-top: 20px;
+            width: 100%;
+        }
+        .account-panel .logout-button:hover {
+            background-color: #c0392b;
+        }
     </style>
     <script>
         function toggleMenu(x) {
@@ -37,7 +136,7 @@
             if (isLogin) {
                 container.querySelector('h1').textContent = 'Se Connecter';
                 formHTML.innerHTML = `
-                    <form id="login-form" onsubmit="handleLogin(event)">
+                    <form id="login-form" onsubmit="handleLogin(event)" class="auth-form">
                         <input type="text" id="login-username" placeholder="Nom d'utilisateur" required autocomplete="username">
                         <input type="password" id="login-password" placeholder="Mot de passe" required autocomplete="current-password">
                         <button type="submit">Connexion</button>
@@ -48,7 +147,7 @@
             } else {
                 container.querySelector('h1').textContent = 'Créer un Compte';
                 formHTML.innerHTML = `
-                    <form id="register-form" onsubmit="handleRegister(event)">
+                    <form id="register-form" onsubmit="handleRegister(event)" class="auth-form">
                         <input type="text" id="register-username" placeholder="Nom d'utilisateur" required autocomplete="username">
                         <input type="password" id="register-password" placeholder="Mot de passe (min 5 caractères)" required minlength="5" autocomplete="new-password">
                         <input type="url" id="register-pdp" placeholder="URL Image de Profil (Optionnel)" oninput="previewPdp(this.value)">
@@ -83,25 +182,18 @@
             document.getElementById('message').style.display = 'none';
         }
 
-        // --- GESTIONNAIRE DE CONNEXION (CLÉ : La redirection est ici) ---
         function handleLogin(event) {
             event.preventDefault();
             hideMessage();
-
-            if (typeof login !== 'function') {
-                showMessage('error', "Erreur: Le script d'authentification (auth.js) n'est pas chargé.");
-                return;
-            }
-
+            if (typeof login !== 'function') { showMessage('error', "Erreur: Le script d'authentification (auth.js) n'est pas chargé."); return; }
             const username = document.getElementById('login-username').value;
             const password = document.getElementById('login-password').value;
             
             if (login(username, password)) {
                 showMessage('success', `Connexion réussie ! Redirection en cours...`);
                 setTimeout(() => {
-                    // C'est cette redirection qui forcera le chargement de index.html et donc window.onload
                     window.location.href = 'index.html'; 
-                }, 1000); // Réduit à 1 seconde pour une meilleure fluidité
+                }, 1000);
             } else {
                 showMessage('error', 'Nom d\'utilisateur ou mot de passe incorrect.');
             }
@@ -110,20 +202,12 @@
         function handleRegister(event) {
             event.preventDefault();
             hideMessage();
-
-            if (typeof registerUser !== 'function') {
-                 showMessage('error', "Erreur: Le script d'authentification (auth.js) n'est pas chargé.");
-                 return;
-            }
-
+            if (typeof registerUser !== 'function') { showMessage('error', "Erreur: Le script d'authentification (auth.js) n'est pas chargé."); return; }
             const username = document.getElementById('register-username').value;
             const password = document.getElementById('register-password').value;
             const pdp = document.getElementById('register-pdp').value;
 
-            if (username.length < 3) {
-                 showMessage('error', 'Le nom d\'utilisateur doit contenir au moins 3 caractères.');
-                 return;
-            }
+            if (username.length < 3) { showMessage('error', 'Le nom d\'utilisateur doit contenir au moins 3 caractères.'); return; }
 
             if (registerUser(username, password, pdp)) {
                 showMessage('success', `Inscription réussie ! Veuillez vous connecter.`);
@@ -157,38 +241,39 @@
 
     <div class="container">
         <div class="auth-container" id="auth-container">
-            <h1>Se Connecter</h1>
-            
-            <div id="form-content">
-                </div>
-            
-            <div id="message" class="message"></div>
-            
-            <div id="switch-mode-button" class="switch-mode">
-                Pas de compte ? S'inscrire ici.
             </div>
-            
-        </div>
     </div>
 
     <script src="auth.js"></script>
     <script>
-        // Initialisation de la page en mode Connexion
-        window.onload = () => { // Utilisation de window.onload ici aussi pour synchronisation
+        // Initialisation de la page
+        window.onload = () => { 
              if (typeof renderAuthControls === 'function') {
-                 renderAuthControls();
+                 renderAuthControls(); // Met à jour la navbar
              }
              
              const currentUser = getCurrentUser();
+             const authContainer = document.getElementById('auth-container');
+
              if (currentUser) {
-                 document.getElementById('auth-container').innerHTML = 
-                    `<p class="message success" style="display:block;">Vous êtes déjà connecté(e) en tant que <strong>${currentUser}</strong>.</p>
-                     <p>Redirection vers l'accueil...</p>`;
-                 setTimeout(() => {
-                     window.location.href = 'index.html';
-                 }, 1000);
+                 const userData = getUserData(currentUser);
+                 const pdpUrl = userData && userData.pdp ? userData.pdp : 'https://i.imgur.com/39hN7hG.png';
+                 
+                 authContainer.innerHTML = `
+                    <div class="account-panel">
+                        <h1 style="text-align: center;">Mon Compte Utilisateur</h1>
+                        <img src="${pdpUrl}" alt="Photo de profil" class="pdp-preview">
+                        <div class="account-info">
+                            <p><strong>Nom d'utilisateur :</strong> ${currentUser}</p>
+                            <p><strong>Rôle :</strong> <span>${userData.role === 'admin' ? '👑 ADMINISTRATEUR' : 'Joueur Standard'}</span></p>
+                            <p><strong>Statut :</strong> <span style="color: #00ff00;">Connecté</span></p>
+                            <p><strong>Meilleur score Invaders :</strong> <span>${userData.games.space_invaders ? userData.games.space_invaders.highScore : '0'}</span></p>
+                        </div>
+                        <button class="logout-button" onclick="logout()">Déconnexion</button>
+                    </div>
+                 `;
              } else {
-                switchAuthMode('login');
+                switchAuthMode('login'); // Affiche le formulaire Connexion/Inscription
              }
         };
     </script>
