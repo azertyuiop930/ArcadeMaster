@@ -26,7 +26,7 @@
             display: flex; 
             flex-direction: column; 
             align-items: center; 
-            padding-top: 55px; /* S'assurer que le contenu n'est pas sous la navbar */
+            padding-top: 55px;
         } 
         
         /* Style du bouton Recommencer */
@@ -40,6 +40,8 @@
             cursor: pointer;
             transition: background-color 0.3s;
             margin-bottom: 20px;
+            /* L'afficher seulement quand GAME OVER */
+            display: none; 
         }
         #reset-button:hover {
             background-color: #e67e22; 
@@ -63,7 +65,7 @@
         <a href="jeux.html">🕹️ Menu Jeux</a>
         <a href="credits.html">📝 Crédits</a>
         <a href="classement.html">🏆 Classement</a>
-        </div>
+    </div>
 
     <h1 class="game-title">SPACE INVADERS</h1>
     
@@ -75,7 +77,7 @@
 
     <script src="auth.js"></script>
     <script>
-        // --- Logique du Menu Hamburger ---
+        // --- 1. Fonctions de la Navbar ---
         function toggleMenu(x) {
             x.classList.toggle("change");
             const sidebar = document.getElementById("sidebar");
@@ -86,26 +88,21 @@
             }
         }
         
-        // CORRECTION MAJEURE : S'assurer que la barre de navigation se charge
         document.addEventListener('DOMContentLoaded', () => {
-             if (typeof renderAuthControls === 'function') {
-                renderAuthControls();
-             } else {
-                // Mesure de sécurité si auth.js est chargé après le DOM
-                setTimeout(() => {
-                    if (typeof renderAuthControls === 'function') {
-                        renderAuthControls();
-                    }
-                }, 100);
-             }
+             setTimeout(() => {
+                 if (typeof renderAuthControls === 'function') {
+                     renderAuthControls();
+                 }
+             }, 100);
         });
         
-        // *** LOGIQUE DU JEU SPACE INVADERS (Graphismes ajustés) ***
+        // --- 2. LOGIQUE DU JEU SPACE INVADERS ---
         
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const scoreDisplay = document.getElementById('scoreValue');
-
+        const resetButton = document.getElementById('reset-button');
+        
         const GAME_WIDTH = 800;
         const GAME_HEIGHT = 600;
         let score = 0;
@@ -131,21 +128,17 @@
         const ENEMY_SPEED_BASE = 0.5; 
         let enemySpawnInterval = 1500; 
         let lastSpawnTime = 0;
-        let animationFrameId = null; // Pour contrôler la boucle
+        let animationFrameId = null;
 
         // --- Fonctions de Dessin ---
-        // ... (drawPlayer, drawBullets, drawEnemies restent inchangées)
-        
         function drawPlayer() {
             ctx.save();
             ctx.translate(player.x, player.y);
             ctx.rotate(player.angle + Math.PI / 2); 
-            
             ctx.fillStyle = '#00ff00';
             ctx.font = `${player.size * 2}px monospace`; 
             ctx.textAlign = 'center';
             ctx.fillText("▲", 0, player.size * 0.7); 
-            
             ctx.restore();
         }
 
@@ -163,7 +156,7 @@
             enemies.forEach(enemy => {
                 ctx.font = `${ENEMY_SIZE}px monospace`;
                 ctx.textAlign = 'center';
-                ctx.fillText("❌", enemy.x, enemy.y + ENEMY_SIZE / 4); 
+                ctx.fillText("👾", enemy.x, enemy.y + ENEMY_SIZE / 4); 
             });
         }
         
@@ -177,32 +170,10 @@
             ctx.font = '30px Arial';
             ctx.fillText(`Score final : ${score}`, GAME_WIDTH / 2, GAME_HEIGHT / 2 + 30);
             ctx.fillText('Appuyez sur ESPACE ou cliquez sur Recommencer', GAME_WIDTH / 2, GAME_HEIGHT / 2 + 80);
+            resetButton.style.display = 'block'; 
         }
 
         // --- Fonctions de Mise à Jour ---
-        // ... (updatePlayer, updateBullets, checkCollisions, shoot, spawnEnemy restent inchangées)
-        
-        function updatePlayer() {
-            player.x += player.velX;
-            player.y += player.velY;
-            if (player.x < 0) player.x = 0;
-            if (player.x > GAME_WIDTH) player.x = GAME_WIDTH;
-            if (player.y < 0) player.y = 0;
-            if (player.y > GAME_HEIGHT) player.y = GAME_HEIGHT;
-            const dx = mouse.x - player.x;
-            const dy = mouse.y - player.y;
-            player.angle = Math.atan2(dy, dx); 
-        }
-
-        function updateBullets() {
-            bullets.forEach((bullet, index) => {
-                bullet.x += bullet.velX;
-                bullet.y += bullet.velY;
-                if (bullet.x < 0 || bullet.x > GAME_WIDTH || bullet.y < 0 || bullet.y > GAME_HEIGHT) {
-                    bullets.splice(index, 1);
-                }
-            });
-        }
 
         function updateEnemies() {
             const scoreBonusSpeed = Math.floor(score / 50) * 0.1;
@@ -224,7 +195,7 @@
                 
                 if (distPlayerEnemy < collisionDist) {
                     const user = getCurrentUser();
-                    // SAUVEGARDE DU SCORE (C'est ici que ça se passe)
+                    // SAUVEGARDE DU SCORE (L'appel critique)
                     if (user && typeof saveGameData !== 'undefined') {
                         saveGameData(user, 'space_invaders', { score: score });
                         console.log(`Score final ${score} enregistré pour ${user}.`);
@@ -232,6 +203,30 @@
                         console.warn("Utilisateur non connecté ou saveGameData non disponible. Score non sauvegardé.");
                     }
                     gameOver = true;
+                }
+            });
+        }
+        
+        // ... (Les fonctions updatePlayer, updateBullets, checkCollisions sont ici) ...
+
+        function updatePlayer() {
+            player.x += player.velX;
+            player.y += player.velY;
+            if (player.x < 0) player.x = 0;
+            if (player.x > GAME_WIDTH) player.x = GAME_WIDTH;
+            if (player.y < 0) player.y = 0;
+            if (player.y > GAME_HEIGHT) player.y = GAME_HEIGHT;
+            const dx = mouse.x - player.x;
+            const dy = mouse.y - player.y;
+            player.angle = Math.atan2(dy, dx); 
+        }
+
+        function updateBullets() {
+            bullets.forEach((bullet, index) => {
+                bullet.x += bullet.velX;
+                bullet.y += bullet.velY;
+                if (bullet.x < 0 || bullet.x > GAME_WIDTH || bullet.y < 0 || bullet.y > GAME_HEIGHT) {
+                    bullets.splice(index, 1);
                 }
             });
         }
@@ -280,7 +275,6 @@
             }
         }
         
-        // Fonction pour réinitialiser le jeu (appelle par le bouton et la touche Espace)
         function resetGame() {
             if (animationFrameId) {
                 cancelAnimationFrame(animationFrameId);
@@ -296,6 +290,7 @@
             player.velX = 0;
             player.velY = 0;
             enemySpawnInterval = 1500;
+            resetButton.style.display = 'none'; 
         }
         
         function resetGameAndStart() {
@@ -324,7 +319,7 @@
             animationFrameId = requestAnimationFrame(gameLoop);
         }
         
-        // --- Événements ---
+        // --- 3. Événements ---
         
         document.addEventListener('keydown', (e) => {
             if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'q') player.velX = -player.speed;
@@ -332,7 +327,7 @@
             else if (e.key === 'ArrowUp' || e.key.toLowerCase() === 'z') player.velY = -player.speed;
             else if (e.key === 'ArrowDown' || e.key.toLowerCase() === 's') player.velY = player.speed;
             
-            if (gameOver && e.key === ' ') {
+            if (gameOver && e.key === ' ') { 
                 e.preventDefault();
                 resetGameAndStart();
             }
@@ -361,7 +356,6 @@
         resetGame();
         requestAnimationFrame(gameLoop);
         
-        // Rendre la fonction accessible globalement pour le bouton
         window.resetGameAndStart = resetGameAndStart; 
     </script>
 </body>
