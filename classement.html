@@ -6,10 +6,18 @@
     <link rel="stylesheet" href="styles.css">
     <style>
         /* Styles spécifiques pour le classement (petits ajustements de colonnes) */
+        .container { 
+            max-width: 600px; /* Retour à la largeur standard */
+            margin: 40px auto; 
+            padding: 20px; 
+            background-color: #333; 
+            border-radius: 8px; 
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5); 
+        }
         
-        /* Ajuster la colonne score/pdp */
-        #leaderboardTable th:nth-child(4), 
-        #leaderboardTable td:nth-child(4) { 
+        /* Ajuster la colonne score */
+        #leaderboardTable th:nth-child(3), 
+        #leaderboardTable td:nth-child(3) { 
             text-align: right; 
             font-weight: bold; 
         }
@@ -49,7 +57,7 @@
                 <tr>
                     <th>Rang</th>
                     <th>Joueur</th>
-                    <th>PDP</th> <th>Meilleur Score</th>
+                    <th>Meilleur Score</th>
                 </tr>
             </thead>
             <tbody id="leaderboardTable">
@@ -71,32 +79,25 @@
         }
         
         const leaderboardBody = document.getElementById('leaderboardTable');
-        const DEFAULT_PDP_URL = 'https://i.imgur.com/39hN7hG.png'; 
 
         function renderLeaderboard() {
-            // S'assurer que les fonctions existent (elles viennent de auth.js)
-            if (typeof getLeaderboard === 'undefined' || typeof getUserData === 'undefined') {
-                console.error("Erreur critique: Les fonctions getLeaderboard ou getUserData ne sont pas définies. Vérifiez auth.js.");
-                leaderboardBody.innerHTML = '<tr><td colspan="4">Erreur de chargement du classement (auth.js manquant ou corrompu).</td></tr>';
+            if (typeof getLeaderboard === 'undefined') {
+                leaderboardBody.innerHTML = '<tr><td colspan="3">Erreur de chargement du classement. Vérifiez auth.js.</td></tr>';
                 return;
             }
 
             const leaderboardData = getLeaderboard('space_invaders', 10);
-            leaderboardBody.innerHTML = ''; // Nettoyer l'ancien contenu
+            leaderboardBody.innerHTML = ''; 
+
+            if (leaderboardData.length === 0) {
+                 leaderboardBody.innerHTML = '<tr><td colspan="3">Aucun score enregistré.</td></tr>';
+                 return;
+            }
 
             leaderboardData.forEach((entry, index) => {
                 const rank = index + 1;
                 let trophy = '';
                 
-                // Obtenir les données complètes de l'utilisateur pour la PDP
-                const userData = getUserData(entry.username);
-                // Si userData est null ou pdp n'existe pas, utilise DEFAULT_PDP_URL
-                const pdpUrl = userData && userData.pdp ? userData.pdp : DEFAULT_PDP_URL;
-
-                // --- DEBOGAGE PDP ---
-                console.log(`Utilisateur: ${entry.username}, PDP URL: ${pdpUrl}`);
-                // --- FIN DEBOGAGE ---
-
                 if (rank === 1) {
                     trophy = '<span class="trophy">🥇</span>';
                 } else if (rank === 2) {
@@ -113,24 +114,15 @@
                 // Cellule 2: Joueur (Nom)
                 row.insertCell().textContent = entry.username;
                 
-                // Cellule 3: PDP (Photo de Profil)
-                row.insertCell().innerHTML = `
-                    <div class="user-display">
-                        <img src="${pdpUrl}" alt="PDP" class="leaderboard-pdp">
-                    </div>
-                `;
-                
-                // Cellule 4: Score
+                // Cellule 3: Score
                 row.insertCell().textContent = entry.score;
             });
         }
 
-        // Lancement du rendu après le chargement des scripts (avec vérification)
         document.addEventListener('DOMContentLoaded', () => {
             if (typeof getLeaderboard !== 'undefined') {
                 renderLeaderboard();
             } else {
-                // Délai de secours si auth.js n'est pas chargé immédiatement
                 setTimeout(renderLeaderboard, 200);
             }
         });
