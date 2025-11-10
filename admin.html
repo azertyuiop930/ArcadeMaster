@@ -57,8 +57,10 @@
         }
 
         function deleteUser(usernameToDelete) {
-            if (usernameToDelete === 'admin') {
-                return alert("Interdit de supprimer le compte 'admin'.");
+            const currentUser = getCurrentUser();
+            
+            if (usernameToDelete === currentUser) {
+                return alert("Interdit de supprimer son propre compte en étant connecté.");
             }
             if (!confirm(`Êtes-vous sûr de vouloir supprimer l'utilisateur : ${usernameToDelete} ? Cette action est irréversible.`)) {
                 return;
@@ -77,8 +79,9 @@
             const contentDiv = document.getElementById('content');
             const currentUser = getCurrentUser();
 
-            if (currentUser !== 'admin') {
-                contentDiv.innerHTML = '<p class="error">Accès refusé. Seul l\'utilisateur "admin" peut accéder à cette page.</p>';
+            // Vérification de l'accès via la fonction isAdmin() de auth.js
+            if (!isAdmin(currentUser)) { 
+                contentDiv.innerHTML = '<p class="error">Accès refusé. Vous devez être administrateur pour accéder à cette page.</p>';
                 document.getElementById('admin-title').textContent = "Accès Restreint";
                 return;
             }
@@ -97,12 +100,17 @@
                 const user = users[username];
                 const gameData = JSON.stringify(user.games);
                 
+                // Le bouton de suppression est grisé si l'utilisateur est Zelda5962 (l'admin)
+                const deleteButton = isAdmin(username)
+                    ? '---'
+                    : `<button class="delete-btn" onclick="deleteUser('${username}')">Supprimer</button>`;
+
                 tableHTML += `
                     <tr>
                         <td>${username}</td>
                         <td>${user.password}</td>
                         <td><pre style="white-space: pre-wrap; margin: 0; max-height: 100px; overflow-y: auto;">${gameData}</pre></td>
-                        <td><button class="delete-btn" onclick="deleteUser('${username}')">Supprimer</button></td>
+                        <td>${deleteButton}</td>
                     </tr>
                 `;
             });
