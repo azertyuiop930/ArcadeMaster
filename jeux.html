@@ -2,47 +2,87 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>ArcadeMaster - Sélection de Jeux</title>
-    <link rel="stylesheet" href="styles.css"> <style>
-        /* Conserver les styles spécifiques aux jeux */
-        body { padding-top: 60px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-        h1 { color: #00ff00; font-size: 2.5em; border-bottom: 2px solid #333; padding-bottom: 10px; margin-top: 40px; }
+    <title>ArcadeMaster - Menu Jeux</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Styles pour centrer le contenu */
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start; /* Aligner en haut pour laisser de la place à la navbar */
+            min-height: 100vh;
+            padding-top: 80px; /* Espace pour la navbar fixe */
+        }
         
-        .game-selection-grid { 
-            display: flex; 
-            gap: 30px; 
-            flex-wrap: wrap;
-            justify-content: center;
+        /* Styles du menu des jeux */
+        .games-container {
+            max-width: 900px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 30px;
+            background-color: var(--color-surface);
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+            text-align: center;
+        }
+        .games-container h1 {
+            color: #00ff00;
+            font-size: 3em;
+            margin-bottom: 25px;
+            text-shadow: 0 0 5px #00ff00;
+        }
+        .games-grid {
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
             margin-top: 30px;
         }
         .game-card {
-            width: 250px;
-            height: 150px;
-            background-color: #333;
-            border: 2px solid #00ff00;
+            background-color: #1a1a1a;
+            border: 2px solid #555;
             border-radius: 8px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s;
+            padding: 20px;
+            text-decoration: none;
+            color: white;
+            transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+            text-align: left;
         }
         .game-card:hover {
-            transform: scale(1.05);
-            background-color: #444;
-            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+            transform: translateY(-5px);
+            border-color: #00ff00;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
         }
         .game-card h2 {
-            margin: 5px 0 10px 0;
-            color: #fff;
-            font-size: 1.5em;
+            font-size: 1.8em;
+            margin-top: 0;
+            color: #f39c12;
         }
         .game-card p {
-            color: #00ff00;
-            font-size: 0.9em;
+            font-size: 1em;
+            color: #ccc;
         }
     </style>
+    <script src="auth.js"></script>
+    <script>
+        function toggleMenu(x) {
+            x.classList.toggle("change");
+            const sidebar = document.getElementById("sidebar");
+            
+            if (sidebar.style.width === "250px") {
+                sidebar.style.width = "0";
+            } else {
+                sidebar.style.width = "250px";
+            }
+        }
+        
+        // Assurez-vous que la navbar se met à jour au chargement
+        document.addEventListener('DOMContentLoaded', () => { 
+             if (typeof renderAuthControls === 'function') {
+                 renderAuthControls();
+             }
+        });
+    </script>
 </head>
 <body>
     
@@ -60,38 +100,25 @@
         <a href="index.html">🏠 Accueil</a>
         <a href="jeux.html">🕹️ Menu Jeux</a>
         <a href="credits.html">📝 Crédits</a>
-        <a href="classement.html">🏆 Classement</a>
-    </div>
-    
-    <h1>Sélection de Jeux 🕹️</h1>
-    
-    <div class="game-selection-grid">
-        
-        <a href="space-invaders.html" style="text-decoration: none;">
-            <div class="game-card">
-                <h2>SPACE INVADERS</h2>
-                <p>Visez et tirez. Classement actif !</p>
-            </div>
-        </a>
-        
-        <div class="game-card" style="opacity: 0.5; border-color: #e74c3c; cursor: default;">
-            <h2>CLICKER RPG</h2>
-            <p>Connectez-vous pour jouer (Bientôt).</p>
+        <a href="authentification.html">⚙️ Compte</a>
         </div>
-        
-    </div>
 
-    <script src="auth.js"></script>
-    <script>
-        function toggleMenu(x) {
-            x.classList.toggle("change");
-            const sidebar = document.getElementById("sidebar");
-            if (sidebar.style.width === "250px") {
-                sidebar.style.width = "0";
-            } else {
-                sidebar.style.width = "250px";
-            }
-        }
-    </script>
+    <div class="games-container">
+        <h1>SÉLECTION DES JEUX</h1>
+        
+        <div class="games-grid">
+            
+            <a href="space_invaders.html" class="game-card"> 
+                <h2>🚀 Space Invaders (Emoji Edition)</h2>
+                <p>Éliminez les envahisseurs de l'espace dans ce classique d'arcade ! (Emoji pour une compatibilité maximale)</p>
+            </a>
+            
+            <a href="#" class="game-card" onclick="alert('Bientôt disponible !'); return false;">
+                <h2>🐍 Snake</h2>
+                <p>Le serpent affamé est bientôt prêt à dévorer des pommes.</p>
+            </a>
+
+        </div>
+    </div>
 </body>
 </html>
