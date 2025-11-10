@@ -6,21 +6,21 @@
     <link rel="stylesheet" href="styles.css">
     
     <script>
-        // --- Fonction du Menu Hamburger (Simplifiée pour la compatibilité) ---
+        // --- Fonction du Menu Hamburger (Utilise la largeur pour l'ouverture) ---
         function toggleMenu(x) {
             x.classList.toggle("change");
             const sidebar = document.getElementById("sidebar");
-            // Utilisez "block" / "none" pour une compatibilité maximale
-            if (sidebar.style.display === "block") { 
-                sidebar.style.display = "none";
+            
+            if (sidebar.style.width === "250px") {
+                sidebar.style.width = "0";
             } else {
-                sidebar.style.display = "block";
+                sidebar.style.width = "250px";
             }
         }
     </script>
 
     <style>
-        /* Styles spécifiques pour le classement (peuvent être déplacés dans styles.css) */
+        /* Styles spécifiques pour le classement */
         
         .leaderboard-table th:nth-child(4), 
         .leaderboard-table td:nth-child(4) { 
@@ -75,7 +75,7 @@
                         </tr>
                     </thead>
                     <tbody id="leaderboardTable_space_invaders">
-                        <tr><td colspan="4" style="text-align:center;">Vérification du script...</td></tr>
+                        <tr><td colspan="4" style="text-align:center;">Chargement du classement...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -140,7 +140,7 @@
                 
                 row.insertCell().innerHTML = `${trophy} ${rank}`;
                 row.insertCell().textContent = entry.username;
-                row.insertCell().innerHTML = `<div class="user-display"><img src="${pdpUrl}" alt="PDP" class="leaderboard-pdp"></div>`;
+                row.insertCell().innerHTML = `<img src="${pdpUrl}" alt="PDP" class="leaderboard-pdp">`;
                 row.insertCell().textContent = entry.score;
             });
         }
