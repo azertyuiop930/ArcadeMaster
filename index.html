@@ -12,10 +12,18 @@
 <body>
 
     <nav id="navbar">
-        <a href="/ArcadeMaster/"><i class="fa-solid fa-house"></i> Accueil</a>
-        <a href="jeux.html"><i class="fa-solid fa-gamepad"></i> Menu Jeux</a>
-        <a href="credits.html"><i class="fa-solid fa-book"></i> Crédits</a>
-        <a href="authentification.html"><i class="fa-solid fa-user-gear"></i> Compte</a>
+        
+        <i class="fa-solid fa-bars menu-toggle"></i>
+        
+        <div class="nav-links">
+            <a href="/ArcadeMaster/"><i class="fa-solid fa-house"></i> Accueil</a>
+            <a href="jeux.html"><i class="fa-solid fa-gamepad"></i> Menu Jeux</a>
+            <a href="credits.html"><i class="fa-solid fa-book"></i> Crédits</a>
+        </div>
+        
+        <a href="authentification.html" class="profile-link">
+             <img src="placeholder_profile.jpg" alt="Profil" class="profile-img-nav">
+        </a>
     </nav>
 
     <div class="auth-card" style="max-width: 600px; margin-top: 40px; text-align: center;">
@@ -30,19 +38,22 @@
             
             <div style="flex: 1; padding: 15px; border: 1px solid #00FF00; border-radius: 8px; background-color: #353535; cursor: pointer;" 
                  onclick="window.location.href='jeux.html'">
-                <h3 style="color: #00FF00;"><i class="fa-solid fa-rocket"></i> Jouer !</h3>
+                 <img src="placeholder_game_icon.png" alt="Jouer" style="width: 50px; height: 50px; margin-bottom: 10px;">
+                <h3 style="color: #00FF00;">Jouer !</h3>
                 <p style="font-size: 0.9em; color: #CCC;">Commencez une partie ou explorez la liste des jeux.</p>
             </div>
             
             <div style="flex: 1; padding: 15px; border: 1px solid #F39C12; border-radius: 8px; background-color: #353535; cursor: pointer;" 
                  onclick="window.location.href='authentification.html'">
-                <h3 style="color: #F39C12;"><i class="fa-solid fa-user-circle"></i> Mon Compte</h3>
+                 <img src="placeholder_account_icon.png" alt="Compte" style="width: 50px; height: 50px; margin-bottom: 10px;">
+                <h3 style="color: #F39C12;">Mon Compte</h3>
                 <p style="font-size: 0.9em; color: #CCC;">Connexion, inscription et gestion de votre profil.</p>
             </div>
             
             <div style="flex: 1; padding: 15px; border: 1px solid #E0E0E0; border-radius: 8px; background-color: #353535; cursor: pointer;" 
                  onclick="window.location.href='credits.html'">
-                <h3 style="color: #E0E0E0;"><i class="fa-solid fa-medal"></i> Crédits</h3>
+                 <img src="placeholder_credits_icon.png" alt="Crédits" style="width: 50px; height: 50px; margin-bottom: 10px;">
+                <h3 style="color: #E0E0E0;">Crédits</h3>
                 <p style="font-size: 0.9em; color: #CCC;">Qui a fait ce projet ?</p>
             </div>
 
