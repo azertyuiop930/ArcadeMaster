@@ -16,7 +16,7 @@
             color: white; 
             margin-top: 10px; 
             font-size: 1.2em; 
-            display: flex; /* Utilisation de flexbox pour aligner les scores */
+            display: flex; 
             gap: 20px;
         }
         .game-title { 
@@ -45,6 +45,61 @@
         #reset-button:hover {
             background-color: #e67e22; 
         }
+        
+        /* Nouveaux styles pour le classement intégré */
+        #leaderboardContainer {
+            width: 800px;
+            margin: 20px auto 0;
+            background-color: var(--color-surface);
+            border: 1px solid var(--color-primary);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+            max-height: 0; /* Caché par défaut */
+            opacity: 0;
+        }
+        
+        #leaderboardContainer.expanded {
+            max-height: 500px; /* Taille maximale arbitraire pour l'expansion */
+            opacity: 1;
+        }
+        
+        #leaderboardTitle {
+            cursor: pointer;
+            background-color: #3a3a3a;
+            color: var(--color-primary);
+            padding: 10px;
+            text-align: center;
+            font-size: 1.2em;
+            border-bottom: 1px solid var(--color-primary);
+        }
+        
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .leaderboard-table th, .leaderboard-table td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #333;
+        }
+        .leaderboard-table th {
+             background-color: #2a2a2a;
+             color: var(--color-primary);
+        }
+        .leaderboard-table td:nth-child(4) { 
+            text-align: right;
+            font-weight: bold;
+            color: var(--color-secondary);
+        }
+        .leaderboard-pdp {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            vertical-align: middle;
+            border: 1px solid var(--color-primary);
+        }
     </style>
 </head>
 <body>
@@ -63,7 +118,6 @@
         <a href="index.html">🏠 Accueil</a>
         <a href="jeux.html">🕹️ Menu Jeux</a>
         <a href="credits.html">📝 Crédits</a>
-        <a href="classement.html">🏆 Classement</a>
         </div>
 
     <h1 class="game-title">SPACE INVADERS</h1>
@@ -75,6 +129,20 @@
     
     <button id="reset-button" onclick="resetGameAndStart()">Recommencer la Partie</button>
     
+    <div id="leaderboardTitle" onclick="toggleLeaderboard()">
+        🏆 CLASSEMENT MONDIAL (Cliquez pour afficher/masquer) ⬇️
+    </div>
+
+    <div id="leaderboardContainer">
+        <table class="leaderboard-table">
+            <thead>
+                <tr><th>Rng</th><th>Joueur</th><th>PDP</th> <th>Score</th></tr>
+            </thead>
+            <tbody id="leaderboardTableBody">
+                </tbody>
+        </table>
+    </div>
+
     <canvas id="gameCanvas" width="800" height="600"></canvas>
 
     <script src="auth.js"></script>
@@ -90,10 +158,66 @@
             }
         }
         
-        // --- Variables Globales de Score ---
-        let currentHighScore = 0; 
+        // --- Fonctions du Classement Intégré ---
+        const DEFAULT_PDP_URL = 'https://i.imgur.com/39hN7hG.png'; 
         const GAME_ID = 'space_invaders';
+        
+        function toggleLeaderboard() {
+            const container = document.getElementById('leaderboardContainer');
+            const title = document.getElementById('leaderboardTitle');
+            container.classList.toggle('expanded');
+            
+            if(container.classList.contains('expanded')) {
+                 title.innerHTML = '🏆 CLASSEMENT MONDIAL (Cliquez pour afficher/masquer) ⬆️';
+                 renderLeaderboard();
+            } else {
+                 title.innerHTML = '🏆 CLASSEMENT MONDIAL (Cliquez pour afficher/masquer) ⬇️';
+            }
+        }
+        
+        function renderLeaderboard() {
+            const leaderboardBody = document.getElementById('leaderboardTableBody');
+            
+            if (typeof getLeaderboard === 'undefined' || typeof getUserData === 'undefined') {
+                leaderboardBody.innerHTML = '<tr><td colspan="4">Erreur: auth.js non chargé.</td></tr>';
+                return;
+            }
 
+            const leaderboardData = getLeaderboard(GAME_ID, 10); 
+            leaderboardBody.innerHTML = ''; 
+
+            if (leaderboardData.length === 0) {
+                 leaderboardBody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Aucun score enregistré.</td></tr>';
+                 return;
+            }
+
+            leaderboardData.forEach((entry, index) => {
+                const rank = index + 1;
+                let trophy = '';
+                
+                const userData = getUserData(entry.username);
+                const pdpUrl = userData && userData.pdp ? userData.pdp : DEFAULT_PDP_URL;
+
+                if (rank === 1) {
+                    trophy = '<span class="trophy">🥇</span>';
+                } else if (rank === 2) {
+                    trophy = '<span class="trophy">🥈</span>';
+                } else if (rank === 3) {
+                    trophy = '<span class="trophy">🥉</span>';
+                }
+
+                const row = leaderboardBody.insertRow();
+                
+                row.insertCell().innerHTML = `${trophy} ${rank}`;
+                row.insertCell().textContent = entry.username;
+                row.insertCell().innerHTML = `<img src="${pdpUrl}" alt="PDP" class="leaderboard-pdp">`;
+                row.insertCell().textContent = entry.score;
+            });
+        }
+        
+        // --- Variables Globales de Score du Jeu ---
+        let currentHighScore = 0; 
+        
         function loadHighScore() {
             const user = getCurrentUser();
             const highScoreElement = document.getElementById('highScoreDisplay').querySelector('span');
@@ -111,19 +235,18 @@
             highScoreElement.textContent = '-';
         }
 
+        // --- Initialisation ---
         document.addEventListener('DOMContentLoaded', () => {
-             // 1. Rend la navigation
              if (typeof renderAuthControls === 'function') {
                  renderAuthControls();
              }
-             // 2. Charge le meilleur score
              loadHighScore(); 
-             // 3. Démarre le jeu
+             // On ne rend pas le classement ici, il se rendra au clic
              resetGame();
              requestAnimationFrame(gameLoop);
         });
         
-        // --- 2. LOGIQUE DU JEU SPACE INVADERS ---
+        // --- 2. LOGIQUE DU JEU SPACE INVADERS (Inchangée) ---
         
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
@@ -157,7 +280,6 @@
         let lastSpawnTime = 0;
         let animationFrameId = null;
 
-        // --- Fonctions de Dessin ---
         function drawPlayer() {
             ctx.save();
             ctx.translate(player.x, player.y);
@@ -183,7 +305,6 @@
             enemies.forEach(enemy => {
                 ctx.font = `${ENEMY_SIZE}px monospace`;
                 ctx.textAlign = 'center';
-                // Monstre 👾
                 ctx.fillText("👾", enemy.x, enemy.y + ENEMY_SIZE / 4); 
             });
         }
@@ -199,9 +320,12 @@
             ctx.fillText(`Score final : ${score}`, GAME_WIDTH / 2, GAME_HEIGHT / 2 + 30);
             ctx.fillText('Appuyez sur ESPACE ou cliquez sur Recommencer', GAME_WIDTH / 2, GAME_HEIGHT / 2 + 80);
             resetButton.style.display = 'block'; 
+            
+            // Ouvrir le classement après la fin du jeu
+            if (!document.getElementById('leaderboardContainer').classList.contains('expanded')) {
+                 toggleLeaderboard();
+            }
         }
-
-        // --- Fonctions de Mise à Jour ---
 
         function updateEnemies() {
             const scoreBonusSpeed = Math.floor(score / 50) * 0.1;
@@ -315,6 +439,10 @@
             player.velY = 0;
             enemySpawnInterval = 1500;
             resetButton.style.display = 'none'; 
+            
+            // Fermer le classement au début du jeu
+            document.getElementById('leaderboardContainer').classList.remove('expanded');
+            document.getElementById('leaderboardTitle').innerHTML = '🏆 CLASSEMENT MONDIAL (Cliquez pour afficher/masquer) ⬇️';
         }
         
         function resetGameAndStart() {
@@ -343,7 +471,7 @@
             animationFrameId = requestAnimationFrame(gameLoop);
         }
         
-        // --- 3. Événements ---
+        // --- 3. Événements (Inchangés) ---
         
         document.addEventListener('keydown', (e) => {
             if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'q') player.velX = -player.speed;
@@ -377,6 +505,7 @@
         });
 
         window.resetGameAndStart = resetGameAndStart; 
+        window.toggleLeaderboard = toggleLeaderboard; // Rendre accessible
     </script>
 </body>
 </html>
