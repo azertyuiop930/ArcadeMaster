@@ -50,7 +50,7 @@ function getUserData(username) {
     return users[username];
 }
 
-// Fonctions de profil
+// FONCTION PDP: Mise à jour de l'URL de la Photo de Profil
 function updatePDP(username, newUrl) {
     const users = loadUsers();
     if (users[username]) {
@@ -162,16 +162,13 @@ function renderAuthControls() {
     if (sidebarElement) {
         let adminLinkSidebar = sidebarElement.querySelector('.admin-link');
         
-        // Si l'utilisateur est admin et que le lien n'existe pas, on le crée
         if (isAdmin(currentUser) && !adminLinkSidebar) {
             const adminAnchor = document.createElement('a');
             adminAnchor.href = "admin.html";
             adminAnchor.textContent = "🛡️ Admin";
             adminAnchor.classList.add('admin-link');
-            // Ajout du lien à la fin de la sidebar
             sidebarElement.appendChild(adminAnchor); 
             
-        // Si l'utilisateur n'est PAS admin et que le lien existe, on le supprime
         } else if (!isAdmin(currentUser) && adminLinkSidebar) {
             adminLinkSidebar.remove();
         }
