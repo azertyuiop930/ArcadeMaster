@@ -1,4 +1,6 @@
-// --- CLASSE AUDIO : A AJOUTER EN PREMIER ---
+// =========================================================
+// 1. CLASSE AUDIO ET DÉCLARATION DES SONS
+// =========================================================
 class Sound {
     constructor(src, volume = 0.3) {
         this.sound = document.createElement("audio");
@@ -15,7 +17,6 @@ class Sound {
         this.sound.play().catch(e => {});
     }
     
-    // Fonction pour la musique de fond
     loop() {
         this.sound.loop = true;
         this.play();
@@ -27,15 +28,17 @@ class Sound {
     }
 }
 
-// --- DÉCLARATION DES SONS : UTILISE VOS NOMS DE FICHIERS ---
-const sfxNormalShoot = new Sound("shoot.mp3", 0.2); // Tir normal
-const sfxShotgunShoot = new Sound("shotgun_shoot.mp3", 0.4); // Tir Fusil à Pompe
-const sfxExplosion = new Sound("bonus_ramassé.mp3", 0.5); // Explosion d'ennemi / Bombe
-const sfxPickup = new Sound("bonus_ramassé.mp3", 0.5); // Ramassage Bonus
-const bgMusic = new Sound("background_music.mp3", 0.15); // Musique de fond 
+// DÉCLARATION DES SONS (utilise vos fichiers : shoot.mp3, shotgun_shoot.mp3, bonus_ramassé.mp3, background_music.mp3)
+const sfxNormalShoot = new Sound("shoot.mp3", 0.2); 
+const sfxShotgunShoot = new Sound("shotgun_shoot.mp3", 0.4); 
+const sfxExplosion = new Sound("bonus_ramassé.mp3", 0.5); // Utilisé pour l'explosion
+const sfxPickup = new Sound("bonus_ramassé.mp3", 0.5);   // Utilisé pour le ramassage de bonus
+const bgMusic = new Sound("background_music.mp3", 0.15); 
 
 
-// --- VARIABLES GLOBALES DU JEU ---
+// =========================================================
+// 2. VARIABLES GLOBALES ET SETUP
+// =========================================================
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const scoreElement = document.getElementById('scoreValue');
@@ -56,14 +59,12 @@ let gameOver = false;
 let gameStarted = false;
 let mousePos = { x: 0, y: 0 }; 
 
-// --- VARIABLES POUR LES BONUS ---
 let powerUps = [];
 let isShieldActive = false;
 let shieldTimer = 0;
 let isShotgunActive = false; 
 let shotgunTimer = 0;
 
-// --- DÉFINITION DES ÉMOJIS ---
 const EMOJIS = {
     player: '🚀', 
     invader: '👾',
@@ -73,7 +74,6 @@ const EMOJIS = {
     shotgun_pu: '🔫' 
 };
 
-// --- PARAMÈTRES D'AFFICHAGE ET JEU ---
 const EMOJI_FONT_SIZE = 30;
 const PLAYER_SIZE = 30;
 const INVADER_SIZE = 30;
@@ -82,16 +82,11 @@ const INVADER_SPAWN_RATE = 120;
 const POWERUP_SPAWN_CHANCE = 0.002; 
 
 
-// --- FONCTION UTILITAIRE DE COLLISION (AABB) ---
-function checkCollision(objA, objB) {
-    return objA.x < objB.x + objB.width &&
-           objA.x + objA.width > objB.x &&
-           objA.y < objB.y + objB.height &&
-           objA.y + objB.height > objB.y;
-}
-
-// --- LOGIQUE DE SAUVEGARDE ET CLASSEMENT (Inchagée) ---
+// =========================================================
+// 3. FONCTIONS D'AUTHENTIFICATION/SAUVEGARDE (NÉCESSAIRE POUR LES SCORES)
+// =========================================================
 function getHighScores() {
+    // Vérifie si les fonctions d'auth.js sont disponibles
     const users = typeof loadUsers === 'function' ? loadUsers() : {};
     let highScores = [];
     for (const username in users) {
@@ -101,6 +96,7 @@ function getHighScores() {
             highScores.push({ username, score: highScore });
         }
     }
+    // Données de test si les fonctions d'auth.js ne sont pas chargées
     if (highScores.length === 0 && typeof loadUsers !== 'function') {
         highScores = [
             { username: 'Arcade_King', score: 5000 },
@@ -112,12 +108,15 @@ function getHighScores() {
     return highScores;
 }
 function updatePersonalHighScore(newScore) {
+    // Vérifie si les fonctions d'auth.js sont disponibles
     const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
-    if (!currentUser || typeof loadUsers !== 'function') return false;
+    if (!currentUser || typeof loadUsers !== 'function' || typeof saveUsers !== 'function') return false;
+    
     const users = loadUsers();
     const userData = users[currentUser];
     if (!userData.games) userData.games = {};
     if (!userData.games.space_invaders) userData.games.space_invaders = { highScore: 0 };
+    
     if (newScore > userData.games.space_invaders.highScore) {
         userData.games.space_invaders.highScore = newScore;
         saveUsers(users); 
@@ -150,7 +149,16 @@ function renderScoreBoard() {
 }
 
 
-// --- CLASSES DES ENTITÉS ---
+// =========================================================
+// 4. CLASSES DES ENTITÉS
+// =========================================================
+
+function checkCollision(objA, objB) {
+    return objA.x < objB.x + objB.width &&
+           objA.x + objA.width > objB.x &&
+           objA.y < objB.y + objB.height &&
+           objA.y + objB.height > objB.y;
+}
 
 class Entity {
     constructor(x, y, width, height, emojiKey) {
@@ -177,14 +185,13 @@ class Player extends Entity {
         this.bullets = [];
         this.canShoot = true;
         this.angle = 0;
-        this.fireRateDelay = 200; // Délai de base (200ms)
+        this.fireRateDelay = 200; 
     }
 
     update(keys) {
         let dx = 0;
         let dy = 0;
         
-        // Mouvement ZQSD
         if (keys['z']) dy = -this.speed;
         if (keys['s']) dy = this.speed;
         if (keys['q']) dx = -this.speed;
@@ -204,17 +211,17 @@ class Player extends Entity {
             const centerY = this.y + this.height / 2;
             
             if (isShotgunActive) {
-                // LOGIQUE FUSIL À POMPE (5 tirs en éventail)
-                const spreadAngle = Math.PI / 18; // Angle d'écart (10 degrés)
+                // LOGIQUE FUSIL À POMPE
+                const spreadAngle = Math.PI / 18; 
                 for (let i = -2; i <= 2; i++) {
                     const angleOffset = i * spreadAngle;
                     this.bullets.push(new Bullet(centerX, centerY, this.angle + angleOffset));
                 }
-                sfxShotgunShoot.play();
+                sfxShotgunShoot.play(); // DÉCLENCHEMENT SON FUSIL À POMPE
             } else {
-                // LOGIQUE TIR NORMAL (1 tir droit)
+                // LOGIQUE TIR NORMAL
                 this.bullets.push(new Bullet(centerX, centerY, this.angle));
-                sfxNormalShoot.play();
+                sfxNormalShoot.play(); // DÉCLENCHEMENT SON TIR NORMAL
             }
             
             this.canShoot = false;
@@ -239,7 +246,6 @@ class Player extends Entity {
         
         ctx.restore();
         
-        // Dessin du bouclier si actif
         if (isShieldActive) {
             ctx.beginPath();
             ctx.arc(centerX, centerY, PLAYER_SIZE * 1.5, 0, Math.PI * 2);
@@ -281,7 +287,7 @@ class PowerUp extends Entity {
         const emojiKey = `${type}_pu`;
         super(x, y, POWERUP_SIZE, POWERUP_SIZE, emojiKey);
         this.type = type;
-        this.dy = 1; // Le bonus descend lentement
+        this.dy = 1; 
     }
     
     update() {
@@ -298,7 +304,7 @@ class Bullet extends Entity {
         super(x - 3, y - 3, 6, 6, 'bullet'); 
         this.angle = angle;
         this.speed = 10;
-        this.lifeTime = 120; // 2 secondes
+        this.lifeTime = 120; 
     }
 
     update() {
@@ -315,26 +321,25 @@ class Bullet extends Entity {
 }
 
 
-// --- GESTION DES BONUS ---
+// =========================================================
+// 5. GESTION DES BONUS ET COLLISIONS
+// =========================================================
 
 function activatePowerUp(type) {
-    // --- SON DE RAMASSAGE BONUS ---
-    sfxPickup.play();
+    sfxPickup.play(); // DÉCLENCHEMENT SON RAMASSAGE
     
     if (type === 'shield') {
         isShieldActive = true;
-        shieldTimer = 10 * 60; // 10 secondes
+        shieldTimer = 10 * 60; 
     } else if (type === 'bomb') {
-        // Applique la bombe
         const enemiesKilled = invaders.length;
         updateScore(enemiesKilled * 10); 
-        invaders = []; // Tue tous les ennemis
-        sfxExplosion.play(); // Son de la bombe
+        invaders = []; 
+        sfxExplosion.play(); // DÉCLENCHEMENT SON EXPLOSION (bombe)
     } else if (type === 'shotgun') {
-        // LOGIQUE FUSIL À POMPE
         isShotgunActive = true;
-        shotgunTimer = 20 * 60; // 20 secondes
-        player.fireRateDelay = 150; // Délai plus lent (150ms)
+        shotgunTimer = 20 * 60; 
+        player.fireRateDelay = 150; 
     }
 }
 
@@ -350,7 +355,7 @@ function updatePowerUpTimers() {
         shotgunTimer--;
         if (shotgunTimer <= 0) {
             isShotgunActive = false;
-            player.fireRateDelay = 200; // Rétablit le délai normal
+            player.fireRateDelay = 200; 
         }
     }
 }
@@ -367,42 +372,6 @@ function spawnPowerUp() {
     }
 }
 
-
-// --- GESTION DU JEU PRINCIPALE ---
-
-let player;
-let invaders = [];
-let keys = {};
-let invaderSpawnCounter = 0;
-
-
-function updateScore(points) {
-    score += points;
-    scoreElement.textContent = score;
-}
-
-function updateLives(amount) {
-    lives += amount;
-    livesElement.textContent = lives;
-    if (lives <= 0) {
-        gameOver = true;
-        bgMusic.stop(); // Arrête la musique quand c'est Game Over
-    }
-}
-
-function spawnInvader() {
-    let x, y;
-    const padding = 10;
-    const side = Math.floor(Math.random() * 4); 
-
-    if (side === 0) { x = Math.random() * GAME_WIDTH; y = -padding; } 
-    else if (side === 1) { x = GAME_WIDTH + padding; y = Math.random() * GAME_HEIGHT; } 
-    else if (side === 2) { x = Math.random() * GAME_WIDTH; y = GAME_HEIGHT + padding; } 
-    else { x = -padding; y = Math.random() * GAME_HEIGHT; }
-
-    invaders.push(new Invader(x, y));
-}
-
 function handleCollisions() {
     
     // 1. Collisions Tirs Joueur vs Envahisseurs
@@ -412,8 +381,7 @@ function handleCollisions() {
                 invader.dead = true;
                 bullet.dead = true;
                 updateScore(invader.points);
-                // --- SON D'EXPLOSION ---
-                sfxExplosion.play();
+                sfxExplosion.play(); // DÉCLENCHEMENT SON EXPLOSION (tir)
             }
         });
         return !bullet.dead;
@@ -445,6 +413,43 @@ function handleCollisions() {
     player.bullets = player.bullets.filter(b => !b.dead);
 }
 
+
+// =========================================================
+// 6. LOGIQUE DU JEU PRINCIPALE
+// =========================================================
+
+let player;
+let invaders = [];
+let keys = {};
+let invaderSpawnCounter = 0;
+
+
+function updateScore(points) {
+    score += points;
+    scoreElement.textContent = score;
+}
+
+function updateLives(amount) {
+    lives += amount;
+    livesElement.textContent = lives;
+    if (lives <= 0) {
+        gameOver = true;
+        bgMusic.stop(); // ARRÊT MUSIQUE
+    }
+}
+
+function spawnInvader() {
+    let x, y;
+    const padding = 10;
+    const side = Math.floor(Math.random() * 4); 
+
+    if (side === 0) { x = Math.random() * GAME_WIDTH; y = -padding; } 
+    else if (side === 1) { x = GAME_WIDTH + padding; y = Math.random() * GAME_HEIGHT; } 
+    else if (side === 2) { x = Math.random() * GAME_WIDTH; y = GAME_HEIGHT + padding; } 
+    else { x = -padding; y = Math.random() * GAME_HEIGHT; }
+
+    invaders.push(new Invader(x, y));
+}
 
 function updateGame() {
     if (gameOver || !gameStarted) return;
@@ -481,7 +486,6 @@ function drawGame() {
         return;
     }
 
-    // Dessiner les entités
     powerUps.forEach(pu => pu.draw(ctx)); 
     invaders.forEach(i => i.draw(ctx));
     player.draw(ctx);
@@ -510,7 +514,9 @@ function gameLoop() {
     drawGame();
 }
 
-// --- GESTION DES ÉVÉNEMENTS (Inchagée) ---
+// =========================================================
+// 7. GESTION DES ÉVÉNEMENTS
+// =========================================================
 
 document.addEventListener('mousemove', (e) => {
     const rect = canvas.getBoundingClientRect();
@@ -547,7 +553,9 @@ document.addEventListener('keyup', (e) => {
 });
 
 
-// --- INITIALISATION DU JEU (Lancement Musique) ---
+// =========================================================
+// 8. INITIALISATION DU JEU
+// =========================================================
 
 function startGame() {
     if (gameLoopInterval) clearInterval(gameLoopInterval); 
@@ -570,8 +578,7 @@ function startGame() {
     scoreElement.textContent = score;
     livesElement.textContent = lives;
     
-    // LANCE LA MUSIQUE
-    bgMusic.loop(); 
+    bgMusic.loop(); // LANCE LA MUSIQUE EN BOUCLE
 
     gameLoopInterval = setInterval(gameLoop, 1000 / 60); 
 }
