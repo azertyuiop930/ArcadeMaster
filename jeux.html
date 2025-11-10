@@ -2,123 +2,51 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>ArcadeMaster - Menu Jeux</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arcade Master - Sélection des Jeux</title>
+    
     <link rel="stylesheet" href="styles.css">
-    <style>
-        /* Styles pour centrer le contenu */
-        body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start; /* Aligner en haut pour laisser de la place à la navbar */
-            min-height: 100vh;
-            padding-top: 80px; /* Espace pour la navbar fixe */
-        }
-        
-        /* Styles du menu des jeux */
-        .games-container {
-            max-width: 900px;
-            width: 100%;
-            margin: 0 auto;
-            padding: 30px;
-            background-color: var(--color-surface);
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
-            text-align: center;
-        }
-        .games-container h1 {
-            color: #00ff00;
-            font-size: 3em;
-            margin-bottom: 25px;
-            text-shadow: 0 0 5px #00ff00;
-        }
-        .games-grid {
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 25px;
-            margin-top: 30px;
-        }
-        .game-card {
-            background-color: #1a1a1a;
-            border: 2px solid #555;
-            border-radius: 8px;
-            padding: 20px;
-            text-decoration: none;
-            color: white;
-            transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
-            text-align: left;
-        }
-        .game-card:hover {
-            transform: translateY(-5px);
-            border-color: #00ff00;
-            box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
-        }
-        .game-card h2 {
-            font-size: 1.8em;
-            margin-top: 0;
-            color: #f39c12;
-        }
-        .game-card p {
-            font-size: 1em;
-            color: #ccc;
-        }
-    </style>
-    <script src="auth.js"></script>
-    <script>
-        function toggleMenu(x) {
-            x.classList.toggle("change");
-            const sidebar = document.getElementById("sidebar");
-            
-            if (sidebar.style.width === "250px") {
-                sidebar.style.width = "0";
-            } else {
-                sidebar.style.width = "250px";
-            }
-        }
-        
-        // Assurez-vous que la navbar se met à jour au chargement
-        document.addEventListener('DOMContentLoaded', () => { 
-             if (typeof renderAuthControls === 'function') {
-                 renderAuthControls();
-             }
-        });
-    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-    
-    <div id="navbar">
-        <div class="hamburger-menu" onclick="toggleMenu(this)">
-            <div class="bar"></div>
-            <div class="bar"></div>
-            <div class="bar"></div>
-        </div>
-        <div id="auth-controls">
-            </div>
-    </div>
 
-    <div id="sidebar">
-        <a href="index.html">🏠 Accueil</a>
-        <a href="jeux.html">🕹️ Menu Jeux</a>
-        <a href="credits.html">📝 Crédits</a>
-        <a href="authentification.html">⚙️ Compte</a>
-        </div>
-
-    <div class="games-container">
-        <h1>SÉLECTION DES JEUX</h1>
+    <nav id="navbar">
+        <i class="fa-solid fa-bars menu-toggle"></i>
         
-        <div class="games-grid">
-            
-            <a href="space_invaders.html" class="game-card"> 
-                <h2>🚀 Space Invaders (Emoji Edition)</h2>
-                <p>Éliminez les envahisseurs de l'espace dans ce classique d'arcade ! (Emoji pour une compatibilité maximale)</p>
-            </a>
-            
-            <a href="#" class="game-card" onclick="alert('Bientôt disponible !'); return false;">
-                <h2>🐍 Snake</h2>
-                <p>Le serpent affamé est bientôt prêt à dévorer des pommes.</p>
-            </a>
+        <div class="nav-links">
+            <a href="/ArcadeMaster/"><i class="fa-solid fa-house"></i> Accueil</a>
+            <a href="jeux.html"><i class="fa-solid fa-gamepad"></i> Menu Jeux</a>
+            <a href="credits.html"><i class="fa-solid fa-book"></i> Crédits</a>
+        </div>
+        
+        <a href="authentification.html" class="profile-link">
+             <i class="fa-solid fa-user-gear"></i>
+        </a>
+    </nav>
 
+    <div class="game-selection-card" style="text-align: center;">
+        
+        <h1 style="font-size: 2em;">SÉLECTION DES JEUX</h1>
+        
+        <div class="card-group">
+            
+            <div class="action-card" style="border: 1px solid #F39C12;" 
+                 onclick="window.location.href='space_invaders.html'">
+                <i class="fa-solid fa-rocket" style="color: #F39C12;"></i>
+                <h3 style="color: #F39C12;">Space Invaders (Emoji Edition)</h3>
+                <p style="font-size: 0.9em; color: #CCC;">Éliminez les envahisseurs de l'espace dans ce classique d'arcade !</p>
+            </div>
+            
+            <div class="action-card" style="border: 1px solid #00FF00; opacity: 0.5; cursor: not-allowed;">
+                <i class="fa-solid fa-snake" style="color: #00FF00;"></i>
+                <h3 style="color: #00FF00;">Snake</h3>
+                <p style="font-size: 0.9em; color: #CCC;">Le serpent est bientôt prêt à dévorer des pommes.</p>
+            </div>
+            
         </div>
     </div>
+    
+    <script src="auth.js"></script>
+
 </body>
 </html>
