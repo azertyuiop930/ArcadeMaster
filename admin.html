@@ -2,57 +2,25 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>ArcadeMaster - Administration</title>
+    <title>ArcadeMaster - Classement</title>
     <link rel="stylesheet" href="styles.css">
     <style>
-        /* Styles spécifiques au panneau Admin */
-        .admin-container {
-            padding-top: 100px;
-            max-width: 600px; /* Retour à la largeur standard */
-            margin: 0 auto;
-            text-align: center;
+        /* Styles spécifiques pour le classement */
+        
+        /* Ajuster la colonne score/pdp */
+        .leaderboard-table th:nth-child(4), 
+        .leaderboard-table td:nth-child(4) { 
+            text-align: right; 
+            font-weight: bold; 
         }
-        h1 {
-            color: #00ff00;
-            border-bottom: 2px solid #555;
-            padding-bottom: 10px;
+        
+        /* Centrer la colonne Rang */
+        .leaderboard-table th:nth-child(1),
+        .leaderboard-table td:nth-child(1) {
+             text-align: center;
+             width: 50px;
         }
-        #user-list {
-            list-style: none;
-            padding: 0;
-        }
-        #user-list li {
-            background: #333;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 6px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        .user-name {
-            font-weight: bold;
-            color: white;
-        }
-        .admin-role {
-            color: yellow;
-            font-size: 0.9em;
-            margin-left: 10px;
-        }
-        .admin-actions button {
-            background-color: #e74c3c;
-            color: white;
-            padding: 8px 12px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-left: 10px;
-        }
+
     </style>
 </head>
 <body>
@@ -74,16 +42,54 @@
         <a href="authentification.html">⚙️ Compte</a>
         </div>
 
-    <div class="admin-container">
-        <h1>🛡️ Panneau d'Administration</h1>
-        <p id="admin-status"></p>
-        <ul id="user-list">
-            </ul>
+    <div class="container">
+        <h1>🏆 Classements</h1>
+        
+        <div id="personal-rank-container" style="margin-bottom: 30px; text-align: center; padding: 15px; background: #3a3a3a; border-radius: 8px; display:none;">
+            </div>
+
+        <div class="leaderboard-grid">
+            
+            <div class="leaderboard-box">
+                <h2>Space Invaders (Top 10)</h2>
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th>Rng</th>
+                            <th>Joueur</th>
+                            <th>PDP</th> 
+                            <th>Score</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboardTable_space_invaders">
+                        </tbody>
+                </table>
+            </div>
+
+            <div class="leaderboard-box">
+                <h2>Jeu Exemple (Top 10)</h2>
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th>Rng</th>
+                            <th>Joueur</th>
+                            <th>PDP</th> 
+                            <th>Score</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboardTable_jeu_exemple">
+                         <tr><td colspan="4" style="text-align:center;">Classement non disponible.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            
+        </div>
     </div>
-    
+
     <script src="auth.js"></script>
     <script>
-        // --- Logique du Menu Hamburger ---
+        // --- 1. Logique du Menu Hamburger (CORRIGÉ) ---
+        // Cette fonction DOIT être définie ici pour l'onclick
         function toggleMenu(x) {
             x.classList.toggle("change");
             const sidebar = document.getElementById("sidebar");
@@ -94,88 +100,110 @@
             }
         }
         
-        const userList = document.getElementById('user-list');
-        const adminStatus = document.getElementById('admin-status');
+        const DEFAULT_PDP_URL = 'https://i.imgur.com/39hN7hG.png'; 
 
-        function deleteUser(username) {
-            if (confirm(`Êtes-vous sûr de vouloir supprimer l'utilisateur : ${username} ? Cette action est irréversible.`)) {
+        // Fonction générique pour rendre n'importe quel classement Top X (Top 10)
+        function renderTopLeaderboard(gameId) {
+            const leaderboardBody = document.getElementById(`leaderboardTable_${gameId}`);
+            if (!leaderboardBody) return; 
+
+            // Vérification des fonctions essentielles
+            if (typeof getLeaderboard === 'undefined' || typeof getUserData === 'undefined') {
+                console.error("Erreur: Les fonctions de auth.js ne sont pas chargées.");
+                leaderboardBody.innerHTML = '<tr><td colspan="4">Erreur: Script d\'authentification manquant.</td></tr>';
+                return;
+            }
+
+            // --- CORRECTION DU CLASSEMENT : S'assure de récupérer les scores à jour
+            const leaderboardData = getLeaderboard(gameId, 10); 
+            leaderboardBody.innerHTML = ''; 
+
+            if (leaderboardData.length === 0) {
+                 leaderboardBody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Aucun score enregistré.</td></tr>';
+                 return;
+            }
+
+            leaderboardData.forEach((entry, index) => {
+                const rank = index + 1;
+                let trophy = '';
                 
-                if (typeof loadUsers === 'undefined') {
-                    alert("Erreur: Les fonctions d'authentification ne sont pas chargées.");
-                    return;
-                }
-                
-                const users = loadUsers();
-                
-                // Empêcher la suppression de l'utilisateur admin actuel
-                if (username === getCurrentUser()) {
-                     alert("Erreur: Vous ne pouvez pas supprimer votre propre compte depuis le panneau d'administration.");
-                     return;
+                const userData = getUserData(entry.username);
+                const pdpUrl = userData && userData.pdp ? userData.pdp : DEFAULT_PDP_URL;
+
+                if (rank === 1) {
+                    trophy = '<span class="trophy">🥇</span>';
+                } else if (rank === 2) {
+                    trophy = '<span class="trophy">🥈</span>';
+                } else if (rank === 3) {
+                    trophy = '<span class="trophy">🥉</span>';
                 }
 
-                if (users[username]) {
-                    delete users[username];
-                    saveUsers(users);
-                    alert(`Utilisateur ${username} supprimé.`);
-                    renderAdminUsers(); // Recharger la liste
-                }
+                const row = leaderboardBody.insertRow();
+                
+                row.insertCell().innerHTML = `${trophy} ${rank}`;
+                row.insertCell().textContent = entry.username;
+                
+                row.insertCell().innerHTML = `
+                    <div class="user-display">
+                        <img src="${pdpUrl}" alt="PDP" class="leaderboard-pdp">
+                    </div>
+                `;
+                
+                row.insertCell().textContent = entry.score;
+            });
+        }
+        
+        // Fonction pour afficher le classement personnel du joueur
+        function renderPersonalRank(gameId) {
+            const currentUser = getCurrentUser();
+            const container = document.getElementById('personal-rank-container');
+            
+            if (!currentUser || typeof getPersonalRank === 'undefined') {
+                container.style.display = 'none';
+                return;
+            }
+
+            const rankData = getPersonalRank(currentUser, gameId);
+
+            if (rankData && rankData.rank <= 10) {
+                container.style.display = 'none';
+            } else if (rankData) {
+                container.style.display = 'block';
+                container.innerHTML = `
+                    <h3>Votre Classement Personnel (Space Invaders)</h3>
+                    <p style="font-size: 1.2em;">
+                        Vous êtes actuellement au rang 
+                        <strong style="color: #00ff00;">#${rankData.rank}</strong> 
+                        avec un score de <strong>${rankData.score}</strong>.
+                    </p>
+                `;
+            } else {
+                container.style.display = 'block';
+                container.innerHTML = `
+                    <h3>Votre Classement Personnel (Space Invaders)</h3>
+                    <p>Vous n'avez pas encore enregistré de score pour ce jeu. Jouez pour apparaître dans le classement !</p>
+                `;
             }
         }
         
-        function renderAdminUsers() {
-            // Vérification de chargement des fonctions
-            if (typeof getCurrentUser === 'undefined' || typeof isAdmin === 'undefined' || typeof loadUsers === 'undefined') {
-                 adminStatus.textContent = "Erreur de chargement. Vérifiez auth.js.";
-                 return;
+        // Fonction principale de rendu au chargement de la page
+        function initializeLeaderboard() {
+            // Ces fonctions viennent de auth.js et s'assurent que la nav bar est bien rendue, 
+            // y compris le lien Admin si l'utilisateur est Zelda5962.
+            if (typeof renderAuthControls === 'function') {
+                renderAuthControls();
             }
             
-            const currentUser = getCurrentUser();
-            
-            if (!currentUser) {
-                adminStatus.textContent = "Accès refusé. Veuillez vous connecter.";
-                userList.innerHTML = '';
-                return;
-            }
-            
-            // Vérification de l'accès Admin
-            if (!isAdmin(currentUser)) {
-                adminStatus.textContent = "Accès refusé. Vous n'avez pas les droits d'administrateur.";
-                userList.innerHTML = '';
-                return;
-            }
-            
-            adminStatus.textContent = `Bienvenue, Administrateur ${currentUser}.`;
-
-            const users = loadUsers();
-            userList.innerHTML = '';
-
-            for (const username in users) {
-                // Déterminer le rôle
-                const role = isAdmin(username) ? '<span class="admin-role">(ADMIN)</span>' : '';
-                
-                const listItem = document.createElement('li');
-                listItem.innerHTML = `
-                    <div class="user-info">
-                        <span class="user-name">${username}</span>
-                        ${role}
-                    </div>
-                    <div class="admin-actions">
-                        <button onclick="deleteUser('${username}')">Supprimer</button>
-                    </div>
-                `;
-                userList.appendChild(listItem);
-            }
+            // Rendu des classements
+            renderTopLeaderboard('space_invaders');
+            // renderTopLeaderboard('jeu_exemple'); // Décommenter si le jeu est ajouté
+            renderPersonalRank('space_invaders');
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            if (typeof loadUsers !== 'undefined') {
-                renderAdminUsers();
-            } else {
-                setTimeout(renderAdminUsers, 200);
-            }
+            // Appel initial avec un petit délai pour s'assurer que auth.js est chargé
+            setTimeout(initializeLeaderboard, 150); 
         });
-        
-        window.deleteUser = deleteUser;
     </script>
 </body>
 </html>
