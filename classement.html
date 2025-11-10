@@ -21,19 +21,16 @@
 
     <style>
         /* Styles spécifiques pour le classement */
-        
         .leaderboard-table th:nth-child(4), 
         .leaderboard-table td:nth-child(4) { 
             text-align: right; 
             font-weight: bold; 
         }
-        
         .leaderboard-table th:nth-child(1),
         .leaderboard-table td:nth-child(1) {
              text-align: center;
              width: 50px;
         }
-
     </style>
 </head>
 <body>
@@ -108,6 +105,7 @@
             const leaderboardBody = document.getElementById(`leaderboardTable_${gameId}`);
             if (!leaderboardBody) return;
 
+            // Vérification de sécurité
             if (typeof getLeaderboard === 'undefined' || typeof getUserData === 'undefined') {
                 leaderboardBody.innerHTML = '<tr><td colspan="4">Erreur: auth.js ne semble pas chargé.</td></tr>';
                 return;
@@ -188,6 +186,8 @@
             }
             
             renderTopLeaderboard('space_invaders');
+            // Vous pouvez commenter les lignes ci-dessous si vous ne voulez pas voir les exemples
+            renderTopLeaderboard('jeu_exemple'); 
             renderPersonalRank('space_invaders');
         }
 
