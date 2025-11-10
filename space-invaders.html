@@ -40,10 +40,10 @@
             align-items: center;
         }
 
-        /* --- NOUVEAU: Panneau d'Information Personnelle (Gauche) --- */
+        /* --- Panneau d'Information Personnelle (Gauche) --- */
         #personal-score-panel {
             width: 250px; 
-            margin-top: 50px; /* Aligner avec le haut du Canvas */
+            margin-top: 50px; 
             background-color: var(--color-surface);
             border: 1px solid var(--color-primary);
             border-radius: 8px;
@@ -62,7 +62,7 @@
             margin: 5px 0;
         }
         
-        /* --- Ancien panneau d'info (maintenant pour le score en cours) --- */
+        /* --- Bar d'information du score en cours (Au dessus du canvas) --- */
         #current-info-bar { 
             color: white; 
             font-size: 1.4em; 
@@ -91,10 +91,10 @@
             background-color: #e67e22; 
         }
         
-        /* --- Classement Mondial (Droite) - Rendu permanent --- */
+        /* --- Classement Mondial (Droite) --- */
         #leaderboard-panel {
             width: 300px; 
-            margin-top: 50px; /* Aligner avec le haut du Canvas */
+            margin-top: 50px; 
             background-color: var(--color-surface);
             border: 1px solid var(--color-primary);
             border-radius: 8px;
@@ -142,6 +142,19 @@
         .leaderboard-table th:nth-child(4), .leaderboard-table td:nth-child(4) { width: 70px;}
 
     </style>
+    <script>
+        // --- Fonction du Menu Hamburger (CORRIGÉE : Déplacée dans le HEAD) ---
+        function toggleMenu(x) {
+            x.classList.toggle("change");
+            const sidebar = document.getElementById("sidebar");
+            
+            if (sidebar.style.width === "250px") {
+                sidebar.style.width = "0";
+            } else {
+                sidebar.style.width = "250px";
+            }
+        }
+    </script>
 </head>
 <body>
     
@@ -205,17 +218,6 @@
 
     <script src="auth.js"></script>
     <script>
-        // --- 1. Fonctions de la Navbar ---
-        function toggleMenu(x) {
-            x.classList.toggle("change");
-            const sidebar = document.getElementById("sidebar");
-            if (sidebar.style.width === "250px") {
-                sidebar.style.width = "0";
-            } else {
-                sidebar.style.width = "250px";
-            }
-        }
-        
         // --- Fonctions du Classement Intégré ---
         const DEFAULT_PDP_URL = 'https://i.imgur.com/39hN7hG.png'; 
         const GAME_ID = 'space_invaders';
@@ -260,7 +262,6 @@
                 row.insertCell().textContent = entry.score;
             });
             
-            // Mise à jour du panneau personnel
             updatePersonalScorePanel(fullLeaderboard);
         }
         
@@ -285,7 +286,6 @@
              }
              scoreElement.textContent = personalHighScore;
              
-             // Trouver le rang de l'utilisateur dans le classement complet
              const userRankIndex = fullLeaderboard.findIndex(entry => entry.username === user);
              if (userRankIndex !== -1) {
                  rankElement.textContent = `#${userRankIndex + 1}`;
@@ -294,7 +294,6 @@
              }
         }
         
-        // --- Variables Globales de Score du Jeu ---
         let currentHighScore = 0; 
         
         function loadHighScore() {
@@ -309,7 +308,6 @@
                     return;
                 }
             }
-            // Si non connecté ou aucun score
             currentHighScore = 0;
             highScoreElement.textContent = '-';
         }
@@ -325,7 +323,7 @@
              requestAnimationFrame(gameLoop);
         });
         
-        // --- 2. LOGIQUE DU JEU SPACE INVADERS (Même code de jeu, seule la fonction de dessin a été revue) ---
+        // --- LOGIQUE DU JEU SPACE INVADERS ---
         
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
@@ -359,13 +357,13 @@
         let lastSpawnTime = 0;
         let animationFrameId = null;
 
-        // --- Dessin des "persos" avec taille augmentée ---
+        // --- Dessin des "persos" avec police fiable ---
         function drawPlayer() {
             ctx.save();
             ctx.translate(player.x, player.y);
             ctx.rotate(player.angle + Math.PI / 2); 
             ctx.fillStyle = '#00ff00';
-            ctx.font = `${player.size * 2.5}px monospace`; 
+            ctx.font = `${player.size * 2.5}px Arial, sans-serif`; 
             ctx.textAlign = 'center';
             ctx.fillText("▲", 0, player.size * 0.7); 
             ctx.restore();
@@ -383,12 +381,11 @@
         function drawEnemies() {
             ctx.fillStyle = '#ff0000';
             enemies.forEach(enemy => {
-                ctx.font = `${ENEMY_SIZE * 1.3}px monospace`; 
+                ctx.font = `${ENEMY_SIZE * 1.3}px Arial, sans-serif`; 
                 ctx.textAlign = 'center';
                 ctx.fillText("👾", enemy.x, enemy.y + ENEMY_SIZE / 4); 
             });
         }
-        // --- Fin du dessin ---
         
         function drawGameOver() {
             ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
@@ -425,7 +422,7 @@
                     if (user && typeof saveGameData !== 'undefined') {
                         saveGameData(user, GAME_ID, { score: score });
                         loadHighScore(); 
-                        renderLeaderboard(); // MÀJ après la fin de partie
+                        renderLeaderboard(); 
                     } 
                     gameOver = true;
                 }
@@ -542,7 +539,7 @@
             animationFrameId = requestAnimationFrame(gameLoop);
         }
         
-        // --- 3. Événements (Inchangés) ---
+        // --- Événements ---
         
         document.addEventListener('keydown', (e) => {
             if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'q') player.velX = -player.speed;
