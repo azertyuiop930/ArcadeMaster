@@ -17,22 +17,20 @@ let score = 0;
 let lives = 3;
 let gameOver = false;
 let gameStarted = false;
+let mousePos = { x: 0, y: 0 }; // Nouvelle variable pour la position de la souris
 
 // --- DÉFINITION DES ÉMOJIS ---
 const EMOJIS = {
     player: '🚀', 
-    invader1: '👽', 
-    invader2: '👾', 
+    invader: '👾', // Un seul type d'ennemi simple
     bullet: '⚡',  
-    shield: '🧱', 
 };
 
-// --- PARAMÈTRES D'AFFICHAGE DES ÉMOJIS ---
+// --- PARAMÈTRES D'AFFICHAGE ET JEU ---
 const EMOJI_FONT_SIZE = 30;
 const PLAYER_SIZE = 30;
 const INVADER_SIZE = 30;
-const SHIELD_WIDTH = 50;
-const SHIELD_HEIGHT = 20;
+const INVADER_SPAWN_RATE = 120; // Nouvel ennemi toutes les 120 frames (2 secondes)
 
 
 // --- FONCTION UTILITAIRE DE COLLISION (AABB) ---
@@ -43,10 +41,10 @@ function checkCollision(objA, objB) {
            objA.y + objA.height > objB.y;
 }
 
-// --- LOGIQUE DE SAUVEGARDE ET CLASSEMENT ---
+// --- LOGIQUE DE SAUVEGARDE ET CLASSEMENT (Utilise auth.js si disponible) ---
+// (Rendu identique à la version précédente, car la logique de score n'a pas changé)
 
 function getHighScores() {
-    // Vérifie si les fonctions de auth.js sont disponibles
     const users = typeof loadUsers === 'function' ? loadUsers() : {};
     let highScores = [];
 
@@ -58,7 +56,6 @@ function getHighScores() {
         }
     }
     
-    // Ajout de scores mock si la liste est vide ou si auth.js n'est pas chargé
     if (highScores.length === 0 && typeof loadUsers !== 'function') {
         highScores = [
             { username: 'Arcade_King', score: 5000 },
@@ -84,7 +81,7 @@ function updatePersonalHighScore(newScore) {
     
     if (newScore > userData.games.space_invaders.highScore) {
         userData.games.space_invaders.highScore = newScore;
-        saveUsers(users); // Sauvegarde
+        saveUsers(users); 
         return true;
     }
     return false;
@@ -97,7 +94,6 @@ function renderScoreBoard() {
     let html = '';
     let foundPersonalScore = false;
 
-    // Afficher le Top 10
     highScores.slice(0, 10).forEach((item, index) => {
         const isCurrentUser = item.username === currentUser;
         const style = isCurrentUser ? 'style="color: #00ff00; font-weight: bold;"' : '';
@@ -107,13 +103,11 @@ function renderScoreBoard() {
 
     leaderboardList.innerHTML = html;
 
-    // Afficher le score personnel sous le Top 10 si non inclus
     const personalScore = highScores.find(item => item.username === currentUser);
     const personalHighScoreValue = personalScore ? personalScore.score : 0;
     
     personalHighScoreElement.textContent = personalHighScoreValue;
     
-    // Si le joueur n'est pas dans le Top 10, afficher son classement réel en bas
     if (currentUser && !foundPersonalScore && personalScore) {
         const userRank = highScores.findIndex(item => item.username === currentUser) + 1;
         if (userRank > 10) {
@@ -125,6 +119,7 @@ function renderScoreBoard() {
 
 
 // --- CLASSES DES ENTITÉS ---
+
 class Entity {
     constructor(x, y, width, height, emojiKey) {
         this.x = x;
@@ -134,7 +129,9 @@ class Entity {
         this.emoji = EMOJIS[emojiKey];
         this.dead = false;
     }
+    
     draw(ctx) {
+        // Le dessin pour les entités simples (aliens) reste le même
         ctx.font = `${EMOJI_FONT_SIZE}px sans-serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
@@ -144,114 +141,126 @@ class Entity {
 
 class Player extends Entity {
     constructor() {
-        super(GAME_WIDTH / 2 - (PLAYER_SIZE / 2), GAME_HEIGHT - 50, PLAYER_SIZE, PLAYER_SIZE, 'player');
-        this.speed = 5;
+        super(GAME_WIDTH / 2 - (PLAYER_SIZE / 2), GAME_HEIGHT / 2 - (PLAYER_SIZE / 2), PLAYER_SIZE, PLAYER_SIZE, 'player');
+        this.speed = 4;
         this.bullets = [];
         this.canShoot = true;
+        this.angle = 0; // Nouvel attribut pour l'angle de rotation
     }
 
     update(keys) {
-        // --- NOUVEAU: Mouvement ZQSD ---
-        if (keys['q'] || keys['ArrowLeft']) {
-            this.x = Math.max(0, this.x - this.speed);
-        }
-        if (keys['d'] || keys['ArrowRight']) {
-            this.x = Math.min(GAME_WIDTH - this.width, this.x + this.speed);
-        }
+        let dx = 0;
+        let dy = 0;
         
-        if ((keys[' '] || keys['Space']) && this.canShoot) {
-            this.shoot();
-            this.canShoot = false;
-            setTimeout(() => this.canShoot = true, 500); 
-        }
+        // Mouvement ZQSD
+        if (keys['z']) dy = -this.speed;
+        if (keys['s']) dy = this.speed;
+        if (keys['q']) dx = -this.speed;
+        if (keys['d']) dx = this.speed;
+
+        // Mise à jour de la position (avec bornes)
+        this.x = Math.max(0, Math.min(GAME_WIDTH - this.width, this.x + dx));
+        this.y = Math.max(0, Math.min(GAME_HEIGHT - this.height, this.y + dy));
+        
+        // Calcul de l'angle vers la souris
+        const centerX = this.x + this.width / 2;
+        const centerY = this.y + this.height / 2;
+        this.angle = Math.atan2(mousePos.y - centerY, mousePos.x - centerX);
     }
     
     shoot() {
-        if (this.bullets.length === 0) { 
-            const bulletX = this.x + this.width / 2;
-            const bulletY = this.y;
-            this.bullets.push(new Bullet(bulletX, bulletY, 'player'));
+        if (this.canShoot) {
+            const centerX = this.x + this.width / 2;
+            const centerY = this.y + this.height / 2;
+            
+            // Création de la balle avec l'angle du joueur (rotation de 90 degrés car l'emoji pointe vers le haut)
+            this.bullets.push(new Bullet(centerX, centerY, this.angle));
+            this.canShoot = false;
+            setTimeout(() => this.canShoot = true, 200); // Temps de rechargement rapide
         }
+    }
+    
+    draw(ctx) {
+        ctx.save();
+        
+        const centerX = this.x + this.width / 2;
+        const centerY = this.y + this.height / 2;
+
+        // 1. Déplacer l'origine au centre de l'objet
+        ctx.translate(centerX, centerY);
+        
+        // 2. Rotation : 90 degrés supplémentaires car l'émoji 🚀 est vertical
+        ctx.rotate(this.angle + Math.PI / 2);
+        
+        // 3. Dessiner l'émoji
+        ctx.font = `${EMOJI_FONT_SIZE}px sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        // On dessine à (-width/2, -height/2) si l'origine était en haut à gauche
+        // Ici, on dessine en (0, 0) car l'origine est au centre
+        ctx.fillText(this.emoji, 0, 0); 
+        
+        ctx.restore();
+        
+        // Dessin des tirs
+        this.bullets.forEach(b => b.draw(ctx));
     }
 }
 
 class Invader extends Entity {
-    constructor(x, y, row) {
-        const imageKey = (row % 2 === 0) ? 'invader2' : 'invader1';
-        super(x, y, INVADER_SIZE, INVADER_SIZE, imageKey);
-        this.points = 10 + (4 - row) * 5; 
-        this.xDirection = 1;
+    constructor(x, y) {
+        super(x, y, INVADER_SIZE, INVADER_SIZE, 'invader');
+        this.speed = 1.5;
+        this.points = 10;
     }
 
-    move() {
-        this.x += 1 * this.xDirection;
+    // Le monstre fonce sur le joueur
+    update(player) {
+        const targetX = player.x + player.width / 2;
+        const targetY = player.y + player.height / 2;
+        const centerX = this.x + this.width / 2;
+        const centerY = this.y + this.height / 2;
+
+        const angle = Math.atan2(targetY - centerY, targetX - centerX);
+        
+        // Mouvement vers le joueur
+        this.x += Math.cos(angle) * this.speed;
+        this.y += Math.sin(angle) * this.speed;
     }
 }
 
 class Bullet extends Entity {
-    constructor(x, y, type) {
-        super(x - 3, y, 6, 12, 'bullet'); 
-        this.speed = (type === 'player') ? -7 : 5; 
-        this.type = type;
+    constructor(x, y, angle) {
+        // La taille est plus petite pour la collision
+        super(x - 3, y - 3, 6, 6, 'bullet'); 
+        this.angle = angle;
+        this.speed = 10;
+        this.lifeTime = 120; // Durée de vie en frames (2 secondes)
     }
-    draw(ctx) {
-        ctx.fillStyle = this.type === 'player' ? 'yellow' : 'red';
-        ctx.fillRect(this.x, this.y, this.width, this.height);
-    }
+
     update() {
-        this.y += this.speed;
+        // Mouvement dans la direction de l'angle
+        this.x += Math.cos(this.angle) * this.speed;
+        this.y += Math.sin(this.angle) * this.speed;
+        this.lifeTime--;
+        if (this.lifeTime <= 0) this.dead = true;
+    }
+
+    draw(ctx) {
+        // Dessin simple pour la balle
+        ctx.fillStyle = 'yellow';
+        ctx.fillRect(this.x, this.y, this.width, this.height);
     }
 }
 
-class Shield extends Entity {
-    constructor(x, y) {
-        super(x, y, SHIELD_WIDTH, SHIELD_HEIGHT, 'shield');
-        this.health = 3; 
-    }
-    draw(ctx) {
-        if (this.health === 3) {
-            this.emoji = EMOJIS['shield'];
-        } else if (this.health === 2) {
-             this.emoji = '🚧'; 
-        } else if (this.health === 1) {
-             this.emoji = '🔥'; 
-        }
-        super.draw(ctx);
-    }
-}
 
 // --- GESTION DU JEU ---
 
 let player;
 let invaders = [];
-let shields = [];
 let keys = {};
-let invaderBullets = [];
-let invaderMoveCounter = 0; 
-const INVADER_MOVE_SPEED = 60; 
+let invaderSpawnCounter = 0;
 
-function createInvaders() {
-    invaders = [];
-    for (let row = 0; row < 5; row++) {
-        for (let col = 0; col < 10; col++) {
-            const x = 50 + col * 60;
-            const y = 50 + row * 40;
-            invaders.push(new Invader(x, y, row));
-        }
-    }
-}
-
-function createShields() {
-    shields = [];
-    const numShields = 4;
-    const spacing = GAME_WIDTH / (numShields + 1);
-    const shieldY = GAME_HEIGHT - 100;
-    
-    for (let i = 0; i < numShields; i++) {
-        const x = (i + 1) * spacing - (SHIELD_WIDTH / 2);
-        shields.push(new Shield(x, shieldY));
-    }
-}
 
 function updateScore(points) {
     score += points;
@@ -266,8 +275,31 @@ function updateLives(amount) {
     }
 }
 
+function spawnInvader() {
+    // Fait apparaître les ennemis sur un des bords de l'écran
+    let x, y;
+    const padding = 10;
+    const side = Math.floor(Math.random() * 4); // 0: haut, 1: droite, 2: bas, 3: gauche
+
+    if (side === 0) { // Haut
+        x = Math.random() * GAME_WIDTH;
+        y = -padding;
+    } else if (side === 1) { // Droite
+        x = GAME_WIDTH + padding;
+        y = Math.random() * GAME_HEIGHT;
+    } else if (side === 2) { // Bas
+        x = Math.random() * GAME_WIDTH;
+        y = GAME_HEIGHT + padding;
+    } else { // Gauche
+        x = -padding;
+        y = Math.random() * GAME_HEIGHT;
+    }
+
+    invaders.push(new Invader(x, y));
+}
+
 function handleCollisions() {
-    // 1. Collisions Tirs Joueur
+    // 1. Collisions Tirs Joueur vs Envahisseurs
     player.bullets = player.bullets.filter(bullet => {
         
         invaders.forEach((invader) => {
@@ -278,102 +310,47 @@ function handleCollisions() {
             }
         });
         
-        shields.forEach((shield) => {
-            if (checkCollision(bullet, shield)) {
-                shield.health--;
-                bullet.dead = true;
-            }
-        });
-        
-        return !bullet.dead && bullet.y > 0;
+        // Nettoyage : Garder si non touché ET encore en vie
+        return !bullet.dead;
     });
 
-    // 2. Collisions Tirs Ennemis 
-    invaderBullets = invaderBullets.filter(bullet => {
-
-        if (checkCollision(bullet, player)) {
-            bullet.dead = true;
-            updateLives(-1); 
+    // 2. Collisions Envahisseurs vs Joueur
+    invaders = invaders.filter(invader => {
+        if (checkCollision(invader, player)) {
+            // Le monstre touche le joueur, les deux sont retirés pour l'instant
+            invader.dead = true; 
+            updateLives(-1);
         }
         
-        shields.forEach((shield) => {
-            if (checkCollision(bullet, shield)) {
-                shield.health--;
-                bullet.dead = true;
-            }
-        });
-
-        return !bullet.dead && bullet.y < GAME_HEIGHT;
+        // Nettoyage : Garder si non touché ET encore en vie
+        return !invader.dead;
     });
-    
-    // 3. Nettoyage des entités 
-    invaders = invaders.filter(i => !i.dead);
-    shields = shields.filter(s => s.health > 0);
-}
 
-function invaderShoot() {
-    if (Math.random() < 0.01 && invaders.length > 0) {
-        const shooter = invaders[Math.floor(Math.random() * invaders.length)];
-        const bulletX = shooter.x + shooter.width / 2;
-        const bulletY = shooter.y + shooter.height;
-        invaderBullets.push(new Bullet(bulletX, bulletY, 'invader'));
-    }
+    // 3. Nettoyage des tirs qui ont atteint leur durée de vie
+    player.bullets = player.bullets.filter(b => !b.dead);
 }
 
 
 function updateGame() {
     if (gameOver || !gameStarted) return;
 
-    // 1. Déplacer le joueur et ses tirs
+    // 1. Mise à jour du joueur (mouvement et angle)
     player.update(keys);
-    player.bullets.forEach(b => b.update());
-    invaderBullets.forEach(b => b.update()); 
-
-    // 2. Déplacer les ennemis (Logique de mouvement)
-    invaderMoveCounter++;
-    if (invaderMoveCounter >= INVADER_MOVE_SPEED) {
-        let edgeReached = false;
-        
-        // Mouvement latéral
-        invaders.forEach(invader => {
-            invader.move();
-            if (invader.x + invader.width >= GAME_WIDTH || invader.x <= 0) {
-                edgeReached = true;
-            }
-        });
-
-        // Descente si le bord est atteint
-        if (edgeReached) {
-            invaders.forEach(invader => {
-                invader.xDirection *= -1; 
-                invader.y += 15;          
-            });
-        } 
-        
-        // Descente constante/agressive pour foncer sur le joueur
-        if (Math.random() < 0.2) { 
-             invaders.forEach(invader => {
-                invader.y += 1;          
-            });
-        }
-        
-        invaderMoveCounter = 0; 
+    
+    // 2. Gestion des ennemis (spawn et mouvement)
+    invaderSpawnCounter++;
+    if (invaderSpawnCounter >= INVADER_SPAWN_RATE) {
+        spawnInvader();
+        invaderSpawnCounter = 0;
     }
-
-    // 3. Tirs ennemis
-    invaderShoot();
+    
+    invaders.forEach(i => i.update(player));
+    
+    // 3. Mise à jour des tirs
+    player.bullets.forEach(b => b.update());
 
     // 4. Gestion des Collisions
     handleCollisions();
-    
-    // 5. Conditions de victoire / défaite
-    if (invaders.length === 0) {
-        gameOver = true;
-    }
-    // Défaite si les ennemis atteignent la ligne de bouclier (ou plus bas)
-    if (invaders.some(i => i.y + i.height >= GAME_HEIGHT - 100)) { 
-        gameOver = true;
-    }
 }
 
 function drawGame() {
@@ -384,32 +361,33 @@ function drawGame() {
         ctx.fillStyle = '#00ff00';
         ctx.font = '30px Arial';
         ctx.textAlign = 'center';
-        ctx.fillText('Appuyez sur ESPACE pour commencer', GAME_WIDTH / 2, GAME_HEIGHT / 2);
+        ctx.fillText('ZQSD pour bouger, Souris pour viser et cliquer pour tirer', GAME_WIDTH / 2, GAME_HEIGHT / 2 - 30);
+        ctx.fillText('Appuyez sur ESPACE pour commencer', GAME_WIDTH / 2, GAME_HEIGHT / 2 + 30);
         return;
     }
 
-    player.draw(ctx);
-    player.bullets.forEach(b => b.draw(ctx));
+    // Dessiner les entités
     invaders.forEach(i => i.draw(ctx));
-    shields.forEach(s => s.draw(ctx)); 
-    invaderBullets.forEach(b => b.draw(ctx)); 
+    player.draw(ctx);
+    
 
     if (gameOver) {
          // Sauvegarde du score si c'est un record
          if (score > 0) {
              updatePersonalHighScore(score);
-             renderScoreBoard(); // Mise à jour du classement après la partie
+             renderScoreBoard(); 
          }
          
          ctx.fillStyle = 'red';
-         ctx.font = '50px Arial';
+         ctx.font = '35px Arial'; // --- CORRECTION TAILLE DE TEXTE
          ctx.textAlign = 'center';
          
-         const message = lives <= 0 ? 'GAME OVER - Les envahisseurs vous ont eu !' : 'VICTOIRE ! Niveau Terminé !';
+         const message = lives <= 0 ? 'GAME OVER - Les envahisseurs vous ont eu !' : 'VICTOIRE TECHNIQUE !';
          ctx.fillText(message, GAME_WIDTH / 2, GAME_HEIGHT / 2);
+         
          ctx.font = '20px Arial';
-         ctx.fillText(`Score final: ${score}`, GAME_WIDTH / 2, GAME_HEIGHT / 2 + 50);
-         ctx.fillText(`Appuyez sur Entrée pour rejouer`, GAME_WIDTH / 2, GAME_HEIGHT / 2 + 90);
+         ctx.fillText(`Score final: ${score}`, GAME_WIDTH / 2, GAME_HEIGHT / 2 + 40);
+         ctx.fillText(`Appuyez sur Entrée pour rejouer`, GAME_WIDTH / 2, GAME_HEIGHT / 2 + 80);
     }
 }
 
@@ -418,23 +396,31 @@ function gameLoop() {
     drawGame();
 }
 
-// --- GESTION DES ÉVÉNEMENTS (ZQSD) ---
+// --- GESTION DES ÉVÉNEMENTS ---
+
+document.addEventListener('mousemove', (e) => {
+    // Calcul de la position de la souris par rapport au Canvas
+    const rect = canvas.getBoundingClientRect();
+    mousePos.x = e.clientX - rect.left;
+    mousePos.y = e.clientY - rect.top;
+});
+
+document.addEventListener('mousedown', (e) => {
+    if (gameStarted && !gameOver && e.button === 0) { // Clic gauche (0)
+        player.shoot();
+    }
+});
 
 document.addEventListener('keydown', (e) => {
-    // Utilisation des touches Q/D pour gauche/droite
-    if (e.key === 'q' || e.key === 'Q' || e.key === 'ArrowLeft') {
-         keys['q'] = true;
-    }
-    if (e.key === 'd' || e.key === 'D' || e.key === 'ArrowRight') {
-         keys['d'] = true;
-    }
+    // Touches ZQSD pour le mouvement
+    if (e.key === 'z' || e.key === 'Z') keys['z'] = true;
+    if (e.key === 's' || e.key === 'S') keys['s'] = true;
+    if (e.key === 'q' || e.key === 'Q') keys['q'] = true;
+    if (e.key === 'd' || e.key === 'D') keys['d'] = true;
     
-    keys[e.code] = true; // Capture de l'espace pour le tir
-
-    if (e.code === 'Space' && !gameOver) {
-        if (!gameStarted) {
-            startGame();
-        } 
+    // Espace pour démarrer
+    if (e.code === 'Space' && !gameOver && !gameStarted) {
+        startGame();
         e.preventDefault(); 
     }
     if (gameOver && e.code === 'Enter') {
@@ -443,14 +429,12 @@ document.addEventListener('keydown', (e) => {
 });
 
 document.addEventListener('keyup', (e) => {
-    if (e.key === 'q' || e.key === 'Q' || e.key === 'ArrowLeft') {
-         keys['q'] = false;
-    }
-    if (e.key === 'd' || e.key === 'D' || e.key === 'ArrowRight') {
-         keys['d'] = false;
-    }
-    keys[e.code] = false;
+    if (e.key === 'z' || e.key === 'Z') keys['z'] = false;
+    if (e.key === 's' || e.key === 'S') keys['s'] = false;
+    if (e.key === 'q' || e.key === 'Q') keys['q'] = false;
+    if (e.key === 'd' || e.key === 'D') keys['d'] = false;
 });
+
 
 // --- INITIALISATION DU JEU ---
 
@@ -462,10 +446,9 @@ function startGame() {
     gameOver = false;
     gameStarted = true;
     keys = {};
-
+    invaders = []; // Les anciens envahisseurs sont supprimés
+    
     player = new Player();
-    createInvaders();
-    createShields(); 
     
     scoreElement.textContent = score;
     livesElement.textContent = lives;
