@@ -97,7 +97,7 @@
         
         const userList = document.getElementById('user-list');
         const adminStatus = document.getElementById('admin-status');
-        const DEFAULT_PDP_URL = 'https://i.imgur.com/39hN7hG.png'; // Doit correspondre à auth.js
+        const DEFAULT_PDP_URL = 'https://i.imgur.com/39hN7hG.png'; 
 
         function deleteUser(username) {
             if (confirm(`Êtes-vous sûr de vouloir supprimer l'utilisateur : ${username} ? Cette action est irréversible.`)) {
@@ -127,7 +127,7 @@
         function renderAdminUsers() {
             // Vérification de chargement des fonctions
             if (typeof getCurrentUser === 'undefined' || typeof isAdmin === 'undefined' || typeof loadUsers === 'undefined') {
-                 adminStatus.textContent = "Erreur de chargement. Vérifiez que auth.js est correctement lié.";
+                 adminStatus.textContent = "Erreur critique: Les fonctions d'administration ne sont pas chargées. Vérifiez auth.js.";
                  return;
             }
             
@@ -157,6 +157,10 @@
                 // Obtenir l'URL de la PDP
                 const pdpUrl = user.pdp || DEFAULT_PDP_URL;
                 
+                // --- DEBOGAGE PDP ---
+                console.log(`Admin - Utilisateur: ${username}, PDP URL: ${pdpUrl}`);
+                // --- FIN DEBOGAGE ---
+
                 // Déterminer le rôle
                 const role = isAdmin(username) ? '<span class="admin-role">(ADMIN)</span>' : '';
                 
