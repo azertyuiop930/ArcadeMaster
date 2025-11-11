@@ -72,6 +72,18 @@
         .username-value {
             color: var(--color-text-light);
         }
+        /* Style pour la sélection du jeu */
+        #gameSelector {
+            display: block;
+            margin: 0 auto 30px auto;
+            padding: 10px;
+            font-size: 1.2em;
+            background-color: var(--color-background);
+            color: var(--color-neon-green);
+            border: 2px solid var(--color-neon-green);
+            border-radius: 5px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -102,16 +114,20 @@
     <div class="main-container" id="mainContent">
         <div style="padding-top: 50px;"></div> 
         
-        <h1 style="font-size: 2.5em; color: var(--color-neon-green);">CLASSEMENT MONDIAL - SPACE INVADERS</h1>
+        <h1 id="rankingTitle" style="font-size: 2.5em; color: var(--color-neon-green); text-align: center;">CLASSEMENT MONDIAL</h1>
         
         <div class="ranking-container">
+            
+            <select id="gameSelector" onchange="renderGlobalRanking()">
+                <option value="space_invaders">Space Invaders 2.0</option>
+                <option value="snake_infini">Snake Infini (Bientôt)</option>
+                <option value="clicker_arcade">Clicker Arcade (Bientôt)</option>
+            </select>
+            
             <h2>MEILLEURS JOUEURS</h2>
             <ul id="globalRankingList" class="ranking-list">
-                <li>Chargement du classement...</li>
+                <li>Sélectionnez un jeu pour voir le classement.</li>
             </ul>
-            <p style="text-align: center; margin-top: 20px; color: var(--color-neon-orange);">
-                *Ce classement est basé sur le meilleur score à Space Invaders.
-            </p>
         </div>
         
     </div>
@@ -128,23 +144,27 @@
             }
             
             const rankingList = document.getElementById('globalRankingList');
+            const selector = document.getElementById('gameSelector');
+            const gameId = selector.value;
+            const gameName = selector.options[selector.selectedIndex].text;
+            
+            document.getElementById('rankingTitle').textContent = `CLASSEMENT MONDIAL - ${gameName}`;
             rankingList.innerHTML = '';
             
             const users = loadUsers();
             
-            // 1. Map les utilisateurs pour obtenir les scores de Space Invaders
+            // 1. Map, filtre et trie les utilisateurs pour le jeu sélectionné
             let rankingData = users.map(user => ({
                 username: user.username,
-                score: user.highScores['space_invaders'] || 0,
+                // Utilise la clé dynamique pour le score
+                score: user.highScores[gameId] || 0, 
                 role: user.role
             }))
-            // 2. Filtre les utilisateurs sans score pour le jeu
             .filter(item => item.score > 0)
-            // 3. Trie par score décroissant
             .sort((a, b) => b.score - a.score);
 
             if (rankingData.length === 0) {
-                 rankingList.innerHTML = '<li>Aucun score enregistré. Jouez à Space Invaders pour entrer dans le classement !</li>';
+                 rankingList.innerHTML = `<li>Aucun score enregistré pour ${gameName}. Jouez pour entrer dans le classement !</li>`;
                  return;
             }
 
@@ -170,7 +190,10 @@
             });
         }
         
-        document.addEventListener('DOMContentLoaded', renderGlobalRanking);
+        document.addEventListener('DOMContentLoaded', () => {
+            // Affiche le classement Space Invaders par défaut au chargement
+            renderGlobalRanking();
+        });
         
     </script>
 </body>
