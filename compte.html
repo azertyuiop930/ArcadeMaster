@@ -1,195 +1,106 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arcade Master - Mon Compte</title>
+<script src="base.js"></script>
+<script src="auth.js"></script>
+<script>
+    // Scripts spécifiques à la page compte
     
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-</head>
-<body>
+    const authContainer = document.getElementById('authContainer');
 
-    <div id="top-bar">
-        <div id="menuToggle" class="menu-toggle">
-            <i class="fa-solid fa-bars"></i>
-        </div>
+    /**
+     * Affiche la vue de gestion du profil si l'utilisateur est connecté.
+     * Sinon, laisse les formulaires d'auth et attache les écouteurs.
+     */
+    function renderProfileView() {
+        const currentUser = getCurrentUser(); // Fonction de auth.js
         
-        <span style="font-size: 1.5em; font-weight: bold; color: var(--color-neon-green);">
-            ARCADE MASTER
-        </span>
-
-        <div style="display: flex; align-items: center; gap: 15px;">
-            <a href="boutique.html" class="currency-display" title="Boutique">
-                <span class="coin-count">0</span>
-                <button id="trollButton" type="button">+</button>
-            </a>
-            <a href="compte.html" style="color: var(--color-text-light);" title="Mon Compte" data-emoji="👤">
-                👤
-            </a>
-        </div>
-    </div>
-
-    <div id="sidebar" class="sidenav">
-        <a href="javascript:void(0)" class="closebtn" id="closeNav" onclick="closeNav()" style="position: absolute; top: 0; right: 25px; font-size: 36px; color: var(--color-neon-orange);">&times;</a>
-        <div id="nav-links">
-            <a href="index.html" data-emoji="🏠">🏠 Accueil</a>
-            <a href="jeux.html" data-emoji="🎮">🎮 Menu Jeux</a>
-            <a href="compte.html" data-emoji="👤">👤 Mon Compte</a>
-            <a href="boutique.html" data-emoji="🛍️">🛍️ Boutique</a>
-            <a href="classement.html" data-emoji="🏆">🏆 Classement</a>
-            <a href="credits.html" data-emoji="📜">📜 Crédits</a>
-        </div>
-    </div>
-
-    <div class="main-container" id="mainContent">
-        <div style="padding-top: 50px;"></div> 
-        
-        <h1 style="font-size: 2.5em;">GESTION DU COMPTE</h1>
-        
-        <div id="authContainer">
-            <div class="auth-card" id="loginArea">
-                <h2>Se Connecter</h2>
-                <form id="loginForm">
-                    <label for="loginUsername">Nom d'utilisateur</label>
-                    <input type="text" id="loginUsername" name="username" required>
+        if (currentUser) {
+            authContainer.innerHTML = `
+                <div class="auth-card" style="max-width: 500px; text-align: center;">
+                    <h2>Bienvenue, ${currentUser.username}!</h2>
                     
-                    <label for="loginPassword">Mot de passe</label>
-                    <input type="password" id="loginPassword" name="password" required>
-                    
-                    <button type="submit">Connexion</button>
-                </form>
-                
-                <p style="text-align: center; margin-top: 20px;">
-                    Pas de compte ? <a href="#" id="showRegister" style="color: var(--color-neon-green);">S'inscrire ici.</a>
-                </p>
-            </div>
-            
-            <div class="auth-card" id="registerArea" style="display: none; margin-top: 20px;">
-                <h2>S'inscrire</h2>
-                <form id="registerForm">
-                    <label for="registerUsername">Nom d'utilisateur</label>
-                    <input type="text" id="registerUsername" name="username" required>
-                    
-                    <label for="registerPassword">Mot de passe</label>
-                    <input type="password" id="registerPassword" name="password" required>
-                    
-                    <button type="submit">Inscription</button>
-                </form>
-                
-                <p style="text-align: center; margin-top: 20px;">
-                    Déjà un compte ? <a href="#" id="showLogin" style="color: var(--color-neon-green);">Se connecter.</a>
-                </p>
-            </div>
-            
-        </div>
-    </div>
-    
-    <script src="base.js"></script>
-    <script src="auth.js"></script>
-    <script>
-        // Scripts spécifiques à la page compte
-        
-        const authContainer = document.getElementById('authContainer');
-
-        /**
-         * Affiche la vue de gestion du profil si l'utilisateur est connecté.
-         * Sinon, laisse les formulaires d'auth.
-         */
-        function renderProfileView() {
-            const currentUser = getCurrentUser(); // Fonction de auth.js
-            
-            if (currentUser) {
-                authContainer.innerHTML = `
-                    <div class="auth-card" style="max-width: 500px; text-align: center;">
-                        <h2>Bienvenue, ${currentUser.username}!</h2>
+                    <div style="margin: 20px 0;">
+                        <img id="profilePic" src="${currentUser.profilePic || 'default.png'}" 
+                             alt="Photo de profil" style="width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--color-neon-orange);">
                         
-                        <div style="margin: 20px 0;">
-                            <img id="profilePic" src="${currentUser.profilePic || 'default.png'}" 
-                                 alt="Photo de profil" style="width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--color-neon-orange);">
-                            
-                            <p style="color: var(--color-text-light); margin-top: 10px;">
-                                Rôle: <span style="color: ${currentUser.role === 'admin' ? '#FFD700' : 'var(--color-neon-green)'}; font-weight: bold;">${currentUser.role.toUpperCase()}</span>
-                            </p>
-                            <p class="currency-display" style="justify-content: center; font-size: 1.5em; margin-top: 10px;">
-                                <span class="coin-count">${currentUser.coins}</span> Pièces
-                            </p>
-                        </div>
-                        
-                        <form id="changePasswordForm">
-                            <h3 style="color: var(--color-neon-green); border-bottom: none; margin-top: 30px;">Changer le mot de passe</h3>
-                            <label for="newPassword">Nouveau mot de passe</label>
-                            <input type="password" id="newPassword" required>
-                            <button type="submit" style="background-color: var(--color-neon-orange);">Mettre à jour le mot de passe</button>
-                        </form>
-                        
-                        <button id="logoutButton" style="background-color: var(--color-neon-red); margin-top: 30px;">
-                            Déconnexion
-                        </button>
-                        
-                        <p style="margin-top: 20px;"><a href="boutique.html" style="color: var(--color-neon-green);">🛍️ Accéder à la boutique de cosmétiques</a></p>
+                        <p style="color: var(--color-text-light); margin-top: 10px;">
+                            Rôle: <span style="color: ${currentUser.role === 'admin' ? '#FFD700' : 'var(--color-neon-green)'}; font-weight: bold;">${currentUser.role.toUpperCase()}</span>
+                        </p>
+                        <p class="currency-display" style="justify-content: center; font-size: 1.5em; margin-top: 10px;">
+                            <span class="coin-count">${currentUser.coins}</span> Pièces
+                        </p>
                     </div>
-                `;
-
-                // Attache l'écouteur de déconnexion
-                document.getElementById('logoutButton').addEventListener('click', logout);
-                
-                // Attache l'écouteur de changement de mot de passe
-                document.getElementById('changePasswordForm').addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    const newPassword = document.getElementById('newPassword').value;
-                    if (newPassword.length < 4) {
-                        alert("Le mot de passe doit contenir au moins 4 caractères.");
-                        return;
-                    }
                     
-                    currentUser.password = newPassword;
-                    updateGlobalUser(currentUser); // Fonction de auth.js
-                    alert("Mot de passe mis à jour avec succès !");
-                    document.getElementById('newPassword').value = '';
-                });
+                    <form id="changePasswordForm">
+                        <h3 style="color: var(--color-neon-green); border-bottom: none; margin-top: 30px;">Changer le mot de passe</h3>
+                        <label for="newPassword">Nouveau mot de passe</label>
+                        <input type="password" id="newPassword" required>
+                        <button type="submit" style="background-color: var(--color-neon-orange);">Mettre à jour le mot de passe</button>
+                    </form>
+                    
+                    <button id="logoutButton" style="background-color: var(--color-neon-red); margin-top: 30px;">
+                        Déconnexion
+                    </button>
+                    
+                    <p style="margin-top: 20px;"><a href="boutique.html" style="color: var(--color-neon-green);">🛍️ Accéder à la boutique de cosmétiques</a></p>
+                </div>
+            `;
 
-                // (Optionnel: Ajouter ici la logique de changement de photo de profil si elle devient fonctionnelle)
+            // Attache l'écouteur de déconnexion
+            document.getElementById('logoutButton').addEventListener('click', logout);
+            
+            // Attache l'écouteur de changement de mot de passe
+            document.getElementById('changePasswordForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const newPassword = document.getElementById('newPassword').value;
+                if (newPassword.length < 4) {
+                    alert("Le mot de passe doit contenir au moins 4 caractères.");
+                    return;
+                }
                 
-            } else {
-                // Utilisateur déconnecté : Gère les soumissions de formulaires
-                
-                // 1. Soumission de Connexion
-                document.getElementById('loginForm').addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    const username = document.getElementById('loginUsername').value;
-                    const password = document.getElementById('loginPassword').value;
-                    login(username, password); // Fonction de auth.js
-                });
+                currentUser.password = newPassword;
+                updateGlobalUser(currentUser); // Fonction de auth.js
+                alert("Mot de passe mis à jour avec succès !");
+                document.getElementById('newPassword').value = '';
+            });
 
-                // 2. Soumission d'Inscription
-                document.getElementById('registerForm').addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    const username = document.getElementById('registerUsername').value;
-                    const password = document.getElementById('registerPassword').value;
-                    register(username, password); // Fonction de auth.js
-                });
+            
+        } else {
+            // Utilisateur déconnecté : Gère les soumissions de formulaires
+            
+            // 1. Soumission de Connexion
+            document.getElementById('loginForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const username = document.getElementById('loginUsername').value;
+                const password = document.getElementById('loginPassword').value;
+                login(username, password); // Fonction de auth.js
+            });
 
-                // 3. Basculement Connexion/Inscription
-                document.getElementById('showRegister').addEventListener('click', (e) => {
-                    e.preventDefault();
-                    document.getElementById('loginArea').style.display = 'none';
-                    document.getElementById('registerArea').style.display = 'block';
-                });
+            // 2. Soumission d'Inscription
+            document.getElementById('registerForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const username = document.getElementById('registerUsername').value;
+                const password = document.getElementById('registerPassword').value;
+                register(username, password); // Fonction de auth.js
+            });
 
-                document.getElementById('showLogin').addEventListener('click', (e) => {
-                    e.preventDefault();
-                    document.getElementById('registerArea').style.display = 'none';
-                    document.getElementById('loginArea').style.display = 'block';
-                });
-            }
+            // 3. Basculement Connexion/Inscription
+            document.getElementById('showRegister').addEventListener('click', (e) => {
+                e.preventDefault();
+                document.getElementById('loginArea').style.display = 'none';
+                document.getElementById('registerArea').style.display = 'block';
+            });
+
+            document.getElementById('showLogin').addEventListener('click', (e) => {
+                e.preventDefault();
+                document.getElementById('registerArea').style.display = 'none';
+                document.getElementById('loginArea').style.display = 'block';
+            });
         }
+    }
 
-        // Exécute la vue appropriée au chargement après un léger délai pour s'assurer que auth.js est chargé
-        document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(renderProfileView, 10); 
-        });
+    // Exécute la vue appropriée au chargement après un délai minimal pour s'assurer que le DOM est prêt
+    document.addEventListener('DOMContentLoaded', () => {
+        // Le setTimeout assure que même si le DOM est chargé, le script d'auth a eu le temps de s'exécuter
+        setTimeout(renderProfileView, 10); 
+    });
 
-    </script>
-</body>
-</html>
+</script>
