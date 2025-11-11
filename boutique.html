@@ -31,12 +31,12 @@
     <div id="sidebar" class="sidenav">
         <a href="javascript:void(0)" class="closebtn" id="closeNav" onclick="closeNav()" style="position: absolute; top: 0; right: 25px; font-size: 36px; color: var(--color-neon-orange);">&times;</a>
         <div id="nav-links">
-            <a href="index.html" data-emoji="🏠">Accueil</a>
-            <a href="jeux.html" data-emoji="🎮">Menu Jeux</a>
-            <a href="compte.html" data-emoji="👤">Mon Compte</a>
-            <a href="boutique.html" data-emoji="🛍️">Boutique</a>
-            <a href="classement.html" data-emoji="🏆">Classement</a>
-            <a href="credits.html" data-emoji="📜">Crédits</a>
+            <a href="index.html" data-emoji="🏠">🏠 Accueil</a>
+            <a href="jeux.html" data-emoji="🎮">🎮 Menu Jeux</a>
+            <a href="compte.html" data-emoji="👤">👤 Mon Compte</a>
+            <a href="boutique.html" data-emoji="🛍️">🛍️ Boutique</a>
+            <a href="classement.html" data-emoji="🏆">🏆 Classement</a>
+            <a href="credits.html" data-emoji="📜">📜 Crédits</a>
         </div>
     </div>
 
@@ -48,7 +48,7 @@
         <div style="text-align: center; margin-bottom: 30px;">
             <p class="currency-display" style="font-size: 1.5em; justify-content: center;">
                 Votre Solde : <span class="coin-count">0</span>
-                <button id="trollButtonBottom" type="button" style="margin-left: 10px;">Acheter plus de pièces +</button>
+                <button id="trollButtonBottom" type="button" style="width: 30px; height: 30px; padding: 0; margin-left: 10px; background-color: var(--color-neon-red); color: white; border-radius: 50%; line-height: 1; font-size: 1.2em;">+</button>
             </p>
             <p style="color: #999; font-style: italic;">
                 Les skins achetés sont actifs pour tous les jeux compatibles.
@@ -71,26 +71,20 @@
     <script src="auth.js"></script>
     <script>
         // --- DONNÉES DES SKINS ---
-        // 'ship' est la catégorie, l'émoji est la valeur visuelle
         const ALL_SKINS = [
             { id: 1, name: "Vaisseau Retro", category: "ship", emoji: '🛸', price: 0, initial: true }, // Skin par défaut
             { id: 2, name: "Chasseur Furtif", category: "ship", emoji: '🦅', price: 100, initial: false },
             { id: 3, name: "Navette Pirate", category: "ship", emoji: '☠️', price: 250, initial: false },
             { id: 4, name: "Goutte d'Alien", category: "ship", emoji: '💧', price: 500, initial: false },
-            
-            // Futurs skins pour d'autres jeux...
         ];
         
         // --- FONCTIONS DE GESTION DE LA BOUTIQUE ---
 
-        /** * Ajoute les données de skins à l'utilisateur lors de l'inscription s'ils n'existent pas.
-         * Stocke les données de skins dans localStorage pour l'exemple.
-         */
         function initializeSkinData(currentUser) {
             if (!currentUser.skins) {
                 currentUser.skins = {
-                    owned: [1], // Possède toujours le skin par défaut (ID 1)
-                    active: { ship: '🛸' } // Skin actif par catégorie (ex: 'ship' pour Space Invaders)
+                    owned: [1], 
+                    active: { ship: '🛸' }
                 };
                 updateGlobalUser(currentUser);
             }
@@ -105,7 +99,17 @@
 
             let currentUser = getCurrentUser(); 
             if (!currentUser) {
-                container.innerHTML = '<p class="alert-message">Veuillez vous connecter pour accéder à la boutique.</p>';
+                // Remplacement du message simple par un bouton qui redirige
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; background-color: var(--color-card-dark); border-radius: 8px; margin: 20px auto;">
+                        <p style="color: var(--color-neon-orange); font-size: 1.2em;">Vous devez être connecté pour accéder à la boutique.</p>
+                        <a href="compte.html">
+                            <button style="width: auto; padding: 10px 20px; margin-top: 20px; background-color: var(--color-neon-green);">
+                                👤 S'inscrire / Se Connecter
+                            </button>
+                        </a>
+                    </div>
+                `;
                 return;
             }
             
@@ -157,7 +161,7 @@
                     
                     if (buySkin(skinId, price)) {
                         alert(`Achat réussi ! ${price} pièces déduites.`);
-                        renderSkins(); // Rafraîchit l'affichage
+                        renderSkins(); 
                     }
                 });
             });
@@ -168,15 +172,14 @@
                     const skinId = parseInt(e.currentTarget.dataset.id);
                     if (activateSkin(skinId)) {
                         alert("Skin activé !");
-                        renderSkins(); // Rafraîchit l'affichage
+                        renderSkins(); 
                     }
                 });
             });
             
-            // Troll Button
+            // Troll Button (Bottom)
             const trollBottomBtn = document.getElementById('trollButtonBottom');
             if (trollBottomBtn) {
-                 // S'assure que la fonction initiateTroll de base.js est appelée
                 trollBottomBtn.addEventListener('click', initiateTroll); 
             }
         }
@@ -186,8 +189,7 @@
             let currentUser = getCurrentUser();
             if (!currentUser || currentUser.skins.owned.includes(skinId)) return false;
             
-            // updateCoins est dans auth.js
-            if (updateCoins(-price)) { // Tente de retirer le montant
+            if (updateCoins(-price)) { 
                 currentUser.skins.owned.push(skinId);
                 updateGlobalUser(currentUser);
                 return true;
@@ -205,13 +207,11 @@
             currentUser.skins.active[skin.category] = skin.emoji;
             updateGlobalUser(currentUser);
             
-            // Le jeu (space_invaders.js) devra lire ce paramètre pour l'affichage du joueur
             return true;
         }
 
         document.addEventListener('DOMContentLoaded', () => {
             renderSkins();
-            // L'écouteur du trollButton (top bar) est déjà dans base.js
         });
     </script>
 </body>
