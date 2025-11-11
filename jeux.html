@@ -25,9 +25,14 @@
             transition: transform 0.3s, box-shadow 0.3s;
             text-align: center;
         }
-        .game-card:hover {
+        .game-card:hover:not(.disabled) {
             transform: translateY(-10px);
             box-shadow: 0 10px 30px var(--color-neon-orange);
+        }
+        .game-card.disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            filter: grayscale(80%);
         }
         .game-card img {
             width: 100%;
@@ -47,7 +52,7 @@
         .game-card p {
             color: var(--color-text-light);
             margin-bottom: 20px;
-            min-height: 40px; /* Assure une hauteur minimale */
+            min-height: 40px; 
         }
         .game-card button {
             background-color: var(--color-neon-green);
@@ -94,25 +99,25 @@
                 <div class="game-card-content">
                     <h3>Space Invaders 2.0</h3>
                     <p>Repoussez les vagues d'envahisseurs avec votre vaisseau.</p>
-                    <a href="space_invaders.html"><button>JOUER</button></a>
+                    <a href="space_invaders.html"><button style="background-color: var(--color-neon-green);">JOUER</button></a>
                 </div>
             </div>
 
-            <div class="game-card">
-                 <img src="placeholder_pong.png" alt="Pong Retro">
+            <div class="game-card disabled">
+                 <img src="placeholder_snake.png" alt="Snake Infini">
                 <div class="game-card-content">
-                    <h3>Pong Rétro</h3>
-                    <p>Le classique indémodable du jeu vidéo. Simple et addictif.</p>
-                    <button disabled style="background-color: gray;">À VENIR</button>
+                    <h3 style="color: gray;">Snake Infini</h3>
+                    <p>Mangez et grandissez sans jamais vous arrêter !</p>
+                    <button disabled style="background-color: gray; cursor: not-allowed;">À VENIR</button>
                 </div>
             </div>
 
-            <div class="game-card">
-                 <img src="placeholder_flappy.png" alt="Flappy Bird Clone">
+            <div class="game-card disabled">
+                 <img src="placeholder_clicker.png" alt="Clicker Arcade">
                 <div class="game-card-content">
-                    <h3>Flappy Arcado</h3>
-                    <p>Un jeu de réflexe intense avec une touche d'arcade.</p>
-                    <button disabled style="background-color: gray;">À VENIR</button>
+                    <h3 style="color: gray;">Clicker Arcade</h3>
+                    <p>Testez votre rapidité dans ce jeu de clics effréné.</p>
+                    <button disabled style="background-color: gray; cursor: not-allowed;">À VENIR</button>
                 </div>
             </div>
             
