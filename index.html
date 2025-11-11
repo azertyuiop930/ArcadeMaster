@@ -14,7 +14,7 @@
         <div id="menuToggle" class="menu-toggle">
             <i class="fa-solid fa-bars"></i>
         </div>
-        <span style="font-size: 1.5em; font-weight: bold; color: var(--color-neon-green);">
+        <span style="font-size: 1.5em; font-weight: bold; color: var(--color-neon-orange);">
             ARCADE MASTER
         </span>
         <div style="display: flex; align-items: center; gap: 15px;">
@@ -41,79 +41,104 @@
     </div>
 
     <div class="main-container" id="mainContent">
-        
         <div style="padding-top: 50px;"></div> 
         
-        <h1 style="font-size: 3em; color: var(--color-neon-orange);">BIENVENUE DANS L'ARCADE</h1>
-        
-        <p style="font-size: 1.2em; color: var(--color-text-light); margin-bottom: 40px;">
-            Plongez dans l'ambiance Rétro-Neon de vos jeux classiques préférés, revisités en version 2.0 !
-        </p>
-        
-        <div class="card-group" style="margin-top: 20px;">
-            
-            <div class="action-card" onclick="window.location.href='jeux.html'">
-                <span class="card-icon">🎮</span>
-                <h3>JOUER</h3>
-                <p>Accéder aux jeux</p>
-            </div>
+        <h1 style="color: var(--color-neon-orange);">Bienvenue dans l'Arcade Master !</h1>
+        <p>Préparez-vous à jouer, à gagner des pièces et à grimper dans le classement.</p>
 
-            <div class="action-card" onclick="window.location.href='classement.html'">
-                <span class="card-icon">🏆</span>
-                <h3>CLASSEMENT</h3>
-                <p>Voir le top score mondial</p>
+        <div class="section-divider"></div>
+
+        <h2 style="color: var(--color-neon-green);">Statut du Compte</h2>
+
+        <div id="status-card" class="stats-card">
+            <div class="stat-item">
+                <span>Statut :</span>
+                <span id="login-status" style="color: var(--color-neon-red); font-weight: bold;">Déconnecté</span>
             </div>
-            
-            <div class="action-card" onclick="window.location.href='boutique.html'">
-                <span class="card-icon">🛍️</span>
-                <h3>BOUTIQUE</h3>
-                <p>Acheter des skins et bonus</p>
+            <div class="stat-item">
+                <span>Nom d'utilisateur :</span>
+                <span id="username-display">Non Connecté</span>
+            </div>
+            <div class="stat-item">
+                <span>Pièces en poche 💰 :</span>
+                <span id="coins-display">0</span>
+            </div>
+            <div class="stat-item">
+                <span>Meilleur Score (Invaders) 🏆 :</span>
+                <span id="highscore-display">0</span>
             </div>
         </div>
         
         <div class="section-divider"></div>
         
-        <h2 style="color: var(--color-neon-green);">VOTRE STATUT</h2>
+        <h2 style="color: var(--color-neon-orange);">Actions Rapides</h2>
         
-        <div class="stats-card">
-            <div class="stat-item">
-                <span>Pièces 💰</span>
-                <span id="userCoins">N/A</span>
-            </div>
-            <div class="stat-item">
-                <span>Meilleur Score 🏆</span>
-                <span id="userHighScore">N/A</span>
-            </div>
-            <div class="stat-item">
-                <span>Connecté</span>
-                <span id="isConnected" style="color: var(--color-neon-red);">NON</span>
-            </div>
+        <div class="card-group">
+            
+            <a href="jeux.html" class="action-card">
+                <span class="card-icon">🎮</span>
+                <h3>Jouer</h3>
+                <p>Lancez vos jeux d'arcade préférés.</p>
+            </a>
+            
+            <a href="compte.html" class="action-card">
+                <span class="card-icon">👤</span>
+                <h3>Mon Compte</h3>
+                <p>Gérez votre profil et vos statistiques.</p>
+            </a>
+
+            <a href="boutique.html" class="action-card">
+                <span class="card-icon">🛍️</span>
+                <h3>Boutique</h3>
+                <p>Achetez des skins avec vos pièces.</p>
+            </a>
+            
+            <a href="classement.html" class="action-card">
+                <span class="card-icon">🏆</span>
+                <h3>Classement</h3>
+                <p>Voyez qui est le maître de l'arcade.</p>
+            </a>
+            
+            <a href="credits.html" class="action-card" style="border-color: var(--color-neon-blue);">
+                <span class="card-icon">📜</span>
+                <h3>Crédits</h3>
+                <p>Les remerciements et sources.</p>
+            </a>
+
         </div>
-        
     </div>
     
     <script src="base.js"></script>
     <script src="auth.js"></script>
     <script>
-        function updateHomeStats() {
-            const currentUser = getCurrentUser();
-            const isConnectedElement = document.getElementById('isConnected');
+        // Met à jour la carte d'état sur la page d'accueil
+        function updateStatusCard() {
+            const user = getCurrentUser();
             
-            if (currentUser) {
-                document.getElementById('userCoins').textContent = currentUser.coins;
-                document.getElementById('userHighScore').textContent = currentUser.highScores['space_invaders'] || 0;
-                isConnectedElement.textContent = 'OUI';
-                isConnectedElement.style.color = 'var(--color-neon-green)';
+            const loginStatus = document.getElementById('login-status');
+            const usernameDisplay = document.getElementById('username-display');
+            const coinsDisplay = document.getElementById('coins-display');
+            const highscoreDisplay = document.getElementById('highscore-display');
+            
+            if (user) {
+                loginStatus.textContent = 'Connecté';
+                loginStatus.style.color = 'var(--color-neon-green)';
+                usernameDisplay.textContent = user.username;
+                coinsDisplay.textContent = user.coins;
+                highscoreDisplay.textContent = user.highScores['space_invaders'] || 0;
             } else {
-                document.getElementById('userCoins').textContent = 'Se connecter';
-                document.getElementById('userHighScore').textContent = 'Se connecter';
-                isConnectedElement.textContent = 'NON';
-                isConnectedElement.style.color = 'var(--color-neon-red)';
+                loginStatus.textContent = 'Déconnecté';
+                loginStatus.style.color = 'var(--color-neon-red)';
+                usernameDisplay.textContent = 'Non Connecté';
+                coinsDisplay.textContent = '0';
+                highscoreDisplay.textContent = '0';
             }
-            updateTopBar(); // Appel de la fonction de base pour synchroniser la barre
         }
         
-        document.addEventListener('DOMContentLoaded', updateHomeStats);
+        document.addEventListener('DOMContentLoaded', () => {
+            updateStatusCard();
+            updateTopBar();
+        });
     </script>
 </body>
 </html>
