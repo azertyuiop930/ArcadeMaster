@@ -117,17 +117,21 @@
 
         <div id="loginForm" class="auth-card">
             <h2>Se Connecter</h2>
-            <form id="loginFormTag"> <input type="text" id="loginUsername" placeholder="Nom d'utilisateur" required>
+            <form onsubmit="return validateLogin(event)">
+                <input type="text" id="loginUsername" placeholder="Nom d'utilisateur" required>
                 <input type="password" id="loginPassword" placeholder="Mot de passe" required>
-                <button type="button" id="loginButton" class="btn-primary">Connexion</button> </form>
+                <button type="submit" class="btn-primary">Connexion</button>
+            </form>
             <p onclick="showRegister()" style="cursor: pointer; color: var(--color-neon-green); margin-top: 15px;">Pas de compte ? S'inscrire</p>
         </div>
 
         <div id="registerForm" class="auth-card" style="display: none;">
             <h2>Créer un Compte</h2>
-            <form id="registerFormTag"> <input type="text" id="registerUsername" placeholder="Nom d'utilisateur" required>
+            <form onsubmit="return validateRegister(event)">
+                <input type="text" id="registerUsername" placeholder="Nom d'utilisateur" required>
                 <input type="password" id="registerPassword" placeholder="Mot de passe" required>
-                <button type="button" id="registerButton" class="btn-primary" style="background-color: var(--color-neon-orange);">Inscription</button> </form>
+                <button type="submit" class="btn-primary" style="background-color: var(--color-neon-orange);">Inscription</button>
+            </form>
             <p onclick="showLogin()" style="cursor: pointer; color: var(--color-neon-green); margin-top: 15px;">Déjà un compte ? Se Connecter</p>
         </div>
         
@@ -192,44 +196,49 @@
             updateTopBar();
         }
 
-        // Initialisation des listeners
+        // NOUVELLES FONCTIONS DE VALIDATION INLINE
+        window.validateLogin = function(event) {
+            event.preventDefault(); // Empêche la soumission du formulaire HTML par défaut
+            
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+
+            // La validation 'required' du HTML devrait déjà fonctionner, mais on ajoute une sécurité
+            if (!username || !password) {
+                alert("Veuillez remplir tous les champs.");
+                return false; 
+            }
+            
+            if (loginUser(username, password)) {
+                renderAccountPage();
+                updateTopBar();
+            }
+            return false; // Empêche toujours la soumission par le navigateur
+        }
+
+        window.validateRegister = function(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('registerUsername').value;
+            const password = document.getElementById('registerPassword').value;
+
+            if (!username || !password) {
+                alert("Veuillez remplir tous les champs.");
+                return false;
+            }
+            
+            if (registerUser(username, password)) {
+                renderAccountPage();
+                updateTopBar();
+            }
+            return false;
+        }
+
+        // Initialisation des listeners (uniquement pour la mise à jour du profil)
         document.addEventListener('DOMContentLoaded', () => {
             renderAccountPage();
             
-            // --- LISTENERS DE CONNEXION/INSCRIPTION (sur le clic du bouton) ---
-            document.getElementById('loginButton').addEventListener('click', () => {
-                const username = document.getElementById('loginUsername').value;
-                const password = document.getElementById('loginPassword').value;
-                
-                // Vérification manuelle des champs requis
-                if (!username || !password) {
-                    alert("Veuillez remplir tous les champs.");
-                    return;
-                }
-                
-                if (loginUser(username, password)) {
-                    renderAccountPage();
-                    updateTopBar();
-                }
-            });
-
-            document.getElementById('registerButton').addEventListener('click', () => {
-                const username = document.getElementById('registerUsername').value;
-                const password = document.getElementById('registerPassword').value;
-
-                // Vérification manuelle des champs requis
-                if (!username || !password) {
-                    alert("Veuillez remplir tous les champs.");
-                    return;
-                }
-                
-                if (registerUser(username, password)) {
-                    renderAccountPage();
-                    updateTopBar();
-                }
-            });
-
-            // --- LISTENER DE MISE À JOUR DE PROFIL (sur la soumission du formulaire) ---
+            // --- LISTENER DE MISE À JOUR DE PROFIL ---
             document.getElementById('profileUpdateForm').addEventListener('submit', (e) => {
                 e.preventDefault();
                 const newPass = document.getElementById('newPassword').value;
