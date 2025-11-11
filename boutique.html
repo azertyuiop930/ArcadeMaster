@@ -14,7 +14,7 @@
         <div id="menuToggle" class="menu-toggle">
             <i class="fa-solid fa-bars"></i>
         </div>
-        <span style="font-size: 1.5em; font-weight: bold; color: var(--color-neon-orange);">
+        <span style="font-size: 1.5em; font-weight: bold; color: var(--color-neon-blue);">
             BOUTIQUE
         </span>
         <div style="display: flex; align-items: center; gap: 15px;">
@@ -22,7 +22,7 @@
                 <span class="coin-count">0</span>
                 <button id="trollButton" type="button">+</button>
             </a>
-            <a href="compte.html" style="color: var(--color-text-light);" title="Mon Compte" data-emoji="👤">
+            <a href="compte.html" style="color: var(--color-text-light);" title="Mon Compte">
                 👤
             </a>
         </div>
@@ -43,157 +43,112 @@
     <div class="main-container" id="mainContent">
         <div style="padding-top: 50px;"></div> 
         
-        <h1 style="font-size: 2.5em; color: var(--color-neon-orange); text-align: center;">BOUTIQUE ARCADE</h1>
+        <h1 style="font-size: 2.5em; color: var(--color-neon-blue); text-align: center;">LE MARCHÉ COSMIQUE</h1>
+        <p style="text-align: center; color: var(--color-text-light);">
+            Bienvenue dans le marché. Achetez de nouvelles apparences pour vos jeux !
+        </p>
+
+        <h2 style="color: var(--color-neon-green); margin-top: 30px; text-align: center;">🛒 Packs de Pièces</h2>
         
-        <div id="shopContent" style="text-align: center;">
-            <p style="color: var(--color-text-light); margin-top: 30px;">
-                Vous devez être **connecté** pour accéder à la boutique et acheter/équiper des skins.
-            </p>
-            <a href="compte.html" style="display: inline-block; margin-top: 20px; padding: 10px 30px; background-color: var(--color-neon-green); color: black; border-radius: 5px; text-decoration: none; font-weight: bold;">
-                🔑 Se connecter maintenant
-            </a>
+        <div class="store-grid">
+            <div class="store-item">
+                <img src="https://cdn-icons-png.flaticon.com/512/1000/1000727.png" alt="Pièces" class="item-icon">
+                <h3>Pack Découverte</h3>
+                <p>10 Pièces</p>
+                <button onclick="buyCoins('10 Coins')" class="btn-primary" style="background-color: var(--color-neon-red);">€2.99</button>
+            </div>
+            <div class="store-item">
+                <img src="https://cdn-icons-png.flaticon.com/512/1000/1000732.png" alt="Pièces" class="item-icon">
+                <h3>Pack Aventurier</h3>
+                <p>100 Pièces</p>
+                <button onclick="buyCoins('100 Coins')" class="btn-primary" style="background-color: var(--color-neon-red);">€5.99</button>
+            </div>
+            <div class="store-item">
+                <img src="https://cdn-icons-png.flaticon.com/512/1000/1000735.png" alt="Pièces" class="item-icon">
+                <h3>Pack Galactique</h3>
+                <p>500 Pièces</p>
+                <button onclick="buyCoins('500 Coins')" class="btn-primary" style="background-color: var(--color-neon-red);">€19.99</button>
+            </div>
+            <div class="store-item">
+                <img src="https://cdn-icons-png.flaticon.com/512/1000/1000742.png" alt="Pièces" class="item-icon">
+                <h3>Pack Maître</h3>
+                <p>1500 Pièces</p>
+                <button onclick="buyCoins('1500 Coins')" class="btn-primary" style="background-color: var(--color-neon-red);">€39.99</button>
+            </div>
         </div>
 
-        <div id="itemsContainer" class="shop-grid" style="display: none;">
+        <h2 style="color: var(--color-neon-orange); margin-top: 50px; text-align: center;">🚀 Vaisseaux Spatiaux</h2>
+        
+        <div class="store-grid" id="shipSkinsGrid">
             </div>
         
     </div>
-    
+
     <script src="base.js"></script>
     <script src="auth.js"></script>
     <script>
-        // Logique spécifique à la boutique
-        const SHOP_ITEMS = [
-            { id: 0, name: "Vaisseau de base", emoji: '🚀', price: 0, game: 'space_invaders', type: 'ship' },
-            { id: 1, name: "Vaisseau Éclair", emoji: '🛸', price: 500, game: 'space_invaders', type: 'ship' },
-            { id: 2, name: "Vaisseau Néon", emoji: '👽', price: 1200, game: 'space_invaders', type: 'ship' },
-            { id: 3, name: "Vaisseau Royal", emoji: '👑', price: 5000, game: 'space_invaders', type: 'ship' },
-            
-            // Skins Snake Infini (Placeholders)
-            { id: 4, name: "Tête Serpent", emoji: '🐍', price: 0, game: 'snake_infini', type: 'snake_head' },
+        // --- LOGIQUE DE LA BOUTIQUE ---
+
+        // Liste des skins disponibles (ID, Nom, Symbole, Prix)
+        const AVAILABLE_SKINS = [
+            { id: 0, name: "Classique", symbol: "🚀", price: 0 },
+            { id: 1, name: "Aigle de Feu", symbol: "🦅", price: 50 },
+            { id: 2, name: "Vipère", symbol: "🐍", price: 150 },
+            { id: 3, name: "Soucoupe UFO", symbol: "🛸", price: 500 },
         ];
         
-        function createItemCard(item, isOwned, isEquipped) {
-            let statusText;
-            let buttonHtml;
-            let cardClass = '';
-
-            if (isEquipped) {
-                cardClass = 'equipped';
-                statusText = 'ÉQUIPÉ';
-                buttonHtml = '<button class="equip-btn" disabled>ÉQUIPÉ</button>';
-            } else if (isOwned) {
-                cardClass = 'owned';
-                statusText = 'Possédé';
-                buttonHtml = `<button class="equip-btn" onclick="equipItem(${item.id})">Équiper</button>`;
-            } else {
-                statusText = `${item.price} 💰`;
-                buttonHtml = `<button class="buy-btn" onclick="buyItem(${item.id})">Acheter</button>`;
-            }
-
-            return `
-                <div class="item-card item-${item.id} ${cardClass}" data-game="${item.game}">
-                    <h3>${item.name} ${item.emoji}</h3>
-                    <p>Skin pour le jeu ${item.game.replace('_', ' ')}.</p>
-                    <span class="item-price">${statusText}</span>
-                    ${buttonHtml}
-                </div>
-            `;
+        // Simule l'achat d'un skin (sans compte ni stockage local)
+        function buySkin(skinId, price) {
+            alert("Achat non disponible en mode local. Le prix était de " + price + " pièces pour " + AVAILABLE_SKINS.find(s => s.id === skinId).name + ".");
+            // Si le compte fonctionnait, ce code vérifierait les pièces et mettrait à jour le profil.
         }
 
-        function renderShop() {
-            const currentUser = getCurrentUser(); 
-            const shopContent = document.getElementById('shopContent');
-            const itemsContainer = document.getElementById('itemsContainer');
-            
-            if (!currentUser) {
-                shopContent.style.display = 'block';
-                itemsContainer.style.display = 'none';
-                return;
-            }
-            
-            shopContent.style.display = 'none';
-            itemsContainer.style.display = 'grid';
+        // Simule l'achat de pièces (Rickroll)
+        window.buyCoins = function(pack) {
+            alert(`Vous avez tenté d'acheter le ${pack}. La transaction est en cours...`);
+            window.location.href = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"; // Célèbre Rickroll
+        }
 
-            let shopHTML = `
-                <p style="text-align: center; color: var(--color-text-light); margin-bottom: 30px;">
-                    Votre solde actuel : <b style="color: var(--color-neon-orange);">${currentUser.coins} 💰</b>
-                </p>
+        function renderSkins() {
+            const grid = document.getElementById('shipSkinsGrid');
+            grid.innerHTML = ''; // Nettoyage
+            
+            AVAILABLE_SKINS.forEach(skin => {
+                const item = document.createElement('div');
+                item.className = 'store-item';
                 
-                <div class="shop-section">
-                    <h2>Space Invaders (Vaisseaux)</h2>
-                    <div class="shop-grid">
-                        ${SHOP_ITEMS.filter(i => i.game === 'space_invaders').map(item => {
-                            const isOwned = currentUser.skins && currentUser.skins.owned && currentUser.skins.owned.includes(item.id);
-                            const isEquipped = currentUser.skins && currentUser.skins.active && currentUser.skins.active.ship === item.emoji;
-                            return createItemCard(item, isOwned || item.id === 0, isEquipped); 
-                        }).join('')}
-                    </div>
-                </div>
-
-                <div class="shop-section">
-                    <h2>Snake Infini (Têtes)</h2>
-                    <p style="color: gray;">🐍 **COMMING SOON** - Les skins de Snake Infini seront bientôt disponibles à l'achat !</p>
-                    <div class="shop-grid">
-                        ${SHOP_ITEMS.filter(i => i.game === 'snake_infini').map(item => {
-                            const isOwned = currentUser.skins && currentUser.skins.owned && currentUser.skins.owned.includes(item.id);
-                            const isEquipped = currentUser.skins && currentUser.skins.active && currentUser.skins.active.snake_head === item.emoji;
-                            return createItemCard(item, isOwned || item.id === 4, isEquipped);
-                        }).join('')}
-                    </div>
-                </div>
-
-                <div class="shop-section">
-                    <h2>Clicker Arcade</h2>
-                    <p style="color: var(--color-neon-red);">❌ Pas de skins prévus pour le Clicker Arcade.</p>
-                </div>
-            `;
-            
-            itemsContainer.innerHTML = shopHTML;
-        }
-
-        window.buyItem = function(itemId) {
-            const currentUser = getCurrentUser();
-            const item = SHOP_ITEMS.find(i => i.id === itemId);
-            
-            if (!currentUser || !item) return;
-
-            if (currentUser.coins >= item.price) {
-                currentUser.coins -= item.price;
-                if (!currentUser.skins.owned) currentUser.skins.owned = [0, 4];
-                if (!currentUser.skins.owned.includes(itemId)) currentUser.skins.owned.push(itemId);
+                // Le symbole du vaisseau comme icône
+                const icon = document.createElement('div');
+                icon.className = 'item-icon';
+                icon.style.fontSize = '3em';
+                icon.textContent = skin.symbol;
+                item.appendChild(icon);
                 
-                updateGlobalUser(currentUser); 
-                alert(`Achat réussi : ${item.name} pour ${item.price} pièces !`);
-                renderShop();
-                updateTopBar();
-            } else {
-                alert(`Fonds insuffisants. Il vous manque ${item.price - currentUser.coins} pièces.`);
-            }
-        }
-        
-        window.equipItem = function(itemId) {
-            const currentUser = getCurrentUser();
-            const item = SHOP_ITEMS.find(i => i.id === itemId);
-            
-            if (!currentUser || !item) return;
-
-            let skinKey;
-            if (item.game === 'space_invaders' && item.type === 'ship') skinKey = 'ship';
-            if (item.game === 'snake_infini' && item.type === 'snake_head') skinKey = 'snake_head';
-            
-            if (skinKey) {
-                if (!currentUser.skins.active) currentUser.skins.active = {};
-                currentUser.skins.active[skinKey] = item.emoji;
-                updateGlobalUser(currentUser);
-                alert(`${item.name} équipé pour ${item.game} !`);
-                renderShop();
-            }
+                const title = document.createElement('h3');
+                title.textContent = skin.name;
+                item.appendChild(title);
+                
+                const priceP = document.createElement('p');
+                priceP.textContent = `${skin.price} Pièces`;
+                item.appendChild(priceP);
+                
+                const button = document.createElement('button');
+                button.className = 'btn-primary';
+                button.textContent = 'Acheter';
+                button.style.backgroundColor = 'var(--color-neon-blue)';
+                
+                button.onclick = () => buySkin(skin.id, skin.price);
+                
+                item.appendChild(button);
+                grid.appendChild(item);
+            });
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-             renderShop();
-             updateTopBar(); // Appel de la fonction de base pour synchroniser la barre
+            if (typeof updateTopBar === 'function') {
+                updateTopBar();
+            }
+            renderSkins(); // Afficher les skins
         });
     </script>
 </body>
