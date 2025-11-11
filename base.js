@@ -70,3 +70,45 @@ document.addEventListener('DOMContentLoaded', (event) => {
     // Exécuter la mise à jour au chargement initial
     updateTopBar();
 });
+
+// --- GESTION GLOBALE DU CODE KONAMI ---
+
+const KONAMI_CODE = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight'];
+let konamiIndex = 0;
+
+document.addEventListener('keydown', (e) => {
+    // Éviter de déclencher si l'utilisateur tape dans un champ de texte
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+        return;
+    }
+
+    if (e.key === KONAMI_CODE[konamiIndex]) {
+        konamiIndex++;
+        if (konamiIndex === KONAMI_CODE.length) {
+            alert("CODE KONAMI ACTIVÉ ! 💰 +50,000 Pièces !");
+            
+            // Logique de gain de pièces
+            const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+            
+            if (user && user.id !== 0) {
+                 // Vrai utilisateur connecté
+                 user.coins = (user.coins || 0) + 50000;
+                 if (typeof updateGlobalUser === 'function') {
+                    updateGlobalUser(user);
+                 }
+            } else {
+                 // Utilisateur déconnecté/fantôme
+                 localStorage.setItem('tempCheatCoins', (parseInt(localStorage.getItem('tempCheatCoins') || '0') + 50000));
+            }
+
+            // Mettre à jour l'affichage des pièces dans la barre supérieure
+            if (typeof updateTopBar === 'function') {
+                updateTopBar(); 
+            }
+
+            konamiIndex = 0; 
+        }
+    } else {
+        konamiIndex = 0; 
+    }
+});
