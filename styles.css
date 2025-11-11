@@ -1,66 +1,75 @@
-/* --- TOP BAR STYLES (IMPORTANT) --- */
+/* --- NOUVEAUX STYLES POUR MENU PRINCIPAL ARRONDI ET RGB --- */
 
-#top-bar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 50px; 
-    background-color: var(--color-background);
-    color: white;
+/* Conteneur du menu pour centrer les éléments */
+.new-game-menu {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: space-between;
-    padding: 0 20px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-    z-index: 1000;
-    transition: margin-left 0.3s;
+    gap: 30px;
+    margin-top: 50px;
 }
 
-/* AJUSTEMENT : Réduit l'espace sur la droite en utilisant une taille fixe pour le conteneur droit */
-#right-container {
-    display: flex;
-    align-items: center;
-    gap: 15px; 
-    padding-right: 5px; /* Petit padding pour éviter qu'il soit collé au bord */
-}
-
-.currency-display {
-    display: flex;
-    align-items: center;
+/* Style de base des pastilles/boutons de jeu */
+.game-pill {
+    width: 90%;
+    max-width: 600px;
+    padding: 20px 40px;
+    border-radius: 40px; /* Grande forme arrondie */
+    text-align: center;
+    font-size: 1.8em;
+    font-weight: bold;
+    color: var(--color-text-light);
     background-color: var(--color-card-dark);
-    border: 2px solid var(--color-neon-orange);
-    border-radius: 20px;
-    padding: 5px 10px;
-    font-weight: bold;
-    color: white;
     text-decoration: none;
-    transition: background-color 0.3s;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-.currency-display:hover {
-    background-color: var(--color-background-dark);
+.game-pill:hover:not(.disabled) {
+    transform: scale(1.03);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
 }
 
-.coin-count {
-    color: var(--color-neon-orange);
-    margin-right: 5px;
+.game-pill span {
+    color: var(--color-neon-orange); /* Couleur du nom du jeu */
 }
 
-/* Style du bouton "Troll" (+) */
-#trollButton {
-    background-color: var(--color-neon-green);
-    color: #121212;
-    border: none;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    line-height: 1;
-    font-size: 14px;
-    font-weight: bold;
-    cursor: pointer;
-    margin-left: 5px;
-    padding: 0;
+.game-pill .status {
+    font-size: 0.7em;
+    font-weight: normal;
+    color: var(--color-neon-green);
+    margin-left: 10px;
+    padding: 5px 10px;
+    border-radius: 20px;
+    background-color: rgba(0, 255, 0, 0.1);
 }
 
-/* ... (Le reste de votre CSS) ... */
+.game-pill.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    filter: grayscale(100%);
+    border: 3px solid gray !important;
+}
+.game-pill.disabled span {
+    color: gray;
+}
+
+
+/* --- EFFET BORDURE ANIMÉE RGB/NEON (Crucial) --- */
+
+/* Définition de l'animation pour les couleurs */
+@keyframes neon-rgb-border {
+    0% { border-color: #FF0000; } /* Rouge */
+    33% { border-color: #00FF00; } /* Vert */
+    66% { border-color: #0000FF; } /* Bleu */
+    100% { border-color: #FF0000; } 
+}
+
+.rgb-border {
+    /* Base de la bordure */
+    border: 3px solid transparent; 
+    /* Application de l'animation */
+    animation: neon-rgb-border 4s linear infinite; 
+}
