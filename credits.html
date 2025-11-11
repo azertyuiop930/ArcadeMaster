@@ -7,50 +7,85 @@
     
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <style>
+        /* Style spécifique pour la page crédits */
+        .credits-section {
+            background-color: #3A3A39;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
+            margin-top: 40px;
+            text-align: center;
+        }
+
+        .credits-section h2 {
+            color: #F39C12;
+            border-bottom: 1px solid #F39C12;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .credits-section ul {
+            list-style: none;
+            padding: 0;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .credits-section ul li {
+            padding: 8px 0;
+            border-bottom: 1px dashed #555;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .credits-section ul li:last-child {
+            border-bottom: none;
+        }
+        
+        .role {
+            color: #00FF00;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
+    <div class="main-container">
 
-    <nav id="navbar">
-        <i class="fa-solid fa-bars menu-toggle"></i>
-        
-        <div class="nav-links">
-            <a href="/ArcadeMaster/"><i class="fa-solid fa-house"></i> Accueil</a>
-            <a href="jeux.html"><i class="fa-solid fa-gamepad"></i> Menu Jeux</a>
-            <a href="credits.html"><i class="fa-solid fa-book"></i> Crédits</a>
-        </div>
-        
-        <a href="authentification.html" class="profile-link">
-             <i class="fa-solid fa-user-gear"></i>
-        </a>
-    </nav>
-
-    <div class="auth-card" style="max-width: 700px; text-align: center;">
-        
-        <h1 style="font-size: 2em;"><i class="fa-solid fa-book"></i> Crédits</h1>
-        
-        <div style="text-align: left; margin-top: 30px;">
+        <nav id="navbar">
+            <div class="nav-links">
+                <a href="/ArcadeMaster/"><i class="fa-solid fa-house"></i> Accueil</a>
+                <a href="jeux.html"><i class="fa-solid fa-gamepad"></i> Menu Jeux</a>
+                <a href="credits.html"><i class="fa-solid fa-book"></i> Crédits</a>
+            </div>
             
-            <h2 style="color: #E0E0E0; border-bottom: 1px solid #555; padding-bottom: 5px; text-align: left;">Développement et Design</h2>
-            <p style="margin-top: 10px;">**Chef de Projet / Développeur Principal :** Zelda59622</p>
-            <p>**Assistance et Scripts Backend :** Gemini AI</p>
+            <a href="authentification.html" class="profile-link">
+                 <i class="fa-solid fa-user-gear"></i>
+            </a>
+        </nav>
 
-            <h2 style="color: #E0E0E0; border-bottom: 1px solid #555; padding-top: 20px; padding-bottom: 5px; text-align: left;">Testeurs et Contributeurs</h2>
-            <ul style="list-style-type: none; padding: 0;">
-                <li>Adamus_44</li>
-                <li>[Nom du Testeur 2]</li>
-                <li>[Nom du Testeur 3]</li>
-                <li>[Nom du Testeur 4]</li>
+        <h1 style="font-size: 2.2em;"><i class="fa-solid fa-medal"></i> Remerciements et Crédits</h1>
+
+        <div class="credits-section">
+            <h2>Équipe de Développement</h2>
+            <ul>
+                <li><span class="role">Concept & Codage Principal :</span> [Votre Nom/Pseudo]</li>
+                <li><span class="role">Design UI/UX :</span> L'esprit de l'Arcade</li>
             </ul>
-            <p style="font-size: 0.8em; color: #F39C12;">*(Ajoutez ici les noms de vos testeurs)*</p>
-
-            <h2 style="color: #E0E0E0; border-bottom: 1px solid #555; padding-top: 20px; padding-bottom: 5px; text-align: left;">Ressources et Licence</h2>
-            <p style="margin-top: 10px;">**Inspiré par :** Classic Space Invaders (Taito)</p>
-            <p>**Icônes :** Font Awesome, Emoji et caractères Unicode.</p>
-            <p style="font-size: 0.9em; margin-top: 15px;">Ce projet est développé à des fins éducatives et de loisir.</p>
-
-            <h2 style="color: #E0E0E0; border-bottom: 1px solid #555; padding-top: 20px; padding-bottom: 5px; text-align: left;">Remerciements Spéciaux</h2>
-            <p style="margin-top: 10px;">Merci à tous les testeurs pour leur aide précieuse.</p>
         </div>
+        
+        <div class="credits-section">
+            <h2>Testeurs et Beta-Feedback</h2>
+            <p style="color: #CCC;">Un grand merci aux personnes qui ont aidé à traquer les bugs et à améliorer l'expérience de jeu.</p>
+            <ul>
+                <li><span class="role">Testeur Principal :</span> **Adamus_44**</li>
+                <li><span class="role">Testeur :</span> [Nom du Testeur 2]</li>
+                <li><span class="role">Testeur :</span> [Nom du Testeur 3]</li>
+                <li><span class="role">Testeur :</span> [Nom du Testeur 4]</li>
+            </ul>
+        </div>
+        
     </div>
     
     <script src="auth.js"></script>
