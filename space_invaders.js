@@ -271,15 +271,19 @@ function endGame(win) {
     clearInterval(gameLoopInterval);
     
     // Sauvegarde du high score (Fonction de auth.js)
-    saveHighScore(GAME_NAME, score);
+    // IMPORTANT : S'assurer que le fichier auth.js est chargé AVANT space_invaders.js
+    if (typeof saveHighScore === 'function') {
+        saveHighScore(GAME_NAME, score);
+    }
     
     const message = win ? 
         `VICTOIRE ! Score final : ${score}` :
-        `GAME OVER ! Votre score : ${score}. High Score Personnel : ${getPersonalHighScore(GAME_NAME)}`;
+        `GAME OVER ! Votre score : ${score}.`;
     
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = '#E0E0E0';
     ctx.font = '40px Arial';
+    ctx.textAlign = 'center'; // Assure le centrage du texte de fin
     ctx.fillText(message, canvas.width / 2, canvas.height / 2);
     
     // Mise à jour finale du leaderboard après la sauvegarde
@@ -321,6 +325,9 @@ function gameLoop(currentTime = 0) {
     
     // 4. Affichage
     draw();
+    
+    // Utilise requestAnimationFrame pour une boucle plus fluide, mais on conserve l'intervalle pour la gestion de la vitesse
+    // requestAnimationFrame(gameLoop); // Optionnel si on préfère requestAnimationFrame
 }
 
 // =========================================================
@@ -332,33 +339,41 @@ function updateScoreBoard() {
     document.getElementById('livesCount').textContent = lives;
     
     // Récupère le high score personnel depuis auth.js
-    const personal = getPersonalHighScore(GAME_NAME);
-    document.getElementById('personalHighScore').textContent = personal;
+    if (typeof getPersonalHighScore === 'function') {
+        const personal = getPersonalHighScore(GAME_NAME);
+        document.getElementById('personalHighScore').textContent = personal;
+    }
     
     updateLeaderboard();
 }
 
 function updateLeaderboard() {
     const leaderboardList = document.getElementById('leaderboardList');
+    if (!leaderboardList) return;
+    
     leaderboardList.innerHTML = '';
     
     // Récupère les top scores depuis auth.js
-    const leaderboard = getLeaderboard(GAME_NAME);
-    
-    if (leaderboard.length === 0) {
-        leaderboardList.innerHTML = '<li>Aucun score enregistré. Soyez le premier!</li>';
-        return;
-    }
-    
-    leaderboard.forEach((item, index) => {
-        const li = document.createElement('li');
-        let roleIcon = '';
-        if (item.role === 'admin') {
-            roleIcon = '<i class="fa-solid fa-shield-halved" style="color: #FFD700; margin-right: 5px;"></i>';
+    if (typeof getLeaderboard === 'function') {
+        const leaderboard = getLeaderboard(GAME_NAME);
+        
+        if (leaderboard.length === 0) {
+            leaderboardList.innerHTML = '<li>Aucun score enregistré. Soyez le premier!</li>';
+            return;
         }
-        li.innerHTML = `${index + 1}. ${roleIcon}${item.username} : **${item.score}**`;
-        leaderboardList.appendChild(li);
-    });
+        
+        leaderboard.forEach((item, index) => {
+            const li = document.createElement('li');
+            let roleIcon = '';
+            if (item.role === 'admin') {
+                roleIcon = '<i class="fa-solid fa-shield-halved" style="color: #FFD700; margin-right: 5px;"></i>';
+            }
+            li.innerHTML = `${index + 1}. ${roleIcon}${item.username} : **${item.score}**`;
+            leaderboardList.appendChild(li);
+        });
+    } else {
+        leaderboardList.innerHTML = '<li>Connectez-vous pour voir les scores.</li>';
+    }
 }
 
 // =========================================================
@@ -382,10 +397,6 @@ document.addEventListener('keyup', (e) => {
 // =========================================================
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Assurez-vous que l'initialisation ne se lance qu'après le chargement de auth.js
-    // Comme auth.js est chargé en premier dans space_invaders.html, on peut l'appeler ici.
+    // Lancement du jeu
     initGame();
 });
-
-// Lance la boucle de jeu.
-// Remarque: La boucle réelle (gameLoopInterval) est démarrée dans initGame().
