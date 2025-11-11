@@ -148,9 +148,8 @@
                 const username = document.getElementById('loginUsername').value;
                 const password = document.getElementById('loginPassword').value;
                 if (loginUser(username, password)) {
-                    // Si la connexion réussit (gérée dans auth.js)
                     renderAccountPage();
-                    updateTopBar(); // Mettre à jour la barre supérieure après connexion
+                    updateTopBar(); // Mise à jour de la barre
                 }
             });
 
@@ -160,11 +159,11 @@
                 const username = document.getElementById('registerUsername').value;
                 const password = document.getElementById('registerPassword').value;
                 if (registerUser(username, password)) {
-                    // Si l'inscription réussit (gérée dans auth.js)
                     renderAccountPage();
                     updateTopBar();
                 }
             });
+            updateTopBar(); // Appel de la fonction de base pour synchroniser la barre
         });
 
         window.logoutUser = function() {
