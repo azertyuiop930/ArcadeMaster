@@ -25,7 +25,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Initialise la Top Bar au chargement de chaque page
-    updateTopBar();
+    // (doit être appelé après le chargement d'auth.js pour être complet)
+    if (typeof updateTopBar === 'function') {
+        updateTopBar();
+    }
 });
 
 
@@ -41,67 +44,45 @@ window.updateTopBar = function() {
     const currentUser = getCurrentUser();
     
     const topBar = document.getElementById('top-bar');
-    if (!topBar) return;
-
-    // Rechercher les éléments à mettre à jour (ou les créer si non présents)
-    let currencyDisplay = topBar.querySelector('.currency-display');
-    let accountLink = topBar.querySelector('#account-link');
-    let rightContainer = topBar.querySelector('#right-container');
+    const rightContainer = document.getElementById('right-container');
     
-    // Si le conteneur de droite n'existe pas, le créer (important pour l'ajout du nouveau bouton)
-    if (!rightContainer) {
-        // Chercher le div existant à droite (si le HTML est bien structuré)
-        rightContainer = topBar.lastElementChild; 
-        if (!rightContainer || rightContainer.id !== 'right-container') {
-             // Si non, on suppose qu'il faut un div générique contenant l'espace des pièces et du compte
-             rightContainer = document.createElement('div');
-             rightContainer.id = 'right-container';
-             rightContainer.style.cssText = 'display: flex; align-items: center; gap: 15px;';
-             topBar.appendChild(rightContainer);
-        }
-    } else {
-        // Vider le conteneur pour le reconstruire
-        rightContainer.innerHTML = '';
-    }
+    if (!topBar || !rightContainer) return;
 
+    // Vider le conteneur pour le reconstruire
+    rightContainer.innerHTML = '';
+    
+    // --- Bouton Troll pour les tests (toujours présent) ---
+    let trollButtonHTML = `<button id="trollButton" type="button">+</button>`;
+    
     if (currentUser) {
         // --- UTILISATEUR CONNECTÉ ---
         
         // 1. Affichage des Pièces
-        if (!currencyDisplay) {
-            currencyDisplay = document.createElement('a');
-            currencyDisplay.href = 'boutique.html';
-            currencyDisplay.className = 'currency-display';
-            currencyDisplay.title = 'Boutique';
-            currencyDisplay.innerHTML = `<span class="coin-count">${currentUser.coins}</span> <button id="trollButton" type="button">+</button>`;
-        } else {
-            currencyDisplay.querySelector('.coin-count').textContent = currentUser.coins;
-        }
+        const currencyDisplay = document.createElement('a');
+        currencyDisplay.href = 'boutique.html';
+        currencyDisplay.className = 'currency-display';
+        currencyDisplay.title = 'Boutique';
+        currencyDisplay.innerHTML = `<span class="coin-count">${currentUser.coins}</span> ${trollButtonHTML}`;
         rightContainer.appendChild(currencyDisplay);
 
 
         // 2. Bouton Mon Compte (Connecté)
-        if (!accountLink) {
-            accountLink = document.createElement('a');
-            accountLink.id = 'account-link';
-            accountLink.href = 'compte.html';
-            accountLink.style.cssText = 'color: var(--color-text-light);';
-            accountLink.title = 'Mon Compte';
-            accountLink.innerHTML = '👤';
-        }
+        const accountLink = document.createElement('a');
+        accountLink.id = 'account-link';
+        accountLink.href = 'compte.html';
+        accountLink.style.cssText = 'color: var(--color-text-light);';
+        accountLink.title = 'Mon Compte';
+        accountLink.innerHTML = '👤';
         rightContainer.appendChild(accountLink);
         
         // 3. Bouton Admin (si admin)
         if (currentUser.role === 'admin') {
-             let adminLink = topBar.querySelector('#admin-link');
-             if (!adminLink) {
-                 adminLink = document.createElement('a');
-                 adminLink.id = 'admin-link';
-                 adminLink.href = 'admin.html';
-                 adminLink.style.cssText = 'color: var(--color-neon-red); font-size: 1.2em;';
-                 adminLink.title = 'Panel Admin';
-                 adminLink.innerHTML = '👑';
-             }
+             const adminLink = document.createElement('a');
+             adminLink.id = 'admin-link';
+             adminLink.href = 'admin.html';
+             adminLink.style.cssText = 'color: var(--color-neon-red); font-size: 1.2em;';
+             adminLink.title = 'Panel Admin';
+             adminLink.innerHTML = '👑';
              // Ajouter le lien Admin devant le lien Compte
              rightContainer.insertBefore(adminLink, accountLink);
         }
@@ -109,20 +90,14 @@ window.updateTopBar = function() {
     } else {
         // --- UTILISATEUR DÉCONNECTÉ ---
 
-        // 1. Bouton Connexion
-        if (!accountLink) {
-            accountLink = document.createElement('a');
-            accountLink.id = 'account-link';
-            accountLink.href = 'compte.html';
-            accountLink.style.cssText = 'color: var(--color-neon-orange); font-weight: bold;';
-            accountLink.title = 'Connexion/Inscription';
-            accountLink.innerHTML = '🔑 Se connecter';
-        } else {
-             accountLink.href = 'compte.html';
-             accountLink.style.cssText = 'color: var(--color-neon-orange); font-weight: bold;';
-             accountLink.innerHTML = '🔑 Se connecter';
-        }
-        rightContainer.appendChild(accountLink);
+        // 1. Bouton Connexion (avec icône clé)
+        const loginLink = document.createElement('a');
+        loginLink.id = 'account-link';
+        loginLink.href = 'compte.html';
+        loginLink.style.cssText = 'color: var(--color-neon-orange); font-weight: bold;';
+        loginLink.title = 'Connexion/Inscription';
+        loginLink.innerHTML = '🔑 Se connecter';
+        rightContainer.appendChild(loginLink);
     }
     
     // Rattachage du Troll Button
