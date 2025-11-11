@@ -23,6 +23,20 @@
             gap: 20px;
             margin-bottom: 20px;
         }
+        /* Styles pour les liens/boutons personnalisés */
+        .btn-link-action {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+            border-radius: 5px;
+            margin-top: 15px;
+            cursor: pointer;
+            text-decoration: none; /* Enlève le soulignement du lien */
+            color: black; /* Texte en noir sur les boutons néons */
+            transition: background-color 0.2s;
+        }
     </style>
 </head>
 <body>
@@ -117,20 +131,26 @@
 
         <div id="loginForm" class="auth-card">
             <h2>Se Connecter</h2>
-            <form onsubmit="return validateLogin(event)">
+            <form>
                 <input type="text" id="loginUsername" placeholder="Nom d'utilisateur" required>
                 <input type="password" id="loginPassword" placeholder="Mot de passe" required>
-                <button type="submit" class="btn-primary">Connexion</button>
+                
+                <a href="javascript:void(0)" onclick="validateLogin()" class="btn-link-action" style="background-color: var(--color-neon-green);">
+                    Connexion
+                </a>
             </form>
             <p onclick="showRegister()" style="cursor: pointer; color: var(--color-neon-green); margin-top: 15px;">Pas de compte ? S'inscrire</p>
         </div>
 
         <div id="registerForm" class="auth-card" style="display: none;">
             <h2>Créer un Compte</h2>
-            <form onsubmit="return validateRegister(event)">
+            <form>
                 <input type="text" id="registerUsername" placeholder="Nom d'utilisateur" required>
                 <input type="password" id="registerPassword" placeholder="Mot de passe" required>
-                <button type="submit" class="btn-primary" style="background-color: var(--color-neon-orange);">Inscription</button>
+                
+                <a href="javascript:void(0)" onclick="validateRegister()" class="btn-link-action" style="background-color: var(--color-neon-orange);">
+                    Inscription
+                </a>
             </form>
             <p onclick="showLogin()" style="cursor: pointer; color: var(--color-neon-green); margin-top: 15px;">Déjà un compte ? Se Connecter</p>
         </div>
@@ -196,49 +216,45 @@
             updateTopBar();
         }
 
-        // NOUVELLES FONCTIONS DE VALIDATION INLINE
-        window.validateLogin = function(event) {
-            event.preventDefault(); // Empêche la soumission du formulaire HTML par défaut
-            
+        // FONCTION DE VALIDATION CONNEXION (Appelée par le lien)
+        window.validateLogin = function() {
             const username = document.getElementById('loginUsername').value;
             const password = document.getElementById('loginPassword').value;
 
-            // La validation 'required' du HTML devrait déjà fonctionner, mais on ajoute une sécurité
+            // Validation manuelle
             if (!username || !password) {
                 alert("Veuillez remplir tous les champs.");
-                return false; 
+                return; 
             }
             
             if (loginUser(username, password)) {
                 renderAccountPage();
                 updateTopBar();
             }
-            return false; // Empêche toujours la soumission par le navigateur
         }
 
-        window.validateRegister = function(event) {
-            event.preventDefault();
-            
+        // FONCTION DE VALIDATION INSCRIPTION (Appelée par le lien)
+        window.validateRegister = function() {
             const username = document.getElementById('registerUsername').value;
             const password = document.getElementById('registerPassword').value;
 
+            // Validation manuelle
             if (!username || !password) {
                 alert("Veuillez remplir tous les champs.");
-                return false;
+                return;
             }
             
             if (registerUser(username, password)) {
                 renderAccountPage();
                 updateTopBar();
             }
-            return false;
         }
 
         // Initialisation des listeners (uniquement pour la mise à jour du profil)
         document.addEventListener('DOMContentLoaded', () => {
             renderAccountPage();
             
-            // --- LISTENER DE MISE À JOUR DE PROFIL ---
+            // --- LISTENER DE MISE À JOUR DE PROFIL (sur la soumission du formulaire) ---
             document.getElementById('profileUpdateForm').addEventListener('submit', (e) => {
                 e.preventDefault();
                 const newPass = document.getElementById('newPassword').value;
