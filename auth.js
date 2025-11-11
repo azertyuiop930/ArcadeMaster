@@ -22,7 +22,9 @@ const DEFAULT_USERS = [
                 ship: '🛸', // Vaisseau Éclair
                 snake_head: '🐍'
             }
-        }
+        },
+        // NOUVEAU : URL par défaut pour la photo de profil
+        profilePictureUrl: 'https://cdn-icons-png.flaticon.com/512/1144/1144760.png'
     },
     {
         id: 2,
@@ -41,7 +43,8 @@ const DEFAULT_USERS = [
                 ship: '🚀',
                 snake_head: '🐍'
             }
-        }
+        },
+        profilePictureUrl: 'https://cdn-icons-png.flaticon.com/512/1144/1144760.png'
     }
 ];
 
@@ -63,7 +66,7 @@ function saveUsers(users) {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(users));
 }
 
-// Enregistrement
+// Enregistrement (MISES À JOUR : Alerte et Champ photo)
 function registerUser(username, password) {
     let users = loadUsers();
 
@@ -75,7 +78,7 @@ function registerUser(username, password) {
     const newUser = {
         id: users.length + 1,
         username: username,
-        password: password, // Encore une fois, non sécurisé, pour le test uniquement
+        password: password, 
         role: 'user',
         coins: 0,
         highScores: {
@@ -84,32 +87,33 @@ function registerUser(username, password) {
             clicker_arcade: 0
         },
         skins: {
-            owned: [0, 4], // Skins de base par défaut
+            owned: [0, 4], 
             active: {
                 ship: '🚀',
                 snake_head: '🐍'
             }
-        }
+        },
+        profilePictureUrl: 'https://cdn-icons-png.flaticon.com/512/1144/1144760.png'
     };
 
     users.push(newUser);
     saveUsers(users);
-    loginUser(username, password); // Connexion automatique après inscription
-    alert("Compte créé et connecté !");
+    loginUser(username, password); // Connexion automatique
+    alert("Compte créé avec succès ! Vous êtes maintenant connecté(e)."); // POPUP
     return true;
 }
 
-// Connexion
+// Connexion (MISES À JOUR : Alerte)
 function loginUser(username, password) {
     const users = loadUsers();
     const user = users.find(u => u.username === username && u.password === password);
 
     if (user) {
         localStorage.setItem(LOCAL_STORAGE_CURRENT_USER, JSON.stringify(user));
-        alert("Connexion réussie ! Bienvenue " + user.username);
+        alert("Connexion réussie ! Bienvenue " + user.username); // POPUP
         return true;
     } else {
-        alert("Nom d'utilisateur ou mot de passe incorrect.");
+        alert("Nom d'utilisateur ou mot de passe incorrect."); // POPUP
         return false;
     }
 }
@@ -132,11 +136,9 @@ function updateGlobalUser(updatedUser) {
     const index = users.findIndex(u => u.id === updatedUser.id);
     
     if (index !== -1) {
-        // Mettre à jour dans la base de données (localStorage)
         users[index] = updatedUser;
         saveUsers(users);
         
-        // Mettre à jour l'utilisateur dans la session courante (localStorage)
         localStorage.setItem(LOCAL_STORAGE_CURRENT_USER, JSON.stringify(updatedUser));
         return true;
     }
@@ -155,9 +157,9 @@ function updateHighScore(gameId, newScore) {
     if (newScore > (user.highScores[gameId] || 0)) {
         user.highScores[gameId] = newScore;
         updateGlobalUser(user);
-        return true; // Nouveau record
+        return true; 
     }
-    return false; // Pas de nouveau record
+    return false;
 }
 
 // Mise à jour des pièces
@@ -169,6 +171,24 @@ function updateCoins(amount) {
     updateGlobalUser(user);
     return user.coins;
 }
+
+// NOUVEAU : Fonction pour mettre à jour le profil
+function updateProfile(newPassword, newProfilePictureUrl) {
+    const user = getCurrentUser();
+    if (!user) return false;
+
+    if (newPassword) {
+        user.password = newPassword;
+    }
+    if (newProfilePictureUrl) {
+        user.profilePictureUrl = newProfilePictureUrl;
+    }
+    
+    updateGlobalUser(user);
+    alert("Votre profil a été mis à jour avec succès.");
+    return true;
+}
+
 
 // Assurez-vous que les utilisateurs de base sont initialisés au chargement
 document.addEventListener('DOMContentLoaded', initUsers);
