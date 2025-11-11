@@ -25,7 +25,7 @@
         </a>
     </nav>
 
-    <div class="main-game-area">
+    <div class="main-game-area" style="max-width: 1200px; margin: 0 auto;">
         
         <h1 style="text-align: center;">Space Invaders (Emoji Edition)</h1>
 
@@ -54,8 +54,13 @@
     </div>
     
     <script src="auth.js"></script> 
-    
     <script src="space_invaders.js"></script> 
+    
+    <script>
+        document.querySelector('.menu-toggle').addEventListener('click', function() {
+            document.querySelector('.nav-links').classList.toggle('active');
+        });
+    </script>
 
 </body>
 </html>
