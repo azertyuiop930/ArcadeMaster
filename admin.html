@@ -7,62 +7,6 @@
     
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    
-    <style>
-        #adminTools {
-            background-color: var(--color-card-dark);
-            padding: 30px;
-            border-radius: 10px;
-            margin-top: 20px;
-            border: 2px solid var(--color-neon-red);
-        }
-        .tool-section {
-            margin-top: 25px;
-            padding-top: 15px;
-            border-top: 1px dashed #444;
-        }
-        .tool-section h2 {
-            color: var(--color-neon-orange);
-            text-align: left;
-            margin-bottom: 15px;
-        }
-        /* Styles pour les champs d'admin (plus étroits que les formulaires normaux) */
-        .admin-form-group {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 15px;
-            align-items: center;
-        }
-        .admin-form-group input, .admin-form-group select {
-            flex-grow: 1;
-            padding: 10px;
-            border-radius: 5px;
-            background-color: #1A1A1A;
-            color: var(--color-text-light);
-            border: 1px solid #777;
-        }
-        .admin-form-group button {
-            width: auto;
-            padding: 10px 20px;
-            margin: 0;
-        }
-        
-        /* Liste des utilisateurs */
-        #userList {
-            list-style: none;
-            padding: 0;
-            margin-top: 20px;
-        }
-        #userList li {
-            background-color: #353535;
-            margin-bottom: 8px;
-            padding: 10px;
-            border-radius: 5px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-    </style>
 </head>
 <body>
 
@@ -71,7 +15,7 @@
             <i class="fa-solid fa-bars"></i>
         </div>
         <span style="font-size: 1.5em; font-weight: bold; color: var(--color-neon-red);">
-            PANEL D'ADMINISTRATION
+            ADMINISTRATION
         </span>
         <div style="display: flex; align-items: center; gap: 15px;">
             <a href="boutique.html" class="currency-display" title="Boutique">
@@ -93,187 +37,89 @@
             <a href="boutique.html" data-emoji="🛍️">🛍️ Boutique</a>
             <a href="classement.html" data-emoji="🏆">🏆 Classement</a>
             <a href="credits.html" data-emoji="📜">📜 Crédits</a>
+            <a href="admin.html" data-emoji="🔑" style="border-left: 5px solid var(--color-neon-red); color: var(--color-neon-red);">🔑 Administration</a>
         </div>
     </div>
 
     <div class="main-container" id="mainContent">
         <div style="padding-top: 50px;"></div> 
         
-        <h1 style="font-size: 2em; color: var(--color-neon-red);">ACCÈS ADMINISTRATEUR</h1>
+        <h1 style="font-size: 2.5em; color: var(--color-neon-red); text-align: center;">PANNEAU ADMINISTRATEUR</h1>
         
-        <p id="adminStatus" style="text-align: center; color: var(--color-neon-green);">
-            <i class="fa-solid fa-lock"></i> Chargement des privilèges...
-        </p>
-        
-        <div id="adminTools" style="display: none;">
+        <div id="adminContent" style="max-width: 800px; margin: 30px auto; text-align: left;">
+            <p style="color: var(--color-text-light); text-align: center;">
+                Cette page est réservée aux administrateurs pour la gestion des données de développement.
+            </p>
             
-            <div class="tool-section">
-                <h2>1. Gestion des Utilisateurs</h2>
-                <div class="admin-form-group">
-                    <input type="text" id="usernameSearch" placeholder="Rechercher par Nom d'utilisateur" onkeyup="renderUserList()">
-                </div>
-                
-                <ul id="userList">
-                    </ul>
+            <div id="adminLogin" class="auth-card" style="border-color: var(--color-neon-red); box-shadow: 0 0 20px rgba(255, 0, 85, 0.3);">
+                <h2>Accès Restreint</h2>
+                <p style="text-align: center; color: var(--color-neon-red);">Vous devez être connecté en tant qu'administrateur.</p>
             </div>
-            
-            <div class="tool-section">
-                <h2>2. Modification de Compte</h2>
-                <div class="admin-form-group">
-                    <input type="text" id="targetUsername" placeholder="Nom d'utilisateur à modifier" required>
+
+            <div id="adminTools" style="display: none;">
+                <h2 style="color: var(--color-neon-red);">Outils de Données</h2>
+                
+                <div class="card-group" style="justify-content: flex-start; margin-left: 0;">
+                    
+                    <div class="action-card" onclick="displayAllUsers()">
+                        <span class="card-icon">👥</span>
+                        <h3 style="color: var(--color-neon-red);">Voir Utilisateurs</h3>
+                        <p>Afficher toutes les données du LocalStorage.</p>
+                    </div>
+
+                    <div class="action-card" onclick="resetAllData()">
+                        <span class="card-icon">💣</span>
+                        <h3 style="color: var(--color-neon-red);">Réinitialiser Tout</h3>
+                        <p>Retour aux utilisateurs de base. **ATTENTION**</p>
+                    </div>
+
                 </div>
-                <div class="admin-form-group">
-                    <input type="number" id="coinAmount" placeholder="Montant Pièces (ex: 500)" min="-99999" required>
-                    <button onclick="addCoins()">Ajouter/Retirer Pièces</button>
-                </div>
-                <div class="admin-form-group">
-                    <input type="number" id="scoreAmount" placeholder="Score Max (ex: 1200)" min="0" required>
-                    <select id="gameSelect">
-                        <option value="space_invaders">Space Invaders 2.0</option>
-                    </select>
-                    <button onclick="setHighScore()">Définir High Score</button>
-                </div>
-                <div class="admin-form-group">
-                    <select id="roleSelect">
-                        <option value="user">User</option>
-                        <option value="admin">Admin</option>
-                    </select>
-                    <button onclick="setRole()">Définir Rôle</button>
-                </div>
-                <div class="admin-form-group">
-                    <button onclick="deleteUser()" style="background-color: var(--color-neon-red);">Supprimer Définitivement (simulé)</button>
+
+                <div id="userDataDisplay" class="stats-card" style="margin-top: 40px; border-color: var(--color-neon-red);">
+                    <h3 style="color: var(--color-neon-red);">Console de Données</h3>
+                    <pre id="userJsonOutput" style="white-space: pre-wrap; word-wrap: break-word; font-size: 0.8em; color: var(--color-text-light); background-color: #000000; padding: 10px; border-radius: 5px;">Les données s'afficheront après le clic...</pre>
                 </div>
             </div>
             
         </div>
+        
     </div>
     
     <script src="base.js"></script>
     <script src="auth.js"></script>
     <script>
-        
         function checkAdminAccess() {
-            const currentUser = getCurrentUser();
-            const adminStatus = document.getElementById('adminStatus');
-            const adminTools = document.getElementById('adminTools');
+            const user = getCurrentUser();
+            const loginSection = document.getElementById('adminLogin');
+            const toolsSection = document.getElementById('adminTools');
 
-            if (!currentUser || currentUser.role !== 'admin') {
-                adminStatus.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Accès refusé. Vous devez être connecté en tant qu\'administrateur.';
-                adminStatus.style.color = 'var(--color-neon-red)';
-                adminTools.style.display = 'none';
+            if (user && user.role === 'admin') {
+                loginSection.style.display = 'none';
+                toolsSection.style.display = 'block';
             } else {
-                adminStatus.innerHTML = `<i class="fa-solid fa-lock-open"></i> Accès Administrateur accordé à ${currentUser.username}.`;
-                adminStatus.style.color = 'var(--color-neon-green)';
-                adminTools.style.display = 'block';
-                renderUserList();
+                loginSection.style.display = 'block';
+                toolsSection.style.display = 'none';
             }
+            updateTopBar();
         }
         
-        // --- TOOL FUNCTIONS ---
-        
-        function renderUserList() {
-            const list = document.getElementById('userList');
-            list.innerHTML = '';
-            
+        window.displayAllUsers = function() {
             const users = loadUsers();
-            const searchTerm = document.getElementById('usernameSearch').value.toLowerCase();
-            
-            users.filter(u => u.username.toLowerCase().includes(searchTerm)).forEach(user => {
-                const li = document.createElement('li');
-                li.innerHTML = `
-                    <span>
-                        <b style="color: ${user.role === 'admin' ? '#FFD700' : 'var(--color-neon-green)'};">${user.username}</b> 
-                        (Rôle: ${user.role.toUpperCase()}) | Pièces: ${user.coins} 💰
-                    </span>
-                    <button onclick="document.getElementById('targetUsername').value='${user.username}'" 
-                            style="width: auto; padding: 5px 10px; margin: 0; background-color: var(--color-neon-orange); font-size: 0.9em;">
-                        Modifier
-                    </button>
-                `;
-                list.appendChild(li);
-            });
-        }
-        
-        function getTargetUser() {
-            const username = document.getElementById('targetUsername').value;
-            const users = loadUsers();
-            const user = users.find(u => u.username === username);
-            if (!user) {
-                alert(`Utilisateur "${username}" non trouvé.`);
-            }
-            return user;
+            document.getElementById('userJsonOutput').textContent = JSON.stringify(users, null, 2);
         }
 
-        function addCoins() {
-            const user = getTargetUser();
-            const amount = parseInt(document.getElementById('coinAmount').value);
-            
-            if (!user || isNaN(amount)) return;
-            
-            const newCoins = user.coins + amount;
-            if (newCoins < 0) {
-                 alert("Opération annulée : Le solde final ne peut être négatif.");
-                 return;
+        window.resetAllData = function() {
+            if (confirm("Êtes-vous SÛR de vouloir réinitialiser TOUTES les données utilisateur au profil par défaut ? Cela effacera tous les scores et pièces.")) {
+                localStorage.removeItem(LOCAL_STORAGE_KEY);
+                localStorage.removeItem(LOCAL_STORAGE_CURRENT_USER);
+                initUsers();
+                checkAdminAccess();
+                alert("Réinitialisation complète effectuée.");
+                document.getElementById('userJsonOutput').textContent = "Données réinitialisées au profil de base.";
             }
-            
-            user.coins = newCoins;
-            updateGlobalUser(user);
-            alert(`Pièces de ${user.username} ajustées. Nouveau solde: ${newCoins} 💰.`);
-            renderUserList();
-        }
-        
-        function setHighScore() {
-            const user = getTargetUser();
-            const score = parseInt(document.getElementById('scoreAmount').value);
-            const game = document.getElementById('gameSelect').value;
-            
-            if (!user || isNaN(score) || score < 0) return;
-            
-            user.highScores[game] = score;
-            updateGlobalUser(user);
-            alert(`High Score de ${user.username} pour ${game} mis à jour à ${score}.`);
-            renderUserList();
-        }
-        
-        function setRole() {
-            const user = getTargetUser();
-            const role = document.getElementById('roleSelect').value;
-            
-            if (!user) return;
-            
-            if (user.username === getCurrentUser().username && role !== 'admin') {
-                alert("Erreur: Vous ne pouvez pas vous retirer vous-même le rôle d'Admin.");
-                return;
-            }
-            
-            user.role = role;
-            updateGlobalUser(user);
-            alert(`Rôle de ${user.username} mis à jour à ${role.toUpperCase()}.`);
-            renderUserList();
-        }
-        
-        function deleteUser() {
-             const user = getTargetUser();
-             if (!user) return;
-             
-             if (user.username === getCurrentUser().username) {
-                 alert("Opération annulée : Vous ne pouvez pas supprimer votre propre compte.");
-                 return;
-             }
-             
-             if (confirm(`Êtes-vous sûr de vouloir supprimer ${user.username} ? Cette action est irréversible (simulée).`)) {
-                 let users = loadUsers();
-                 users = users.filter(u => u.username !== user.username);
-                 saveUsers(users);
-                 alert(`L'utilisateur ${user.username} a été supprimé (du localStorage).`);
-                 
-                 document.getElementById('targetUsername').value = '';
-                 renderUserList();
-             }
         }
 
         document.addEventListener('DOMContentLoaded', checkAdminAccess);
-
     </script>
 </body>
 </html>
