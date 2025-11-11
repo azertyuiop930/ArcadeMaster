@@ -18,7 +18,7 @@
             ARCADE MASTER
         </span>
         <div style="display: flex; align-items: center; gap: 15px;">
-             <a href="boutique.html" class="currency-display" title="Boutique">
+            <a href="boutique.html" class="currency-display" title="Boutique">
                 <span class="coin-count">0</span>
                 <button id="trollButton" type="button">+</button>
             </a>
@@ -95,7 +95,6 @@
     <script src="base.js"></script>
     <script src="auth.js"></script>
     <script>
-        // Logique pour l'accueil (simple affichage des stats)
         function updateHomeStats() {
             const currentUser = getCurrentUser();
             const isConnectedElement = document.getElementById('isConnected');
@@ -111,6 +110,7 @@
                 isConnectedElement.textContent = 'NON';
                 isConnectedElement.style.color = 'var(--color-neon-red)';
             }
+            updateTopBar(); // Appel de la fonction de base pour synchroniser la barre
         }
         
         document.addEventListener('DOMContentLoaded', updateHomeStats);
