@@ -7,8 +7,56 @@
     
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    
-    </head>
+
+    <style>
+        /* Styles spécifiques au menu jeux */
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+            padding: 0 20px;
+        }
+        .game-card {
+            background-color: var(--color-card-dark);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            text-align: center;
+        }
+        .game-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 30px var(--color-neon-orange);
+        }
+        .game-card img {
+            width: 100%;
+            height: 180px; 
+            object-fit: cover;
+            border-bottom: 3px solid var(--color-neon-green);
+        }
+        .game-card-content {
+            padding: 20px;
+        }
+        .game-card h3 {
+            color: var(--color-neon-orange);
+            font-size: 1.8em;
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+        .game-card p {
+            color: var(--color-text-light);
+            margin-bottom: 20px;
+            min-height: 40px; /* Assure une hauteur minimale */
+        }
+        .game-card button {
+            background-color: var(--color-neon-green);
+            padding: 10px 25px;
+            font-size: 1em;
+        }
+        
+    </style>
+</head>
 <body>
 
     <div id="top-bar">
@@ -37,23 +85,35 @@
     <div class="main-container" id="mainContent">
         <div style="padding-top: 50px;"></div> 
         
-        <h1 style="font-size: 2.5em; color: var(--color-neon-green); text-align: center;">CHOISISSEZ VOTRE JEU</h1>
+        <h1 style="font-size: 2.5em; color: var(--color-neon-green);">CHOISISSEZ VOTRE JEU</h1>
         
-        <div class="new-game-menu">
+        <div class="game-grid">
             
-            <a href="space_invaders.html" class="game-pill rgb-border">
-                <span>👾 Space Invaders 2.0</span>
-                <span class="status">JOUER</span>
-            </a>
-
-            <div class="game-pill disabled">
-                <span>🐍 Snake Infini</span>
-                <span class="status" style="color: red; background-color: rgba(255, 0, 0, 0.1);">À VENIR</span>
+            <div class="game-card">
+                <img src="placeholder_invaders.png" alt="Space Invaders 2.0">
+                <div class="game-card-content">
+                    <h3>Space Invaders 2.0</h3>
+                    <p>Repoussez les vagues d'envahisseurs et visez le meilleur score !</p>
+                    <a href="space_invaders.html"><button>JOUER</button></a>
+                </div>
             </div>
-            
-            <div class="game-pill disabled">
-                <span>🖱️ Clicker Arcade</span>
-                <span class="status" style="color: red; background-color: rgba(255, 0, 0, 0.1);">À VENIR</span>
+
+            <div class="game-card">
+                 <img src="placeholder_pong.png" alt="Pong Retro">
+                <div class="game-card-content">
+                    <h3>Pong Rétro</h3>
+                    <p>Le classique indémodable du jeu vidéo. Simple et addictif.</p>
+                    <button disabled style="background-color: gray;">À VENIR</button>
+                </div>
+            </div>
+
+            <div class="game-card">
+                 <img src="placeholder_flappy.png" alt="Flappy Bird Clone">
+                <div class="game-card-content">
+                    <h3>Flappy Arcado</h3>
+                    <p>Un jeu de réflexe intense avec une touche d'arcade.</p>
+                    <button disabled style="background-color: gray;">À VENIR</button>
+                </div>
             </div>
             
         </div>
