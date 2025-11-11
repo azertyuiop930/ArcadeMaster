@@ -7,6 +7,60 @@
     
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <style>
+        /* Styles spécifiques à la boutique */
+        .shop-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+            padding: 0 20px;
+        }
+        .item-card {
+            background-color: var(--color-card-dark);
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+            text-align: center;
+            padding: 20px;
+            transition: transform 0.3s, border-color 0.3s;
+            border: 3px solid transparent;
+        }
+        .item-card.owned {
+            border-color: var(--color-neon-green);
+        }
+        .item-card.equipped {
+            border-color: var(--color-neon-orange);
+            box-shadow: 0 0 20px var(--color-neon-orange);
+        }
+        .item-card h3 {
+            color: var(--color-neon-green);
+            font-size: 2em;
+            margin: 10px 0;
+        }
+        .item-card p {
+            color: var(--color-text-light);
+            margin-bottom: 15px;
+        }
+        .item-price {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--color-neon-orange);
+            margin-bottom: 20px;
+            display: block;
+        }
+        .item-card button {
+            padding: 10px 20px;
+            font-size: 1.1em;
+            min-width: 150px;
+        }
+        .item-card button.buy-btn {
+            background-color: var(--color-neon-orange);
+        }
+        .item-card button.equip-btn {
+            background-color: var(--color-neon-green);
+        }
+    </style>
 </head>
 <body>
 
@@ -15,16 +69,9 @@
             <i class="fa-solid fa-bars"></i>
         </div>
         <span style="font-size: 1.5em; font-weight: bold; color: var(--color-neon-orange);">
-            BOUTIQUE ARCADE
+            ARCADE SHOP
         </span>
-        <div style="display: flex; align-items: center; gap: 15px;">
-            <a href="boutique.html" class="currency-display" title="Boutique">
-                <span class="coin-count">0</span>
-                <button id="trollButton" type="button">+</button>
-            </a>
-            <a href="compte.html" style="color: var(--color-text-light);" title="Mon Compte" data-emoji="👤">
-                👤
-            </a>
+        <div id="right-container" style="display: flex; align-items: center; gap: 15px;">
         </div>
     </div>
 
@@ -43,176 +90,140 @@
     <div class="main-container" id="mainContent">
         <div style="padding-top: 50px;"></div> 
         
-        <h1 style="font-size: 2.5em; color: var(--color-neon-orange);">PERSONNALISEZ VOTRE PARTIE</h1>
-        
-        <div style="text-align: center; margin-bottom: 30px;">
-            <p class="currency-display" style="font-size: 1.5em; justify-content: center;">
-                Votre Solde : <span class="coin-count">0</span>
-                <button id="trollButtonBottom" type="button" style="width: 30px; height: 30px; padding: 0; margin-left: 10px; background-color: var(--color-neon-red); color: white; border-radius: 50%; line-height: 1; font-size: 1.2em;">+</button>
-            </p>
-            <p style="color: #999; font-style: italic;">
-                Les skins achetés sont actifs pour tous les jeux compatibles.
-            </p>
-        </div>
+        <h1 style="font-size: 2.5em; color: var(--color-neon-orange);">BOUTIQUE DE COSMÉTIQUES</h1>
+        <p style="text-align: center; color: var(--color-text-light); margin-bottom: 30px;">
+            Dépensez vos pièces durement gagnées pour personnaliser votre vaisseau !
+        </p>
 
-        <div id="shopContent">
+        <div class="shop-grid" id="shopGrid">
+            <div class="item-card item-0 equipped" data-name="Vaisseau de base" data-emoji="🚀" data-price="0">
+                <h3>Vaisseau de base 🚀</h3>
+                <p>Le vaisseau par défaut. Fiable et simple.</p>
+                <span class="item-price">Possédé</span>
+                <button class="equip-btn">ÉQUIPÉ</button>
+            </div>
             
-            <h2 style="text-align: left; color: var(--color-neon-green); border-bottom: 1px solid #444; padding-bottom: 10px;">🚀 Skins Space Invaders</h2>
+            <div class="item-card item-1" data-name="Vaisseau Éclair" data-emoji="🛸" data-price="500">
+                <h3>Vaisseau Éclair 🛸</h3>
+                <p>Un design furtif et rapide.</p>
+                <span class="item-price">500 💰</span>
+                <button class="buy-btn" onclick="buyItem(1)">Acheter</button>
+            </div>
             
-            <div class="card-group" id="skinListContainer">
-                
-                </div>
+            <div class="item-card item-2" data-name="Vaisseau Néon" data-emoji="👽" data-price="1200">
+                <h3>Vaisseau Néon 👽</h3>
+                <p>Illuminez l'espace avec ce modèle unique.</p>
+                <span class="item-price">1200 💰</span>
+                <button class="buy-btn" onclick="buyItem(2)">Acheter</button>
+            </div>
             
-        </div>
+            <div class="item-card item-3" data-name="Vaisseau Royal" data-emoji="👑" data-price="5000">
+                <h3>Vaisseau Royal 👑</h3>
+                <p>Réservé à l'élite.</p>
+                <span class="item-price">5000 💰</span>
+                <button class="buy-btn" onclick="buyItem(3)">Acheter</button>
+            </div>
+
+            </div>
         
     </div>
     
     <script src="base.js"></script>
     <script src="auth.js"></script>
     <script>
-        // --- DONNÉES DES SKINS ---
-        const ALL_SKINS = [
-            { id: 1, name: "Vaisseau Retro", category: "ship", emoji: '🛸', price: 0, initial: true }, // Skin par défaut
-            { id: 2, name: "Chasseur Furtif", category: "ship", emoji: '🦅', price: 100, initial: false },
-            { id: 3, name: "Navette Pirate", category: "ship", emoji: '☠️', price: 250, initial: false },
-            { id: 4, name: "Goutte d'Alien", category: "ship", emoji: '💧', price: 500, initial: false },
+        // Logique spécifique à la boutique
+
+        const SHOP_ITEMS = [
+            { id: 0, name: "Vaisseau de base", emoji: '🚀', price: 0, type: 'ship' },
+            { id: 1, name: "Vaisseau Éclair", emoji: '🛸', price: 500, type: 'ship' },
+            { id: 2, name: "Vaisseau Néon", emoji: '👽', price: 1200, type: 'ship' },
+            { id: 3, name: "Vaisseau Royal", emoji: '👑', price: 5000, type: 'ship' },
         ];
         
-        // --- FONCTIONS DE GESTION DE LA BOUTIQUE ---
-
-        function initializeSkinData(currentUser) {
-            if (!currentUser.skins) {
-                currentUser.skins = {
-                    owned: [1], 
-                    active: { ship: '🛸' }
-                };
-                updateGlobalUser(currentUser);
-            }
-            return currentUser;
-        }
-        
-        /** Affiche la liste des skins et gère les boutons Acheter/Activer */
-        function renderSkins() {
-            const container = document.getElementById('skinListContainer');
-            if (!container) return;
-            container.innerHTML = '';
-
-            let currentUser = getCurrentUser(); 
+        function updateShopDisplay() {
+            const currentUser = getCurrentUser();
             if (!currentUser) {
-                // Remplacement du message simple par un bouton qui redirige
-                container.innerHTML = `
-                    <div style="text-align: center; padding: 40px; background-color: var(--color-card-dark); border-radius: 8px; margin: 20px auto;">
-                        <p style="color: var(--color-neon-orange); font-size: 1.2em;">Vous devez être connecté pour accéder à la boutique.</p>
-                        <a href="compte.html">
-                            <button style="width: auto; padding: 10px 20px; margin-top: 20px; background-color: var(--color-neon-green);">
-                                👤 S'inscrire / Se Connecter
-                            </button>
-                        </a>
-                    </div>
-                `;
+                // Si non connecté, n'affiche pas les boutons d'achat/équipement
+                document.getElementById('shopGrid').querySelectorAll('button').forEach(btn => btn.disabled = true);
                 return;
             }
             
-            // S'assure que les données de skins sont initialisées
-            currentUser = initializeSkinData(currentUser); 
-            
-            ALL_SKINS.forEach(skin => {
-                const isOwned = currentUser.skins.owned.includes(skin.id);
-                const isActive = currentUser.skins.active[skin.category] === skin.emoji;
-                
-                const card = document.createElement('div');
-                card.className = 'action-card skin-item';
-                card.style.borderColor = isActive ? 'var(--color-neon-green)' : (isOwned ? 'var(--color-neon-orange)' : '#555');
-                
-                let buttonHTML = '';
-                let statusText = '';
+            SHOP_ITEMS.forEach(item => {
+                const card = document.querySelector(`.item-card.item-${item.id}`);
+                if (!card) return;
 
-                if (isActive) {
-                    statusText = `<p style="color: var(--color-neon-green); font-weight: bold;">✅ ACTIF</p>`;
-                    buttonHTML = `<button class="activate-btn" disabled style="background-color: #555; cursor: default;">Activé</button>`;
-                } else if (isOwned) {
-                    statusText = `<p style="color: var(--color-neon-orange);">Possédé</p>`;
-                    buttonHTML = `<button class="activate-btn" data-id="${skin.id}" style="background-color: var(--color-neon-green);">Activer</button>`;
+                card.classList.remove('owned', 'equipped');
+                const priceSpan = card.querySelector('.item-price');
+                const button = card.querySelector('button');
+
+                const isOwned = currentUser.skins && currentUser.skins.owned && currentUser.skins.owned.includes(item.id);
+                const isEquipped = currentUser.skins && currentUser.skins.active && currentUser.skins.active.ship === item.emoji;
+
+                if (isEquipped) {
+                    card.classList.add('equipped');
+                    priceSpan.textContent = 'ÉQUIPÉ';
+                    button.textContent = 'ÉQUIPÉ';
+                    button.disabled = true;
+                    button.className = 'equip-btn';
+                } else if (isOwned || item.id === 0) { // L'ID 0 est toujours possédé
+                    card.classList.add('owned');
+                    priceSpan.textContent = 'Possédé';
+                    button.textContent = 'Équiper';
+                    button.disabled = false;
+                    button.className = 'equip-btn';
+                    button.onclick = () => equipItem(item.id);
                 } else {
-                    statusText = `<p style="color: var(--color-neon-red);">${skin.price} 💰</p>`;
-                    buttonHTML = `<button class="buy-btn" data-id="${skin.id}" data-price="${skin.price}" style="background-color: var(--color-neon-red);">Acheter</button>`;
+                    priceSpan.innerHTML = `${item.price} 💰`;
+                    button.textContent = 'Acheter';
+                    button.disabled = false;
+                    button.className = 'buy-btn';
+                    button.onclick = () => buyItem(item.id);
+                }
+            });
+        }
+        
+        window.buyItem = function(itemId) {
+            const currentUser = getCurrentUser();
+            if (!currentUser) {
+                alert("Vous devez être connecté pour effectuer des achats !");
+                return;
+            }
+            
+            const item = SHOP_ITEMS.find(i => i.id === itemId);
+            if (!item) return;
+
+            if (currentUser.coins >= item.price) {
+                // Achat réussi
+                currentUser.coins -= item.price;
+                if (!currentUser.skins.owned) {
+                    currentUser.skins.owned = [0]; // S'assurer que le 0 est là
+                }
+                if (!currentUser.skins.owned.includes(itemId)) {
+                    currentUser.skins.owned.push(itemId);
                 }
                 
-                card.innerHTML = `
-                    <span class="card-icon">${skin.emoji}</span> 
-                    <h3>${skin.name}</h3>
-                    ${statusText}
-                    ${buttonHTML}
-                `;
-                container.appendChild(card);
-            });
-            
-            // --- Attache les écouteurs d'événements ---
-            attachSkinListeners();
-        }
-        
-        /** Attache les événements d'achat et d'activation aux boutons */
-        function attachSkinListeners() {
-            // Achat
-            document.querySelectorAll('.buy-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const skinId = parseInt(e.currentTarget.dataset.id);
-                    const price = parseInt(e.currentTarget.dataset.price);
-                    
-                    if (buySkin(skinId, price)) {
-                        alert(`Achat réussi ! ${price} pièces déduites.`);
-                        renderSkins(); 
-                    }
-                });
-            });
-
-            // Activation
-            document.querySelectorAll('.activate-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const skinId = parseInt(e.currentTarget.dataset.id);
-                    if (activateSkin(skinId)) {
-                        alert("Skin activé !");
-                        renderSkins(); 
-                    }
-                });
-            });
-            
-            // Troll Button (Bottom)
-            const trollBottomBtn = document.getElementById('trollButtonBottom');
-            if (trollBottomBtn) {
-                trollBottomBtn.addEventListener('click', initiateTroll); 
+                updateGlobalUser(currentUser); 
+                alert(`Achat réussi : ${item.name} pour ${item.price} pièces !`);
+                updateShopDisplay();
+            } else {
+                alert(`Fonds insuffisants. Il vous manque ${item.price - currentUser.coins} pièces.`);
             }
         }
         
-        /** Logique d'achat */
-        function buySkin(skinId, price) {
-            let currentUser = getCurrentUser();
-            if (!currentUser || currentUser.skins.owned.includes(skinId)) return false;
+        window.equipItem = function(itemId) {
+            const currentUser = getCurrentUser();
+            const item = SHOP_ITEMS.find(i => i.id === itemId);
             
-            if (updateCoins(-price)) { 
-                currentUser.skins.owned.push(skinId);
-                updateGlobalUser(currentUser);
-                return true;
-            }
-            return false;
-        }
-
-        /** Logique d'activation */
-        function activateSkin(skinId) {
-            let currentUser = getCurrentUser();
-            const skin = ALL_SKINS.find(s => s.id === skinId);
+            if (!currentUser || !item || item.type !== 'ship') return;
             
-            if (!currentUser || !skin || !currentUser.skins.owned.includes(skinId)) return false;
-            
-            currentUser.skins.active[skin.category] = skin.emoji;
+            // Équipement
+            currentUser.skins.active.ship = item.emoji;
             updateGlobalUser(currentUser);
-            
-            return true;
+            alert(`${item.name} équipé !`);
+            updateShopDisplay();
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            renderSkins();
-        });
+        document.addEventListener('DOMContentLoaded', updateShopDisplay);
     </script>
 </body>
 </html>
