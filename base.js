@@ -39,7 +39,8 @@ function updateCoinDisplay() {
 
 /** Fonction pour le bouton troll du Rickroll */
 function initiateTroll() {
-    alert("Achats de pièces indisponibles. Vous avez été Rickrollé !");
+    // ANCIEN CODE : alert("Achats de pièces indisponibles. Vous avez été Rickrollé !");
+    
     // Ouvre la vidéo dans une nouvelle fenêtre
     window.open(RICKROLL_URL, '_blank'); 
 }
@@ -61,10 +62,16 @@ document.addEventListener('DOMContentLoaded', () => {
         closeButton.addEventListener('click', closeNav);
     }
     
-    // Attache l'événement du bouton troll
+    // Attache l'événement du bouton troll (Top Bar)
     const trollButton = document.getElementById('trollButton');
     if (trollButton) {
         trollButton.addEventListener('click', initiateTroll);
+    }
+    
+    // Attache l'événement du bouton troll (Bottom Button, ex: Boutique)
+    const trollBottomBtn = document.getElementById('trollButtonBottom');
+    if (trollBottomBtn) {
+        trollBottomBtn.addEventListener('click', initiateTroll);
     }
     
     // Initialise l'affichage des pièces au chargement
