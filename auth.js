@@ -12,9 +12,11 @@ const CURRENT_USER_KEY = 'arcadeMasterCurrentUser';
 /** Charge la liste des utilisateurs depuis le localStorage */
 function loadUsers() {
     const usersJson = localStorage.getItem(USER_STORAGE_KEY);
-    return usersJson ? JSON.parse(usersJson) : [
-        // Utilisateur Admin par défaut (À changer pour la production !)
-        {
+    const users = usersJson ? JSON.parse(usersJson) : [];
+    
+    // Ajout de l'utilisateur Admin par défaut s'il n'existe pas
+    if (!users.some(u => u.username === 'Zelda5962')) {
+        users.push({
             username: 'Zelda5962',
             password: 'mdp', 
             role: 'admin',
@@ -25,8 +27,10 @@ function loadUsers() {
             skins: {
                 active: { ship: '🚀' },
             }
-        }
-    ];
+        });
+    }
+    
+    return users;
 }
 
 /** Sauvegarde la liste des utilisateurs dans le localStorage */
@@ -37,18 +41,13 @@ function saveUsers(users) {
 /** Récupère l'utilisateur actuellement connecté */
 function getCurrentUser() {
     const userJson = localStorage.getItem(CURRENT_USER_KEY);
-    // Vérifie si l'utilisateur stocké existe encore dans la base globale
     if (userJson) {
         const tempUser = JSON.parse(userJson);
         const globalUsers = loadUsers();
+        // Recherche la version complète et la plus récente de l'utilisateur
         const fullUser = globalUsers.find(u => u.username === tempUser.username);
-        
-        // Si l'utilisateur est trouvé, retourne sa version la plus récente
-        if (fullUser) {
-            return fullUser;
-        }
+        return fullUser || null;
     }
-    // Sinon, l'utilisateur est déconnecté (ou l'entrée est obsolète)
     return null;
 }
 
@@ -78,20 +77,19 @@ function updateGlobalUser(userToUpdate) {
     if (index !== -1) {
         users[index] = userToUpdate;
     } else {
-        // Ajout si non trouvé (ne devrait pas arriver en mise à jour)
         users.push(userToUpdate);
     }
     
     saveUsers(users);
     
-    // Si c'est l'utilisateur actuel, met à jour la session
+    // Si c'est l'utilisateur actuel, met à jour la session et la Top Bar
     const currentUser = getCurrentUser();
     if (currentUser && currentUser.username === userToUpdate.username) {
         setCurrentUser(userToUpdate);
     }
 }
 
-// --- FONCTIONS D'AUTHENTIFICATION ---
+// --- FONCTIONS D'AUTHENTIFICATION AVEC POPUPS ---
 
 /** Tente de connecter un utilisateur */
 function login(username, password) {
@@ -99,11 +97,13 @@ function login(username, password) {
     const user = users.find(u => u.username === username);
 
     if (!user) {
+        // Popup 1 : Nom d'utilisateur introuvable
         alert('❌ Erreur de Connexion : Nom d\'utilisateur introuvable.');
         return false;
     }
 
     if (user.password !== password) {
+        // Popup 2 : Mauvais mot de passe
         alert('❌ Erreur de Connexion : Mot de passe incorrect.');
         return false;
     }
@@ -113,7 +113,12 @@ function login(username, password) {
     
     // Redirige ou rafraîchit la page de compte
     if (window.location.pathname.endsWith('compte.html')) {
-        renderProfileView(); // Redéfinit la vue du profil sur la page compte
+        // Utilise la fonction de compte.html pour switcher la vue
+        if (typeof renderProfileView === 'function') {
+            renderProfileView(); 
+        } else {
+            window.location.reload(); 
+        }
     } else {
         window.location.href = 'index.html';
     }
@@ -126,11 +131,13 @@ function register(username, password) {
     const users = loadUsers();
     
     if (users.some(u => u.username.toLowerCase() === username.toLowerCase())) {
-        alert('⚠️ Erreur d\'Inscription : Ce nom d\'utilisateur existe déjà.');
+        // Popup 3 : Compte existe déjà
+        alert('⚠️ Erreur d\'Inscription : Ce nom d\'utilisateur existe déjà. Veuillez vous connecter.');
         return false;
     }
 
     if (username.length < 3 || password.length < 4) {
+        // Popup 4 : Règle de validation
         alert('⚠️ Erreur d\'Inscription : Le nom doit avoir 3+ caractères, le mot de passe 4+.');
         return false;
     }
@@ -154,7 +161,11 @@ function register(username, password) {
     
     // Redirige ou rafraîchit
     if (window.location.pathname.endsWith('compte.html')) {
-        renderProfileView(); 
+        if (typeof renderProfileView === 'function') {
+            renderProfileView(); 
+        } else {
+            window.location.reload(); 
+        }
     } else {
         window.location.href = 'index.html';
     }
