@@ -2,207 +2,68 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>ArcadeMaster - Administration</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arcade Master - Administration</title>
+    
     <link rel="stylesheet" href="styles.css">
-    <style>
-        /* Styles spécifiques au panneau d'administration */
-        .admin-panel {
-            max-width: 800px;
-            margin: 50px auto;
-            background-color: var(--color-surface);
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-        }
-        .admin-panel h1 {
-            color: var(--color-primary);
-            font-size: 2.5em;
-            text-align: center;
-            border-bottom: 2px solid var(--color-primary);
-            padding-bottom: 10px;
-            margin-bottom: 30px;
-        }
-        .admin-panel h2 {
-            color: var(--color-text);
-            font-size: 1.5em;
-            margin-top: 20px;
-        }
-        .user-list {
-            list-style: none;
-            padding: 0;
-        }
-        .user-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 15px;
-            margin-bottom: 10px;
-            background-color: #2a2a2a;
-            border-radius: 5px;
-            transition: background-color 0.2s;
-        }
-        .user-info {
-            display: flex;
-            align-items: center;
-            color: var(--color-text);
-            font-size: 1.1em;
-        }
-        .user-pdp {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            margin-right: 15px;
-            border: 2px solid var(--color-primary);
-        }
-        .user-name {
-            font-weight: bold;
-        }
-        .user-role {
-            margin-left: 10px;
-            color: #f39c12; /* Jaune/Orange pour ADMIN */
-            font-size: 0.9em;
-        }
-        .admin-controls button.delete {
-            background-color: #e74c3c; /* Rouge pour Supprimer */
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        .admin-controls button.delete:hover {
-            background-color: #c0392b;
-        }
-        .welcome-message {
-            text-align: center;
-            color: var(--color-text);
-            font-size: 1.2em;
-            margin-bottom: 25px;
-        }
-        .separator {
-            border: 0;
-            height: 1px;
-            background-color: #555;
-            margin: 20px 0;
-        }
-    </style>
-    <script>
-        // --- Fonction du Menu Hamburger (UNIFORME ET ESSENTIELLE) ---
-        function toggleMenu(x) {
-            x.classList.toggle("change");
-            const sidebar = document.getElementById("sidebar");
-            
-            if (sidebar.style.width === "250px") {
-                sidebar.style.width = "0";
-            } else {
-                sidebar.style.width = "250px";
-            }
-        }
-    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
+    <div class="main-container">
+
+        <nav id="navbar">
+            <div class="nav-links">
+                <a href="/ArcadeMaster/"><i class="fa-solid fa-house"></i> Accueil</a>
+                <a href="jeux.html"><i class="fa-solid fa-gamepad"></i> Menu Jeux</a>
+                <a href="credits.html"><i class="fa-solid fa-book"></i> Crédits</a>
+            </div>
+            
+            <a href="authentification.html" class="profile-link">
+                 <i class="fa-solid fa-user-gear"></i>
+            </a>
+        </nav>
+
+        <div class="auth-card" id="adminContent" style="max-width: 600px;">
+            
+            <h1 style="font-size: 2em; color: #FFD700;"><i class="fa-solid fa-screwdriver-wrench"></i> Panneau d'Administration</h1>
+            
+            <div id="statusMessage" style="text-align: center; margin-top: 20px;">
+                </div>
+
+            <div id="adminPanel" style="display: none; margin-top: 30px; padding-top: 20px; border-top: 1px solid #555;">
+                <h2 style="color: #00FF00; text-align: left;">Bienvenue, Administrateur !</h2>
+                <p>Ceci est l'espace de gestion. Pour l'instant, c'est une zone sécurisée, mais vous pouvez y ajouter des outils plus tard (gestion des utilisateurs, réinitialisation des scores, etc.).</p>
+                
+                <button onclick="alert('Fonctionnalité en cours de développement !')" style="background-color: #F39C12;">
+                    <i class="fa-solid fa-users"></i> Gérer les utilisateurs
+                </button>
+            </div>
+            
+        </div>
+    </div>
     
-    <div id="navbar">
-        <div class="hamburger-menu" onclick="toggleMenu(this)">
-            <div class="bar"></div>
-            <div class="bar"></div>
-            <div class="bar"></div>
-        </div>
-        <div id="auth-controls">
-            </div>
-    </div>
-
-    <div id="sidebar">
-        <a href="index.html">🏠 Accueil</a>
-        <a href="jeux.html">🕹️ Menu Jeux</a>
-        <a href="credits.html">📝 Crédits</a>
-        <a href="authentification.html">⚙️ Compte</a>
-    </div>
-
-    <div class="container">
-        <div class="admin-panel">
-            <h1>🛡️ Panneau d'Administration</h1>
-            
-            <div class="welcome-message">
-                Bienvenue, Administrateur <span id="adminUsername">...</span>.
-            </div>
-
-            <hr class="separator">
-
-            <h2>Gestion des Utilisateurs</h2>
-            
-            <div id="userListContainer">
-                <p style="text-align: center; color: #aaa;">Chargement des utilisateurs...</p>
-            </div>
-            
-            <hr class="separator">
-        </div>
-    </div>
-
     <script src="auth.js"></script>
     <script>
-        const DEFAULT_PDP_URL = 'https://i.imgur.com/39hN7hG.png'; 
+        document.addEventListener('DOMContentLoaded', () => {
+            const currentUser = getCurrentUser(); // Fonction définie dans auth.js
+            const statusMessage = document.getElementById('statusMessage');
+            const adminPanel = document.getElementById('adminPanel');
 
-        // Fonction pour générer le contenu de la liste des utilisateurs
-        function renderAdminPanel() {
-            if (typeof getCurrentUser !== 'function' || typeof loadUsers !== 'function' || typeof deleteUser !== 'function') {
-                document.getElementById('userListContainer').innerHTML = 
-                    '<p style="color: #e74c3c; text-align: center;">Erreur: Le fichier auth.js n\'est pas chargé ou est incomplet.</p>';
-                return;
-            }
+            if (currentUser && currentUser.role === 'admin') {
+                // Utilisateur connecté et est Admin
+                statusMessage.innerHTML = '<p style="color: #00FF00;">Accès autorisé. Vous êtes l\'administrateur du système.</p>';
+                adminPanel.style.display = 'block';
 
-            const currentUser = getCurrentUser();
-            const userListContainer = document.getElementById('userListContainer');
-            const adminUsernameElement = document.getElementById('adminUsername');
-            
-            adminUsernameElement.textContent = currentUser || 'Inconnu';
-
-            const users = loadUsers();
-            let userListHTML = '<ul class="user-list">';
-
-            for (const username in users) {
-                const userData = users[username];
-                const isAdminUser = userData.role === 'admin';
-                const pdpUrl = userData.pdp || DEFAULT_PDP_URL;
-                
-                userListHTML += `
-                    <li class="user-item">
-                        <div class="user-info">
-                            <img src="${pdpUrl}" alt="PDP" class="user-pdp">
-                            <span class="user-name">${username}</span>
-                            ${isAdminUser ? `<span class="user-role">(ADMIN)</span>` : ''}
-                        </div>
-                        <div class="admin-controls">
-                            ${username !== currentUser && !isAdminUser 
-                                ? `<button class="delete" onclick="deleteUser('${username}')">Supprimer</button>` 
-                                : (username === currentUser 
-                                    ? '<span style="color:#aaa;">(Vous)</span>' 
-                                    : (isAdminUser && username !== currentUser ? '<span style="color:#f39c12;">(Autre Admin)</span>' : '')
-                                  )
-                            }
-                        </div>
-                    </li>
+            } else {
+                // Non connecté ou n'est pas Admin
+                statusMessage.innerHTML = `
+                    <p style="color: #E74C3C; font-weight: bold;">Accès Refusé. </p>
+                    <p>Vous devez être connecté avec un compte administrateur pour accéder à cette page.</p>
+                    <a href="authentification.html" style="color: #F39C12; margin-top: 10px; display: block;">Se connecter ou s'inscrire</a>
                 `;
             }
-            
-            userListHTML += '</ul>';
-            userListContainer.innerHTML = userListHTML;
-        }
-
-        // --- Vérification et Initialisation ---
-        document.addEventListener('DOMContentLoaded', () => {
-            if (typeof renderAuthControls === 'function') {
-                renderAuthControls();
-            }
-            
-            if (!getCurrentUser() || getUserData(getCurrentUser()).role !== 'admin') {
-                window.location.href = 'index.html'; 
-                return;
-            }
-
-            renderAdminPanel();
         });
     </script>
+
 </body>
 </html>
