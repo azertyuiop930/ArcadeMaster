@@ -30,7 +30,7 @@ let player = {
 
 // Vitesse de base du jeu
 let scoreSpeedFactor = 1;
-let gameLoopSpeed = 50; 
+let gameLoopSpeed = 50; // Intervalle en ms (20 FPS)
 
 // Entités (listes)
 let enemies = [];
@@ -391,7 +391,7 @@ function drawEntities() {
         gameBoard.appendChild(enemyElement);
     });
 
-    // Dessin des Tirs Joueur (Mise à jour de la position selon speedX/Y)
+    // Dessin des Tirs Joueur
     playerBullets.forEach(bullet => {
         const bulletElement = document.createElement('div');
         bulletElement.style.left = `${bullet.x}px`;
@@ -400,7 +400,7 @@ function drawEntities() {
         gameBoard.appendChild(bulletElement);
     });
     
-    // Dessin des Tirs Ennemis (si implémentés)
+    // Dessin des Tirs Ennemis 
     enemyBullets.forEach(bullet => {
         const bulletElement = document.createElement('div');
         bulletElement.style.left = `${bullet.x}px`;
@@ -418,6 +418,9 @@ function drawEntities() {
         pElement.textContent = p.type === 'shield' ? '🛡️' : (p.type === 'shotgun' ? '🔫' : '💣');
         gameBoard.appendChild(pElement);
     });
+
+    // NOTE : Les écrans instructionsScreen et gameOverScreen sont rendus ici 
+    // car ils sont des enfants de #gameBoard dans le HTML. 
 }
 
 
@@ -459,7 +462,9 @@ function startGame() {
     
     isGameRunning = true;
     isGameOver = false; 
-    instructionsScreen.style.display = 'none';
+    
+    // Les overlays doivent être masqués au lancement car ils sont dans le gameBoard
+    instructionsScreen.style.display = 'none'; 
     gameOverScreen.style.display = 'none';
 
     resetGame();
@@ -481,8 +486,8 @@ function endGame() {
 }
 
 
-// --- 8. GESTION DES CHEATS (DEPLACÉ DANS BASE.JS) ---
-// La logique du code Konami est maintenant gérée globalement par base.js
+// --- 8. GESTION DES CHEATS (DANS BASE.JS) ---
+// La logique du code Konami est gérée globalement par base.js
 
 
 // --- 9. ÉVÉNEMENTS & INITIALISATION ---
@@ -490,7 +495,7 @@ function endGame() {
 document.addEventListener('keydown', (e) => {
     const key = e.key.toLowerCase();
     
-    // Désactivation de la barre d'espace pour le lancement (seul le bouton fonctionne)
+    // Désactivation de la barre d'espace pour le lancement
     if ((key === ' ' || key === 'spacebar') && isGameRunning) {
         e.preventDefault(); 
     }
@@ -508,14 +513,14 @@ document.addEventListener('keyup', (e) => {
     delete keysPressed[key];
 });
 
-// Gestion de la Souris (Visée et Tir, prévention de sélection)
+// Gestion de la Souris (Visée et Tir)
 gameBoard.addEventListener('mousemove', (e) => {
     const rect = gameBoard.getBoundingClientRect();
     mousePosition.x = e.clientX - rect.left;
     mousePosition.y = e.clientY - rect.top;
 });
 
-// ÉVÉNEMENT DE TIR CORRIGÉ : utilise mousedown et empêche le menu contextuel et la sélection
+// ÉVÉNEMENT DE TIR (Correction)
 gameBoard.addEventListener('mousedown', playerShoot); 
 gameBoard.addEventListener('contextmenu', (e) => e.preventDefault()); 
 gameBoard.addEventListener('selectstart', (e) => e.preventDefault());
@@ -535,6 +540,5 @@ if (startButton) {
 document.addEventListener('DOMContentLoaded', () => {
     setupBoard();
     loadActiveSkins(); 
-    instructionsScreen.style.display = 'flex';
-    gameOverScreen.style.display = 'none';
+    // L'écran d'instructions est affiché par défaut via le HTML/CSS
 });
