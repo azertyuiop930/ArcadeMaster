@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arcade Master - Space Invaders 2.0</title>
+    
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <style>
+        /* Styles spécifiques pour l'interface de jeu */
+        #gameCanvas {
+            width: 500px;
+            height: 600px;
+            /* La couleur et l'ombre sont définies dans styles.css (.game-container) */
+        }
+        
+        .score-info p {
+            margin: 5px 0;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+
+        .leaderboard-container {
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 1px dashed #555;
+        }
+        
+        .leaderboard-container h3 {
+            color: var(--color-neon-green);
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        
+    </style>
+</head>
+<body>
+
+    <div id="top-bar">
+        <div id="menuToggle" class="menu-toggle">
+            <i class="fa-solid fa-bars"></i>
+        </div>
+        <span style="font-size: 1.5em; font-weight: bold; color: var(--color-neon-green);">
+            SPACE INVADERS 2.0
+        </span>
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <a href="boutique.html" class="currency-display" title="Boutique">
+                <span class="coin-count">0</span>
+                <button id="trollButton" type="button">+</button>
+            </a>
+            <a href="compte.html" style="color: var(--color-text-light);" title="Mon Compte" data-emoji="👤">
+                👤
+            </a>
+        </div>
+    </div>
+
+    <div id="sidebar" class="sidenav">
+        <a href="javascript:void(0)" class="closebtn" id="closeNav" onclick="closeNav()" style="position: absolute; top: 0; right: 25px; font-size: 36px; color: var(--color-neon-orange);">&times;</a>
+        <div id="nav-links">
+            <a href="index.html" data-emoji="🏠">Accueil</a>
+            <a href="jeux.html" data-emoji="🎮">Menu Jeux</a>
+            <a href="compte.html" data-emoji="👤">Mon Compte</a>
+            <a href="boutique.html" data-emoji="🛍️">Boutique</a>
+            <a href="classement.html" data-emoji="🏆">Classement</a>
+            <a href="credits.html" data-emoji="📜">Crédits</a>
+        </div>
+    </div>
+
+    <div class="main-container" id="mainContent">
+        <div style="padding-top: 50px;"></div> 
+        
+        <h1 style="font-size: 2em;">SPACE INVADERS 2.0</h1>
+
+        <div class="game-container">
+            
+            <canvas id="gameCanvas" width="500" height="600"></canvas>
+
+            <div id="score-board">
+                <h2>TABLEAU DES SCORES</h2>
+                
+                <div class="score-info">
+                    <p>Score Actuel : <span id="currentScore" style="color: var(--color-neon-green);">0</span></p>
+                    <p>Vies : <span id="livesCount" style="color: var(--color-neon-red);">3</span></p>
+                    <p>Record Personnel : <span id="personalHighScore" style="color: var(--color-neon-orange);">0</span></p>
+                    <p>Pièces Gagnées : <span id="coinsGained" style="color: var(--color-neon-orange);">0</span></p>
+                </div>
+                
+                <div class="leaderboard-container">
+                    <h3>🏆 TOP 10 GLOBAL</h3>
+                    <ol id="leaderboardList" style="list-style-position: inside; text-align: left; padding: 0 20px;">
+                        <li>Connexion en cours...</li>
+                    </ol>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <button onclick="initGame()" style="background-color: var(--color-neon-green);">
+                        <i class="fa-solid fa-play"></i> Nouvelle Partie
+                    </button>
+                </div>
+            </div>
+            
+        </div>
+        
+        <div style="margin-top: 30px; background-color: #252525; padding: 20px; border-radius: 10px;">
+            <h2 style="text-align: left; border-bottom: 1px solid #444; padding-bottom: 10px;">Contrôles & Bonus</h2>
+            <p style="color: var(--color-text-light); font-size: 0.9em;">
+                **Déplacement :** ZQSD & Flèches | 
+                **Tir :** Le tir suit la direction de votre souris (clic gauche ou Espace pour tirer).
+            </p>
+            
+            <ul style="list-style: none; padding: 0; margin-top: 15px;">
+                <li style="color: var(--color-neon-green);">**Shotgun :** Tire dans 5 directions (20s).</li>
+                <li style="color: var(--color-neon-orange);">**Bouclier :** Tue les ennemis au contact (10s - pas de points).</li>
+                <li style="color: var(--color-neon-red);">**Bombe :** Tue tous les ennemis à l'écran (donne les points).</li>
+            </ul>
+        </div>
+        
+    </div>
+    
+    <script src="base.js"></script>
+    <script src="auth.js"></script>
+    <script src="space_invaders.js"></script>
+
+</body>
+</html>
