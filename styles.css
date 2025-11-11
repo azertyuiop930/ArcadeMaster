@@ -1,75 +1,363 @@
-/* --- NOUVEAUX STYLES POUR MENU PRINCIPAL ARRONDI ET RGB --- */
-
-/* Conteneur du menu pour centrer les éléments */
-.new-game-menu {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 30px;
-    margin-top: 50px;
+/* --- Variables Neon / Couleurs du Thème --- */
+:root {
+    --color-background: #0d0d1a;
+    --color-card-dark: #1a1a33;
+    --color-text-light: #f0f0f0;
+    
+    /* Couleurs Neon */
+    --color-neon-green: #00ffaa;
+    --color-neon-orange: #ffaa00;
+    --color-neon-red: #ff0055;
+    --color-neon-blue: #00aaff;
 }
 
-/* Style de base des pastilles/boutons de jeu */
-.game-pill {
-    width: 90%;
-    max-width: 600px;
-    padding: 20px 40px;
-    border-radius: 40px; /* Grande forme arrondie */
-    text-align: center;
-    font-size: 1.8em;
-    font-weight: bold;
+/* --- Base & Typographie --- */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: var(--color-background);
     color: var(--color-text-light);
-    background-color: var(--color-card-dark);
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+    min-height: 100vh;
+}
+* {
+    box-sizing: border-box;
+}
+
+h1, h2, h3 {
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
+}
+
+/* --- Conteneur Principal --- */
+.main-container {
+    padding: 20px;
+    padding-top: 80px; /* Laisse de l'espace pour la barre fixe */
+    max-width: 1200px;
+    margin: 0 auto;
+    text-align: center;
+}
+.section-divider {
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--color-neon-green), transparent);
+    margin: 40px 0;
+}
+
+/* --- Boutons Génériques --- */
+button, .btn-primary {
+    background-color: var(--color-neon-orange);
+    color: var(--color-background);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s, transform 0.1s;
     text-decoration: none;
-    transition: transform 0.2s, box-shadow 0.2s;
+    display: inline-block;
+}
+button:hover:not(:disabled), .btn-primary:hover {
+    background-color: #ffc44d;
+    transform: scale(1.05);
+}
+button:disabled {
+    cursor: not-allowed;
+    background-color: #555;
+    color: #999;
+}
+
+
+/* --- Barre Supérieure (#top-bar) --- */
+#top-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    background-color: rgba(0, 0, 0, 0.95);
+    border-bottom: 2px solid var(--color-neon-green);
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 0 20px;
+    z-index: 1000;
+}
+.menu-toggle {
+    font-size: 1.5em;
+    cursor: pointer;
+    color: var(--color-neon-orange);
 }
 
-.game-pill:hover:not(.disabled) {
-    transform: scale(1.03);
-    box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
-}
-
-.game-pill span {
-    color: var(--color-neon-orange); /* Couleur du nom du jeu */
-}
-
-.game-pill .status {
-    font-size: 0.7em;
-    font-weight: normal;
-    color: var(--color-neon-green);
-    margin-left: 10px;
+/* Affichage des Pièces */
+.currency-display {
+    display: flex;
+    align-items: center;
+    background-color: var(--color-card-dark);
     padding: 5px 10px;
     border-radius: 20px;
-    background-color: rgba(0, 255, 0, 0.1);
+    border: 1px solid var(--color-neon-orange);
+    color: var(--color-text-light);
+    text-decoration: none;
+}
+.coin-count {
+    font-weight: bold;
+    color: var(--color-neon-green);
+    margin-right: 5px;
+}
+#trollButton {
+    background-color: transparent;
+    color: var(--color-neon-orange);
+    padding: 0 5px;
+    margin-left: 5px;
+    font-size: 1.2em;
+    border: none;
 }
 
-.game-pill.disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+
+/* --- Menu Latéral (Sidebar) --- */
+.sidenav {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 2000;
+    top: 0;
+    left: 0;
+    background-color: rgba(13, 13, 26, 0.98);
+    overflow-x: hidden;
+    transition: 0.5s;
+    padding-top: 60px;
+    border-right: 3px solid var(--color-neon-orange);
+}
+
+.sidenav a {
+    padding: 15px 15px 15px 32px;
+    text-decoration: none;
+    font-size: 1.5em;
+    color: var(--color-text-light);
+    display: block;
+    transition: 0.3s;
+    border-left: 5px solid transparent;
+}
+
+.sidenav a:hover {
+    color: var(--color-neon-green);
+    background-color: rgba(255, 165, 0, 0.1);
+    border-left: 5px solid var(--color-neon-green);
+}
+
+.sidenav .closebtn {
+    position: absolute;
+    top: 0;
+    right: 25px;
+    font-size: 36px;
+    margin-left: 50px;
+}
+
+/* --- Cartes d'Action et de Statut (Index et Jeux) --- */
+
+.card-group {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 30px;
+    margin: 20px auto;
+    max-width: 1000px;
+    padding: 0 10px;
+}
+
+.action-card {
+    background-color: var(--color-card-dark);
+    padding: 30px 20px;
+    border-radius: 10px;
+    width: 200px;
+    text-align: center;
+    border: 3px solid var(--color-neon-orange);
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
+}
+
+.action-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(255, 165, 0, 0.5);
+}
+
+.action-card .card-icon {
+    display: block;
+    font-size: 3em;
+    margin-bottom: 10px;
+}
+
+.action-card h3 {
+    margin: 5px 0;
+    color: var(--color-neon-orange);
+    font-size: 1.5em;
+}
+
+.action-card p {
+    color: var(--color-text-light);
+    font-size: 1em;
+}
+
+/* Cartes "Coming Soon" */
+.coming-soon-card {
+    cursor: not-allowed !important;
     filter: grayscale(100%);
-    border: 3px solid gray !important;
+    opacity: 0.7;
 }
-.game-pill.disabled span {
-    color: gray;
-}
-
-
-/* --- EFFET BORDURE ANIMÉE RGB/NEON (Crucial) --- */
-
-/* Définition de l'animation pour les couleurs */
-@keyframes neon-rgb-border {
-    0% { border-color: #FF0000; } /* Rouge */
-    33% { border-color: #00FF00; } /* Vert */
-    66% { border-color: #0000FF; } /* Bleu */
-    100% { border-color: #FF0000; } 
+.coming-soon-card:hover {
+    transform: none;
+    box-shadow: none;
 }
 
-.rgb-border {
-    /* Base de la bordure */
-    border: 3px solid transparent; 
-    /* Application de l'animation */
-    animation: neon-rgb-border 4s linear infinite; 
+
+/* --- Formulaires et Cartes d'Auth (Compte) --- */
+.auth-card {
+    max-width: 400px;
+    margin: 50px auto 20px auto;
+    padding: 30px;
+    background-color: var(--color-card-dark);
+    border-radius: 10px;
+    border: 2px solid var(--color-neon-blue);
+    box-shadow: 0 0 20px rgba(0, 170, 255, 0.3);
+    text-align: left;
+}
+.auth-card h2 {
+    text-align: center;
+    color: var(--color-neon-green);
+    margin-top: 0;
+}
+.auth-card input {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: 1px solid #555;
+    border-radius: 5px;
+    background-color: #2a2a47;
+    color: var(--color-text-light);
+    font-size: 1em;
+}
+.auth-card button {
+    width: 100%;
+    margin-top: 20px;
+}
+
+
+/* --- Statistiques et Profil (Compte, Index) --- */
+.stats-card {
+    background-color: var(--color-card-dark);
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid var(--color-neon-green);
+    max-width: 500px;
+    margin: 20px auto;
+    text-align: left;
+}
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+}
+.stat-item:last-child {
+    border-bottom: none;
+}
+.stat-item span:first-child {
+    color: var(--color-neon-blue);
+}
+.stat-item span:last-child {
+    font-weight: bold;
+}
+
+/* --- Boutique --- */
+.shop-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 25px;
+    margin: 30px 0;
+}
+.item-card {
+    background-color: #1f1f3f;
+    padding: 20px;
+    border-radius: 8px;
+    border: 2px solid #555;
+    text-align: center;
+    transition: border-color 0.2s;
+}
+.item-card h3 {
+    color: var(--color-neon-orange);
+    font-size: 1.4em;
+}
+.item-card .item-price {
+    display: block;
+    margin: 10px 0;
+    font-weight: bold;
+    color: var(--color-neon-green);
+}
+.item-card.owned {
+    border-color: var(--color-neon-blue);
+}
+.item-card.equipped {
+    border: 3px solid var(--color-neon-green);
+    background-color: #2a3a2a;
+    box-shadow: 0 0 15px rgba(0, 255, 170, 0.5);
+}
+.buy-btn {
+    background-color: var(--color-neon-orange);
+}
+.equip-btn {
+    background-color: var(--color-neon-blue);
+}
+
+/* --- Classement --- */
+.ranking-container {
+    max-width: 600px;
+    margin: 40px auto;
+    background-color: var(--color-card-dark);
+    padding: 30px;
+    border-radius: 10px;
+    border: 1px solid var(--color-neon-green);
+}
+.ranking-container h2 {
+    color: var(--color-neon-orange);
+    text-align: center;
+}
+.ranking-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 20px;
+}
+.ranking-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px dashed #3a3a5a;
+}
+.ranking-list li:last-child {
+    border-bottom: none;
+}
+.rank-info {
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+}
+.rank-number {
+    width: 30px;
+    text-align: center;
+    color: var(--color-neon-green);
+    font-size: 1.2em;
+}
+.score-value {
+    color: var(--color-neon-orange);
+    font-weight: bold;
+}
+#gameSelector {
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    border: 1px solid var(--color-neon-blue);
+    background-color: #2a2a47;
+    color: var(--color-text-light);
+    width: 100%;
+    font-size: 1em;
 }
