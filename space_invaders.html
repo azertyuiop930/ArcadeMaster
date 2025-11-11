@@ -7,14 +7,20 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="space_invaders.css"> 
     <style>
-        /* CSS spécifique pour la taille du plateau si space_invaders.css n'est pas utilisé ou mis à jour */
+        /* CSS spécifique pour la taille du plateau */
         .game-wrapper {
-            width: 800px; /* Doit correspondre à BOARD_WIDTH */
+            width: 800px; /* Taille du plateau */
             margin: 20px auto;
         }
         #gameBoard {
-            width: 800px; /* Doit correspondre à BOARD_WIDTH */
-            height: 600px; /* Doit correspondre à BOARD_HEIGHT */
+            width: 800px; /* Taille du plateau */
+            height: 600px; /* Taille du plateau */
+            position: relative; /* Important pour les overlays */
+        }
+        
+        /* Correction de la barre supérieure/latérale si les styles globaux ne suffisent pas */
+        .main-container {
+            padding-top: 50px; /* Assure que le contenu n'est pas sous la barre du haut */
         }
     </style>
 </head>
@@ -34,45 +40,44 @@
             </div>
 
             <div id="gameBoard">
-                </div>
-        </div>
-        
-        <div id="instructionsScreen" class="overlay" style="display: flex;">
-            <h1 style="color: var(--color-neon-orange);">SPACE INVADERS : ASSAUT COSMIQUE</h1>
-            <p style="font-size: 1.1em; margin: 10px 0;">
-                Détruisez les envahisseurs qui convergent vers vous. Attention, ils deviennent plus rapides avec le temps !
-            </p>
-            
-            <div style="margin: 20px 0; border: 1px solid var(--color-neon-blue); padding: 15px; border-radius: 5px; width: 80%;">
-                <h3 style="color: var(--color-neon-blue); text-align: center; margin-bottom: 10px; border-bottom: 1px dashed var(--color-neon-blue); padding-bottom: 5px;">Contrôles :</h3>
-                
-                <div style="display: flex; justify-content: space-around; gap: 20px; text-align: center;">
-                    <div style="flex-grow: 1;">
-                        <p>**Déplacement :** ZQSD / WASD</p>
-                    </div>
-                    <div style="flex-grow: 1;">
-                        <p>**Visée & Tir :** Souris (Clic Gauche)</p>
-                    </div>
+                <div id="instructionsScreen" class="overlay" style="display: flex;">
+                    <h1 style="color: var(--color-neon-orange); font-size: 2em; margin-bottom: 10px;">PRÊT AU COMBAT</h1>
+                    <p style="font-size: 1.1em; margin: 10px 0;">
+                        Détruisez les envahisseurs qui convergent vers vous.
+                    </p>
+                    
+                    <button id="startButton" class="btn-primary" style="background-color: var(--color-neon-green); font-size: 1.5em; padding: 10px 30px; margin-top: 30px;">
+                        LANCER LE JEU
+                    </button>
                 </div>
                 
-                <p style="font-size: 0.9em; color: var(--color-text-light); text-align: center; margin-top: 15px;">
-                    *Les bonus apparaissent aléatoirement après la destruction des ennemis.*
-                </p>
+                <div id="gameOverScreen" class="overlay" style="display: none;">
+                    <h1 style="color: var(--color-neon-red);">GAME OVER</h1>
+                    <p id="finalScore" style="font-size: 1.5em; margin-bottom: 20px;"></p>
+                    <p style="color: var(--color-text-light);">La galaxie a perdu un héros aujourd'hui.</p>
+                    
+                    <button id="restartButton" class="btn-primary" style="background-color: var(--color-neon-blue); font-size: 1.2em; margin-top: 20px;">
+                        Recommencer
+                    </button>
+                </div>
             </div>
-            
-            <button id="startButton" class="btn-primary" style="background-color: var(--color-neon-green); font-size: 1.2em;">
-                LANCER LE JEU
-            </button>
         </div>
 
-        <div id="gameOverScreen" class="overlay" style="display: none;">
-            <h1 style="color: var(--color-neon-red);">GAME OVER</h1>
-            <p id="finalScore" style="font-size: 1.5em; margin-bottom: 20px;"></p>
-            <p style="color: var(--color-text-light);">La galaxie a perdu un héros aujourd'hui.</p>
+        <div id="helpZone" style="max-width: 800px; margin: 20px auto 40px auto; padding: 15px; border: 1px solid var(--color-neon-blue); border-radius: 5px;">
+             <h3 style="color: var(--color-neon-blue); text-align: center; margin-bottom: 10px; border-bottom: 1px dashed var(--color-neon-blue); padding-bottom: 5px;">Comment Jouer :</h3>
             
-            <button id="restartButton" class="btn-primary" style="background-color: var(--color-neon-blue); font-size: 1.2em; margin-top: 20px;">
-                Recommencer
-            </button>
+            <div style="display: flex; justify-content: space-around; gap: 20px; text-align: center; font-size: 1.1em;">
+                <div style="flex-grow: 1;">
+                    <p>**Déplacement :** ZQSD / WASD</p>
+                </div>
+                <div style="flex-grow: 1;">
+                    <p>**Visée & Tir :** Souris (Clic Gauche)</p>
+                </div>
+            </div>
+            
+            <p style="font-size: 0.9em; color: var(--color-text-light); text-align: center; margin-top: 15px;">
+                *Les bonus apparaissent aléatoirement après la destruction des ennemis.*
+            </p>
         </div>
 
     </div>
