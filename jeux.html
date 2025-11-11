@@ -3,59 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arcade Master - Menu Jeux</title>
+    <title>Arcade Master - Sélection des Jeux</title>
     
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
-    <style>
-        /* Styles spécifiques au menu jeux */
-        .game-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            margin-top: 40px;
-            padding: 0 20px;
-        }
-        .game-card {
-            background-color: var(--color-card-dark);
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
-            transition: transform 0.3s, box-shadow 0.3s;
-            text-align: center;
-        }
-        .game-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 10px 30px var(--color-neon-orange);
-        }
-        .game-card img {
-            width: 100%;
-            height: 180px; 
-            object-fit: cover;
-            border-bottom: 3px solid var(--color-neon-green);
-        }
-        .game-card-content {
-            padding: 20px;
-        }
-        .game-card h3 {
-            color: var(--color-neon-orange);
-            font-size: 1.8em;
-            margin-top: 0;
-            margin-bottom: 10px;
-        }
-        .game-card p {
-            color: var(--color-text-light);
-            margin-bottom: 20px;
-            min-height: 40px; /* Assure une hauteur minimale */
-        }
-        .game-card button {
-            background-color: var(--color-neon-green);
-            padding: 10px 25px;
-            font-size: 1em;
-        }
-        
-    </style>
 </head>
 <body>
 
@@ -63,10 +14,17 @@
         <div id="menuToggle" class="menu-toggle">
             <i class="fa-solid fa-bars"></i>
         </div>
-        <span style="font-size: 1.5em; font-weight: bold; color: var(--color-neon-orange);">
-            MENU JEUX
+        <span style="font-size: 1.5em; font-weight: bold; color: var(--color-neon-green);">
+            ARCADE MASTER
         </span>
-        <div id="right-container" style="display: flex; align-items: center; gap: 15px;">
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <a href="boutique.html" class="currency-display" title="Boutique">
+                <span class="coin-count">0</span>
+                <button id="trollButton" type="button">+</button>
+            </a>
+            <a href="compte.html" style="color: var(--color-text-light);" title="Mon Compte" data-emoji="👤">
+                👤
+            </a>
         </div>
     </div>
 
@@ -83,41 +41,46 @@
     </div>
 
     <div class="main-container" id="mainContent">
+        
         <div style="padding-top: 50px;"></div> 
-        
-        <h1 style="font-size: 2.5em; color: var(--color-neon-green);">CHOISISSEZ VOTRE JEU</h1>
-        
-        <div class="game-grid">
-            
-            <div class="game-card">
-                <img src="placeholder_invaders.png" alt="Space Invaders 2.0">
-                <div class="game-card-content">
-                    <h3>Space Invaders 2.0</h3>
-                    <p>Repoussez les vagues d'envahisseurs et visez le meilleur score !</p>
-                    <a href="space_invaders.html"><button>JOUER</button></a>
-                </div>
-            </div>
 
-            <div class="game-card">
-                 <img src="placeholder_pong.png" alt="Pong Retro">
-                <div class="game-card-content">
-                    <h3>Pong Rétro</h3>
-                    <p>Le classique indémodable du jeu vidéo. Simple et addictif.</p>
-                    <button disabled style="background-color: gray;">À VENIR</button>
-                </div>
-            </div>
-
-            <div class="game-card">
-                 <img src="placeholder_flappy.png" alt="Flappy Bird Clone">
-                <div class="game-card-content">
-                    <h3>Flappy Arcado</h3>
-                    <p>Un jeu de réflexe intense avec une touche d'arcade.</p>
-                    <button disabled style="background-color: gray;">À VENIR</button>
-                </div>
-            </div>
+        <div style="text-align: center;">
             
+            <h1 style="font-size: 2em;">SÉLECTION DES JEUX</h1>
+            
+            <p style="color: var(--color-neon-green); margin-bottom: 30px;">
+                Choisissez votre version 2.0 préférée !
+            </p>
+            
+            <div class="card-group">
+                
+                <div class="action-card" style="border-color: var(--color-neon-green);" 
+                     onclick="window.location.href='space_invaders.html'">
+                    <span class="card-icon">🚀</span>
+                    <h3 style="color: var(--color-neon-green);">Space Invaders 2.0</h3>
+                    <p style="font-size: 0.9em; color: #CCC;">Visée à la souris et bonus explosifs !</p>
+                </div>
+                
+                <div class="action-card coming-soon-card" style="border-color: #555; opacity: 0.5; cursor: not-allowed;">
+                    <span class="card-icon">🐍</span>
+                    <h3 style="color: #999;">Snake Infini</h3>
+                    <p style="font-size: 0.9em; color: #777;">COMING SOON</p>
+                </div>
+                
+                <div class="action-card coming-soon-card" style="border-color: #555; opacity: 0.5; cursor: not-allowed;">
+                    <span class="card-icon">🖱️</span>
+                    <h3 style="color: #999;">Clicker</h3>
+                    <p style="font-size: 0.9em; color: #777;">COMING SOON</p>
+                </div>
+
+                <div class="action-card coming-soon-card" style="border-color: #555; opacity: 0.5; cursor: not-allowed;">
+                    <span class="card-icon">👾</span>
+                    <h3 style="color: #999;">Jeu Mystère</h3>
+                    <p style="font-size: 0.9em; color: #777;">COMING SOON</p>
+                </div>
+                
+            </div>
         </div>
-        
     </div>
     
     <script src="base.js"></script>
