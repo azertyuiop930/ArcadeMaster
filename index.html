@@ -100,7 +100,7 @@
              const currentUser = getCurrentUser();
              const welcomeMessage = document.getElementById('welcome-message');
              
-             if (currentUser) {
+             if (currentUser && welcomeMessage) {
                  welcomeMessage.innerHTML = `<p style="font-size: 1.2em; color: var(--color-text-light);">
                     Heureux de vous revoir, <b style="color: var(--color-neon-orange);">${currentUser.username}</b> !</p>
                  `;
