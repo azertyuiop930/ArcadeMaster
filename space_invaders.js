@@ -12,7 +12,7 @@ const GAME_NAME = 'space_invaders';
 const GRID_SIZE = 40;
 const PLAYER_SIZE = GRID_SIZE;
 const ALIEN_SIZE = GRID_SIZE;
-const BULLET_SIZE = 5;
+const BULLET_SIZE = 20; // Taille de l'émoji
 const COINS_PER_KILL = 1; // 1 Pièce par ennemi tué
 
 // --- ÉTAT DU JEU ---
@@ -40,7 +40,6 @@ let playerMoveSpeed = 5;
 // --- BONUS ET COOLDOWNS ---
 let isShieldActive = false;
 let isShotgunActive = false;
-let shotgunCooldown = 0;
 const SHOTGUN_DURATION = 20000; // 20 secondes
 const SHIELD_DURATION = 10000;  // 10 secondes
 const BASE_SHOT_DELAY = 150; // Délai de tir normal (ms)
@@ -48,7 +47,7 @@ const SHOTGUN_SHOT_DELAY = 400; // Délai de tir du shotgun (ms)
 let lastShotTime = 0;
 
 // --- EMOJIS (Textures) ---
-const EMOJI = {
+let EMOJI = {
     PLAYER: '🚀',
     ALIEN: '👾',
     BULLET: '⚡',
@@ -83,8 +82,6 @@ class Player extends Entity {
     }
     
     draw() {
-        super.draw();
-        
         // Dessine le bouclier si actif
         if (isShieldActive) {
             ctx.beginPath();
@@ -95,6 +92,11 @@ class Player extends Entity {
             ctx.lineWidth = 2;
             ctx.stroke();
         }
+        
+        // Dessine le joueur (skin dynamique)
+        ctx.font = `${this.size}px Arial`;
+        ctx.textAlign = 'center';
+        ctx.fillText(EMOJI.PLAYER, this.x + this.size / 2, this.y + this.size * 0.85);
     }
 }
 
@@ -103,10 +105,22 @@ class Player extends Entity {
 // 2. INITIALISATION ET VAGUES
 // =========================================================
 
+/** Synchronise le skin actif depuis auth.js */
+function syncPlayerSkin() {
+    const currentUser = getCurrentUser();
+    if (currentUser && currentUser.skins && currentUser.skins.active) {
+        EMOJI.PLAYER = currentUser.skins.active.ship || '🚀';
+    } else {
+        EMOJI.PLAYER = '🚀'; // Défaut
+    }
+}
+
 /** Initialise ou réinitialise le jeu */
 window.initGame = function() {
     if (gameLoopInterval) clearInterval(gameLoopInterval);
-
+    
+    syncPlayerSkin(); // Récupère le skin le plus récent
+    
     score = 0;
     lives = 3;
     coinsGained = 0;
@@ -116,7 +130,6 @@ window.initGame = function() {
     aliens = [];
     isShieldActive = false;
     isShotgunActive = false;
-    shotgunCooldown = 0;
     
     alienMoveTimer = ALIEN_MOVE_INTERVAL;
     alienMoveSpeed = 10;
@@ -139,7 +152,6 @@ window.initGame = function() {
 /** Crée une nouvelle vague d'aliens */
 function createAliens() {
     aliens = [];
-    // Augmente la difficulté avec la vague
     const rows = 4 + Math.min(wave - 1, 3); // Max 7 rangées
     const cols = 8;
     const paddingX = (canvas.width - cols * ALIEN_SIZE * 1.5) / 2;
@@ -160,8 +172,7 @@ function createAliens() {
 function nextWave() {
     wave++;
     bullets = [];
-    // Augmente la vitesse et la fréquence de mouvement des aliens
-    alienMoveSpeed += 3;
+    alienMoveSpeed = Math.min(25, alienMoveSpeed + 3);
     alienMoveTimer = Math.max(200, ALIEN_MOVE_INTERVAL - wave * 100); 
 
     alert(`Vague ${wave} ! Nouvelle vague d'envahisseurs en approche.`);
@@ -176,22 +187,21 @@ function nextWave() {
 function movePlayer() {
     const speed = playerMoveSpeed;
 
-    if (keys['KeyQ']) { // ZQSD
+    if (keys['KeyQ'] || keys['ArrowLeft']) {
         player.x = Math.max(0, player.x - speed);
     }
-    if (keys['KeyD']) {
+    if (keys['KeyD'] || keys['ArrowRight']) {
         player.x = Math.min(canvas.width - PLAYER_SIZE, player.x + speed);
     }
-    // Permet le mouvement vertical (même si ce n'est pas le standard du genre)
-    if (keys['KeyZ']) { 
-        player.y = Math.max(canvas.height - 150, player.y - speed); // Limite le mouvement vertical
+    if (keys['KeyZ'] || keys['ArrowUp']) { 
+        player.y = Math.max(canvas.height - 150, player.y - speed);
     }
-    if (keys['KeyS']) {
+    if (keys['KeyS'] || keys['ArrowDown']) {
         player.y = Math.min(canvas.height - PLAYER_SIZE, player.y + speed);
     }
 }
 
-let alienDirection = 1; // 1 = droite, -1 = gauche
+let alienDirection = 1; 
 let lastAlienMoveTime = 0;
 
 /** Déplace les aliens */
@@ -201,7 +211,6 @@ function moveAliens(deltaTime) {
     if (lastAlienMoveTime >= alienMoveTimer) {
         let shouldDrop = false;
 
-        // Vérifie si un alien touche le bord
         for (const alien of aliens) {
             if (alien.x + ALIEN_SIZE + alienDirection * alienMoveSpeed > canvas.width || alien.x + alienDirection * alienMoveSpeed < 0) {
                 alienDirection *= -1;
@@ -210,15 +219,12 @@ function moveAliens(deltaTime) {
             }
         }
 
-        // Applique le mouvement
         for (const alien of aliens) {
             if (shouldDrop) {
-                alien.y += 20; // Descend
+                alien.y += 20; 
             }
-            // Déplace latéralement
             alien.x += alienDirection * alienMoveSpeed;
             
-            // Vérifie la défaite
             if (alien.y + ALIEN_SIZE > player.y) {
                 endGame(false);
                 return;
@@ -231,15 +237,13 @@ function moveAliens(deltaTime) {
 /** Met à jour la position des tirs */
 function moveBullets() {
     bullets.forEach(bullet => {
-        // Le mouvement dépend de la direction (angle) calculée au moment du tir
         bullet.x += bullet.dx;
         bullet.y += bullet.dy;
     });
 
-    // Filtre les balles hors écran
     bullets = bullets.filter(bullet => 
-        bullet.x > -10 && bullet.x < canvas.width + 10 && 
-        bullet.y > -10 && bullet.y < canvas.height + 10
+        bullet.x > -BULLET_SIZE && bullet.x < canvas.width + BULLET_SIZE && 
+        bullet.y > -BULLET_SIZE && bullet.y < canvas.height + BULLET_SIZE
     );
 }
 
@@ -249,6 +253,8 @@ function moveBullets() {
 
 /** Calcule l'angle et la direction du tir (Visée à la souris) */
 function fireBullet() {
+    if (gameOver) return;
+
     const currentTime = performance.now();
     const shotDelay = isShotgunActive ? SHOTGUN_SHOT_DELAY : BASE_SHOT_DELAY;
 
@@ -264,7 +270,6 @@ function fireBullet() {
     // Angle entre le joueur et le curseur de la souris
     const angle = Math.atan2(mousePos.y - playerCenterY, mousePos.x - playerCenterX);
     
-    // Directions de base (simple tir)
     const directions = [angle];
     
     // Mode Shotgun : ajoute 4 directions supplémentaires
@@ -280,12 +285,11 @@ function fireBullet() {
         const dy = Math.sin(dir) * bulletSpeed;
         
         const newBullet = new Entity(
-            playerCenterX - 10,
-            playerCenterY - 10,
-            20,
+            playerCenterX - BULLET_SIZE / 2,
+            playerCenterY - BULLET_SIZE / 2,
+            BULLET_SIZE,
             EMOJI.BULLET
         );
-        // Stocke la vitesse et la direction dans l'objet Bullet
         newBullet.dx = dx;
         newBullet.dy = dy;
         
@@ -307,11 +311,9 @@ function activateBonus(type) {
     if (type === 'shield') {
         isShieldActive = true;
         shieldEndTime = currentTime + SHIELD_DURATION;
-        console.log("Bouclier activé !");
     } else if (type === 'shotgun') {
         isShotgunActive = true;
         shotgunEndTime = currentTime + SHOTGUN_DURATION;
-        console.log("Shotgun activé !");
     }
 }
 
@@ -319,46 +321,45 @@ function activateBonus(type) {
 function updateBonusTimers(currentTime) {
     if (isShieldActive && currentTime > shieldEndTime) {
         isShieldActive = false;
-        console.log("Bouclier désactivé.");
     }
     if (isShotgunActive && currentTime > shotgunEndTime) {
         isShotgunActive = false;
-        console.log("Shotgun désactivé.");
     }
     
     // 1 chance sur 1000 par frame d'apparition d'un bonus
-    if (Math.random() < 0.001 && aliens.length > 5) { 
+    if (Math.random() < 0.001 && aliens.length > 5 && powerUps.length < 3) { 
         if (Math.random() < 0.3) {
             spawnPowerUp('shotgun');
         } else if (Math.random() < 0.6) {
             spawnPowerUp('shield');
         } else {
-            spawnPowerUp('bomb'); // La bombe est plus rare
+            spawnPowerUp('bomb'); 
         }
     }
 }
 
-let powerUps = []; // [type: 'shield'|'shotgun'|'bomb', x, y, emoji]
+let powerUps = []; 
 
 function spawnPowerUp(type) {
-    const x = Math.random() * (canvas.width - 50);
+    const size = 30;
+    const x = Math.random() * (canvas.width - size);
     const y = 0;
     let emoji = '';
     
     if (type === 'shield') emoji = EMOJI.SHIELD;
     else if (type === 'shotgun') emoji = EMOJI.SHOTGUN;
-    else if (type === 'bomb') emoji = '💣'; // Bombe
+    else if (type === 'bomb') emoji = '💣'; 
 
-    powerUps.push(new Entity(x, y, 30, emoji));
-    powerUps[powerUps.length - 1].type = type;
+    const powerUp = new Entity(x, y, size, emoji);
+    powerUp.type = type;
+    powerUps.push(powerUp);
 }
 
 function movePowerUps() {
     powerUps.forEach(p => {
-        p.y += 2; // Descente lente
+        p.y += 2; 
     });
     
-    // Suppression des power-ups hors écran
     powerUps = powerUps.filter(p => p.y < canvas.height);
 }
 
@@ -379,51 +380,44 @@ function checkCollisions() {
         let hit = false;
         aliens = aliens.filter((alien) => {
             if (checkCollision(bullet, alien) && !hit) {
-                // Collision : l'alien est détruit
                 score += 10;
                 coinsGained += COINS_PER_KILL;
-                hit = true; // La balle n'a frappé qu'un seul alien
+                hit = true; 
                 return false; 
             }
-            return true; // Garde l'alien
+            return true; 
         });
-        return !hit; // Garde la balle seulement si elle n'a rien touché
+        return !hit; 
     });
     
     // 2. Collisions Aliens vs Joueur (et Bouclier)
     aliens = aliens.filter((alien) => {
         if (checkCollision(player, alien)) {
             if (isShieldActive) {
-                // L'alien meurt, mais le joueur ne prend pas de dégâts et pas de points
                 return false; 
             } else {
-                // Dégâts
                 lives--;
-                // Fait disparaître l'alien après le contact
                 return false; 
             }
         }
-        return true; // Garde l'alien
+        return true; 
     });
     
     // 3. Collisions Joueur vs PowerUps
     powerUps = powerUps.filter((p) => {
         if (checkCollision(player, p)) {
             if (p.type === 'bomb') {
-                // Bombe : tue tous les aliens (donne des points)
                 score += aliens.length * 10;
                 coinsGained += aliens.length * COINS_PER_KILL;
                 aliens = []; 
-                alert("BOMBE ! Écran nettoyé.");
             } else {
                 activateBonus(p.type);
             }
-            return false; // Le power-up est consommé
+            return false; 
         }
         return true;
     });
 
-    // Conditions de fin de jeu
     if (lives <= 0) {
         endGame(false);
     } else if (aliens.length === 0) {
@@ -441,11 +435,25 @@ function draw() {
     ctx.fillStyle = '#121212';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Dessine toutes les entités
     aliens.forEach(alien => alien.draw());
     powerUps.forEach(p => p.draw());
     bullets.forEach(bullet => bullet.draw());
     player.draw();
+    
+    // Affichage des durées de bonus
+    const currentTime = performance.now();
+    ctx.fillStyle = 'white';
+    ctx.font = '16px Arial';
+    ctx.textAlign = 'right';
+    
+    if (isShieldActive) {
+        const remaining = Math.ceil((shieldEndTime - currentTime) / 1000);
+        ctx.fillText(`🛡️ Bouclier: ${remaining}s`, canvas.width - 10, canvas.height - 10);
+    }
+    if (isShotgunActive) {
+        const remaining = Math.ceil((shotgunEndTime - currentTime) / 1000);
+        ctx.fillText(`💥 Shotgun: ${remaining}s`, canvas.width - 10, canvas.height - 30);
+    }
 }
 
 function gameLoop(currentTime) {
@@ -454,19 +462,12 @@ function gameLoop(currentTime) {
     const deltaTime = currentTime - lastTime;
     lastTime = currentTime;
 
-    // 1. Mise à jour des temporisateurs
     updateBonusTimers(currentTime);
-    
-    // 2. Mise à jour des positions
     movePlayer();
     moveAliens(deltaTime);
     moveBullets();
     movePowerUps();
-    
-    // 3. Détection des collisions
     checkCollisions();
-    
-    // 4. Affichage
     draw();
 }
 
@@ -479,7 +480,6 @@ function updateScoreBoard() {
     document.getElementById('livesCount').textContent = lives;
     document.getElementById('coinsGained').textContent = coinsGained;
     
-    // Récupère le high score personnel via auth.js
     if (typeof getCurrentUser === 'function') {
         const currentUser = getCurrentUser();
         const personal = (currentUser && currentUser.highScores[GAME_NAME]) || 0;
@@ -491,35 +491,30 @@ function updateScoreBoard() {
 
 function updateLeaderboard() {
     const leaderboardList = document.getElementById('leaderboardList');
-    if (!leaderboardList) return;
+    if (!leaderboardList || typeof loadUsers !== 'function') return;
     
     leaderboardList.innerHTML = '';
     
-    // Récupère les top scores (simulé par auth.js)
-    if (typeof loadUsers === 'function') {
-        const users = loadUsers();
-        let leaderboard = users.map(user => ({
-            username: user.username,
-            score: user.highScores[GAME_NAME] || 0,
-            role: user.role
-        }))
-        .filter(item => item.score > 0)
-        .sort((a, b) => b.score - a.score)
-        .slice(0, 10); // Top 10
+    const users = loadUsers();
+    let leaderboard = users.map(user => ({
+        username: user.username,
+        score: user.highScores[GAME_NAME] || 0,
+        role: user.role
+    }))
+    .filter(item => item.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 10); 
 
-        if (leaderboard.length === 0) {
-            leaderboardList.innerHTML = '<li>Aucun score enregistré.</li>';
-            return;
-        }
-        
-        leaderboard.forEach((item, index) => {
-            const li = document.createElement('li');
-            li.innerHTML = `${index + 1}. ${item.role === 'admin' ? '👑' : ''} ${item.username}: <b>${item.score}</b>`;
-            leaderboardList.appendChild(li);
-        });
-    } else {
-        leaderboardList.innerHTML = '<li>Connectez-vous pour voir les scores.</li>';
+    if (leaderboard.length === 0) {
+        leaderboardList.innerHTML = '<li>Aucun score enregistré.</li>';
+        return;
     }
+    
+    leaderboard.forEach((item, index) => {
+        const li = document.createElement('li');
+        li.innerHTML = `${index + 1}. ${item.role === 'admin' ? '👑' : ''} ${item.username}: <b>${item.score}</b>`;
+        leaderboardList.appendChild(li);
+    });
 }
 
 /** Fonction appelée à la fin de la partie */
@@ -528,21 +523,19 @@ function endGame(win) {
     gameOver = true;
     clearInterval(gameLoopInterval);
     
-    // Sauvegarde du high score et des pièces (via auth.js)
     if (typeof getCurrentUser === 'function' && typeof updateGlobalUser === 'function' && typeof updateCoins === 'function') {
         let currentUser = getCurrentUser();
         
         if (currentUser) {
-            // Sauvegarde du score
             if (!currentUser.highScores[GAME_NAME] || score > currentUser.highScores[GAME_NAME]) {
                 currentUser.highScores[GAME_NAME] = score;
                 alert(`NOUVEAU RECORD PERSONNEL : ${score} !`);
             }
             
-            // Ajout des pièces gagnées
-            updateCoins(coinsGained); // Fonction de auth.js
-            
-            updateGlobalUser(currentUser); // Sauvegarde
+            updateCoins(coinsGained);
+            updateGlobalUser(currentUser); 
+        } else {
+             alert(`Partie terminée. Score : ${score}. Connectez-vous pour enregistrer votre score !`);
         }
     }
     
@@ -556,7 +549,6 @@ function endGame(win) {
     ctx.textAlign = 'center'; 
     ctx.fillText(message, canvas.width / 2, canvas.height / 2);
     
-    // Mise à jour finale du leaderboard
     updateLeaderboard();
 }
 
@@ -566,7 +558,6 @@ function endGame(win) {
 
 // Souris pour la visée
 canvas.addEventListener('mousemove', (e) => {
-    // Calcul de la position relative au canvas
     const rect = canvas.getBoundingClientRect();
     mousePos.x = e.clientX - rect.left;
     mousePos.y = e.clientY - rect.top;
@@ -574,16 +565,17 @@ canvas.addEventListener('mousemove', (e) => {
 
 // Clic pour le tir
 canvas.addEventListener('mousedown', (e) => {
-    if (e.button === 0 && !gameOver) { // Clic gauche
+    if (e.button === 0 && !gameOver) { 
         fireBullet();
     }
 });
 
+// Clic pour le tir sur la barre espace (en plus de la souris)
 document.addEventListener('keydown', (e) => {
     keys[e.code] = true;
-    // Espace pour tirer (alternative)
-    if (e.code === 'Space' && !gameOver) { 
-        e.preventDefault();
+    
+    if (e.code === 'Space' && !gameOver) {
+        e.preventDefault(); // Empêche le défilement
         fireBullet();
     }
 });
@@ -592,13 +584,13 @@ document.addEventListener('keyup', (e) => {
     keys[e.code] = false;
 });
 
-// =========================================================
-// 10. DÉMARRAGE
-// =========================================================
-
+// Initialise le jeu au chargement (sans démarrer la loop)
 document.addEventListener('DOMContentLoaded', () => {
-    // Si la page contient le canvas, lance le jeu
-    if (canvas) {
-        initGame();
-    }
+    syncPlayerSkin(); // Synchronise le skin au chargement de la page
+    updateLeaderboard();
+    // Affiche le message de démarrage
+    ctx.fillStyle = 'var(--color-neon-green)';
+    ctx.font = '24px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText("Appuyez sur 'Nouvelle Partie' pour commencer !", canvas.width / 2, canvas.height / 2);
 });
