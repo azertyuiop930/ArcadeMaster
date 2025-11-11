@@ -37,6 +37,14 @@
             color: black; /* Texte en noir sur les boutons néons */
             transition: background-color 0.2s;
         }
+        /* Style spécifique pour l'avatar dans la barre supérieure */
+        .top-bar-profile-pic {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 5px;
+        }
     </style>
 </head>
 <body>
@@ -53,7 +61,7 @@
                 <span class="coin-count">0</span>
                 <button id="trollButton" type="button">+</button>
             </a>
-            <a href="compte.html" style="color: var(--color-text-light);" title="Mon Compte" data-emoji="👤">
+            <a href="compte.html" style="color: var(--color-text-light);" title="Mon Compte">
                 👤
             </a>
         </div>
@@ -75,9 +83,6 @@
         <div style="padding-top: 50px;"></div> 
         
         <h1 style="font-size: 2.5em; color: var(--color-neon-orange); text-align: center;">CONNEXION / INSCRIPTION</h1>
-
-        <div id="authContainer">
-            </div>
 
         <div id="profileView" class="auth-card" style="display: none;">
             <div class="profile-header">
@@ -124,7 +129,7 @@
                 <span class="skin-item">Vaisseau: <b id="activeShip">🚀</b></span>
             </div>
 
-            <button onclick="logoutUser()" class="btn-primary" style="background-color: var(--color-neon-red); margin-top: 30px;">
+            <button onclick="logoutAndRender()" class="btn-primary" style="background-color: var(--color-neon-red); margin-top: 30px;">
                 Se Déconnecter
             </button>
         </div>
@@ -135,7 +140,7 @@
                 <input type="text" id="loginUsername" placeholder="Nom d'utilisateur" required>
                 <input type="password" id="loginPassword" placeholder="Mot de passe" required>
                 
-                <a href="javascript:void(0)" onclick="validateLogin()" class="btn-link-action" style="background-color: var(--color-neon-green);">
+                <a href="javascript:void(0)" onclick="handleLogin()" class="btn-link-action" style="background-color: var(--color-neon-green);">
                     Connexion
                 </a>
             </form>
@@ -148,7 +153,7 @@
                 <input type="text" id="registerUsername" placeholder="Nom d'utilisateur" required>
                 <input type="password" id="registerPassword" placeholder="Mot de passe" required>
                 
-                <a href="javascript:void(0)" onclick="validateRegister()" class="btn-link-action" style="background-color: var(--color-neon-orange);">
+                <a href="javascript:void(0)" onclick="handleRegister()" class="btn-link-action" style="background-color: var(--color-neon-orange);">
                     Inscription
                 </a>
             </form>
@@ -157,23 +162,27 @@
         
     </div>
     
-    <script src="base.js"></script>
+    <script src="base.js"></script> 
     <script src="auth.js"></script>
     <script>
-        // Logique d'affichage des vues
+        // --- LOGIQUE D'AFFICHAGE DE LA PAGE COMPTE ---
+
+        // Affiche la vue Connexion
         function showLogin() {
             document.getElementById('loginForm').style.display = 'block';
             document.getElementById('registerForm').style.display = 'none';
             document.getElementById('profileView').style.display = 'none';
         }
+        // Affiche la vue Inscription
         function showRegister() {
             document.getElementById('loginForm').style.display = 'none';
             document.getElementById('registerForm').style.display = 'block';
             document.getElementById('profileView').style.display = 'none';
         }
 
+        // Met à jour la page pour afficher le profil ou les formulaires
         function renderAccountPage() {
-            const user = getCurrentUser();
+            const user = getCurrentUser(); // Récupère l'utilisateur connecté depuis auth.js
 
             if (user) {
                 // Remplissage des champs du profil
@@ -182,81 +191,66 @@
                 document.getElementById('profileCoins').textContent = user.coins;
                 document.getElementById('profileHighScore').textContent = user.highScores['space_invaders'] || 0;
                 document.getElementById('profileRole').textContent = user.role;
-                
-                // Photo de profil
                 document.getElementById('profilePicture').src = user.profilePictureUrl;
-                
-                // Skins
-                const activeShipElement = document.getElementById('activeShip');
-                if(activeShipElement) {
-                     activeShipElement.textContent = user.skins.active.ship;
-                }
+                document.getElementById('activeShip').textContent = user.skins.active.ship;
 
                 // Affichage du profil
                 document.getElementById('profileView').style.display = 'block';
                 document.getElementById('loginForm').style.display = 'none';
                 document.getElementById('registerForm').style.display = 'none';
-
-                // Nettoyer les champs du formulaire de mise à jour
-                document.getElementById('newPassword').value = '';
-                document.getElementById('confirmNewPassword').value = '';
-                document.getElementById('newProfilePicUrl').value = '';
-
             } else {
-                // Affichage Connexion/Inscription
+                // Affichage Connexion/Inscription par défaut
                 showLogin();
                 document.getElementById('profileView').style.display = 'none';
             }
+            
+            // Met à jour l'icône dans la barre supérieure (fonction dans base.js)
+            if (typeof updateTopBar === 'function') {
+                updateTopBar();
+            }
         }
         
-        // Fonction de déconnexion globale
-        window.logoutUser = function() {
-            logout();
-            renderAccountPage();
-            updateTopBar();
-        }
-
-        // FONCTION DE VALIDATION CONNEXION (VERSION FINALE SANS TEST D'ALERTE)
-        window.validateLogin = function() {
+        // Gère le clic du bouton Connexion
+        window.handleLogin = function() {
             const username = document.getElementById('loginUsername').value;
             const password = document.getElementById('loginPassword').value;
 
-            // 1. Validation des champs
             if (!username || !password) {
                 alert("Veuillez remplir tous les champs."); 
                 return; 
             }
             
-            // 2. Connexion complète (si successful, auth.js gère la pop-up de succès)
             if (loginUser(username, password)) {
-                renderAccountPage(); // Met à jour la page pour afficher le profil
-                updateTopBar();
+                renderAccountPage(); // Met à jour la vue de la page vers le profil
             }
         }
 
-        // FONCTION DE VALIDATION INSCRIPTION (VERSION FINALE SANS TEST D'ALERTE)
-        window.validateRegister = function() {
+        // Gère le clic du bouton Inscription
+        window.handleRegister = function() {
             const username = document.getElementById('registerUsername').value;
             const password = document.getElementById('registerPassword').value;
 
-            // 1. Validation des champs
             if (!username || !password) {
                 alert("Veuillez remplir tous les champs.");
                 return;
             }
             
-            // 2. Inscription complète (si successful, auth.js gère la pop-up de succès)
             if (registerUser(username, password)) {
-                renderAccountPage(); // Met à jour la page pour afficher le profil
-                updateTopBar();
+                renderAccountPage(); // Met à jour la vue de la page vers le profil
             }
         }
 
-        // Initialisation des listeners (uniquement pour la mise à jour du profil)
+        // Gère la déconnexion et la mise à jour de la vue
+        window.logoutAndRender = function() {
+            logout();
+            renderAccountPage(); // Revient à la vue de connexion
+        }
+
+
+        // Gestion de la mise à jour du profil (Maintient le type="submit" car il n'y a pas de conflit ici)
         document.addEventListener('DOMContentLoaded', () => {
-            renderAccountPage();
+            renderAccountPage(); // Initialisation de la vue au chargement de la page
             
-            // --- LISTENER DE MISE À JOUR DE PROFIL (sur la soumission du formulaire) ---
             document.getElementById('profileUpdateForm').addEventListener('submit', (e) => {
                 e.preventDefault();
                 const newPass = document.getElementById('newPassword').value;
@@ -278,12 +272,9 @@
                 }
 
                 if (updateProfile(passwordToUpdate, newPicUrl)) {
-                    renderAccountPage(); 
-                    updateTopBar(); 
+                    renderAccountPage(); // Rafraîchit les données du profil
                 }
             });
-            
-            updateTopBar();
         });
     </script>
 </body>
