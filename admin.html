@@ -7,6 +7,62 @@
     
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <style>
+        #adminTools {
+            background-color: var(--color-card-dark);
+            padding: 30px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border: 2px solid var(--color-neon-red);
+        }
+        .tool-section {
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px dashed #444;
+        }
+        .tool-section h2 {
+            color: var(--color-neon-orange);
+            text-align: left;
+            margin-bottom: 15px;
+        }
+        /* Styles pour les champs d'admin (plus étroits que les formulaires normaux) */
+        .admin-form-group {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+        .admin-form-group input, .admin-form-group select {
+            flex-grow: 1;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #1A1A1A;
+            color: var(--color-text-light);
+            border: 1px solid #777;
+        }
+        .admin-form-group button {
+            width: auto;
+            padding: 10px 20px;
+            margin: 0;
+        }
+        
+        /* Liste des utilisateurs */
+        #userList {
+            list-style: none;
+            padding: 0;
+            margin-top: 20px;
+        }
+        #userList li {
+            background-color: #353535;
+            margin-bottom: 8px;
+            padding: 10px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+    </style>
 </head>
 <body>
 
@@ -14,8 +70,8 @@
         <div id="menuToggle" class="menu-toggle">
             <i class="fa-solid fa-bars"></i>
         </div>
-        <span style="font-size: 1.5em; font-weight: bold; color: var(--color-neon-green);">
-            MENU ADMIN
+        <span style="font-size: 1.5em; font-weight: bold; color: var(--color-neon-red);">
+            PANEL D'ADMINISTRATION
         </span>
         <div style="display: flex; align-items: center; gap: 15px;">
             <a href="boutique.html" class="currency-display" title="Boutique">
@@ -31,138 +87,193 @@
     <div id="sidebar" class="sidenav">
         <a href="javascript:void(0)" class="closebtn" id="closeNav" onclick="closeNav()" style="position: absolute; top: 0; right: 25px; font-size: 36px; color: var(--color-neon-orange);">&times;</a>
         <div id="nav-links">
-            <a href="index.html" data-emoji="🏠">Accueil</a>
-            <a href="jeux.html" data-emoji="🎮">Menu Jeux</a>
-            <a href="compte.html" data-emoji="👤">Mon Compte</a>
-            <a href="boutique.html" data-emoji="🛍️">Boutique</a>
-            <a href="classement.html" data-emoji="🏆">Classement</a>
-            <a href="credits.html" data-emoji="📜">Crédits</a>
+            <a href="index.html" data-emoji="🏠">🏠 Accueil</a>
+            <a href="jeux.html" data-emoji="🎮">🎮 Menu Jeux</a>
+            <a href="compte.html" data-emoji="👤">👤 Mon Compte</a>
+            <a href="boutique.html" data-emoji="🛍️">🛍️ Boutique</a>
+            <a href="classement.html" data-emoji="🏆">🏆 Classement</a>
+            <a href="credits.html" data-emoji="📜">📜 Crédits</a>
         </div>
     </div>
 
     <div class="main-container" id="mainContent">
         <div style="padding-top: 50px;"></div> 
         
-        <h1 style="font-size: 2.5em; color: var(--color-neon-red);">TABLEAU DE BORD ADMINISTRATEUR 👑</h1>
+        <h1 style="font-size: 2em; color: var(--color-neon-red);">ACCÈS ADMINISTRATEUR</h1>
         
-        <div id="adminContent">
+        <p id="adminStatus" style="text-align: center; color: var(--color-neon-green);">
+            <i class="fa-solid fa-lock"></i> Chargement des privilèges...
+        </p>
+        
+        <div id="adminTools" style="display: none;">
             
-            <div class="auth-card" style="max-width: 600px;">
-                <h2 style="color: var(--color-neon-red);">Suppression de Compte (Danger Zone)</h2>
+            <div class="tool-section">
+                <h2>1. Gestion des Utilisateurs</h2>
+                <div class="admin-form-group">
+                    <input type="text" id="usernameSearch" placeholder="Rechercher par Nom d'utilisateur" onkeyup="renderUserList()">
+                </div>
                 
-                <form id="deleteAccountForm">
-                    <label for="targetUsername">Nom d'utilisateur à supprimer</label>
-                    <input type="text" id="targetUsername" required placeholder="Ex: JeanScoreur">
-                    
-                    <label for="deletionReason">Raison de la suppression (Obligatoire)</label>
-                    <input type="text" id="deletionReason" required placeholder="Ex: Triche répétée, Inactivité prolongée, etc.">
-                    
-                    <button type="submit" style="background-color: var(--color-neon-red);">
-                        <i class="fa-solid fa-trash-can"></i> Supprimer le Compte
-                    </button>
-                    <p style="font-size: 0.8em; color: #aaa; margin-top: 10px; text-align: center;">
-                        **ATTENTION :** Cette action est irréversible et supprime tous les scores et pièces.
-                    </p>
-                </form>
+                <ul id="userList">
+                    </ul>
             </div>
-
-            <div class="auth-card" style="max-width: 600px; margin-top: 40px;">
-                <h2 style="color: var(--color-neon-green);">Liste des Utilisateurs Actuels</h2>
-                <ul id="userList" style="list-style: none; padding: 0; text-align: left;">
-                    <li style="padding: 5px 0; border-bottom: 1px dashed #444;">Chargement...</li>
-                </ul>
+            
+            <div class="tool-section">
+                <h2>2. Modification de Compte</h2>
+                <div class="admin-form-group">
+                    <input type="text" id="targetUsername" placeholder="Nom d'utilisateur à modifier" required>
+                </div>
+                <div class="admin-form-group">
+                    <input type="number" id="coinAmount" placeholder="Montant Pièces (ex: 500)" min="-99999" required>
+                    <button onclick="addCoins()">Ajouter/Retirer Pièces</button>
+                </div>
+                <div class="admin-form-group">
+                    <input type="number" id="scoreAmount" placeholder="Score Max (ex: 1200)" min="0" required>
+                    <select id="gameSelect">
+                        <option value="space_invaders">Space Invaders 2.0</option>
+                    </select>
+                    <button onclick="setHighScore()">Définir High Score</button>
+                </div>
+                <div class="admin-form-group">
+                    <select id="roleSelect">
+                        <option value="user">User</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                    <button onclick="setRole()">Définir Rôle</button>
+                </div>
+                <div class="admin-form-group">
+                    <button onclick="deleteUser()" style="background-color: var(--color-neon-red);">Supprimer Définitivement (simulé)</button>
+                </div>
             </div>
-
+            
         </div>
     </div>
     
     <script src="base.js"></script>
     <script src="auth.js"></script>
     <script>
-        // Scripts spécifiques à la page Admin
-
-        /** Vérifie si l'utilisateur est Admin. Sinon, redirige. */
+        
         function checkAdminAccess() {
-            const currentUser = getCurrentUser(); // de auth.js
+            const currentUser = getCurrentUser();
+            const adminStatus = document.getElementById('adminStatus');
+            const adminTools = document.getElementById('adminTools');
+
             if (!currentUser || currentUser.role !== 'admin') {
-                alert("Accès refusé. Vous devez être administrateur pour voir cette page.");
-                window.location.href = 'index.html';
+                adminStatus.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Accès refusé. Vous devez être connecté en tant qu\'administrateur.';
+                adminStatus.style.color = 'var(--color-neon-red)';
+                adminTools.style.display = 'none';
+            } else {
+                adminStatus.innerHTML = `<i class="fa-solid fa-lock-open"></i> Accès Administrateur accordé à ${currentUser.username}.`;
+                adminStatus.style.color = 'var(--color-neon-green)';
+                adminTools.style.display = 'block';
+                renderUserList();
             }
         }
-
-        /** Affiche la liste des utilisateurs */
-        function displayUserList() {
-            const users = loadUsers(); // de auth.js
+        
+        // --- TOOL FUNCTIONS ---
+        
+        function renderUserList() {
             const list = document.getElementById('userList');
             list.innerHTML = '';
             
-            users.filter(u => !u.isDeleted) // N'affiche que les comptes actifs
-                 .sort((a, b) => a.username.localeCompare(b.username))
-                 .forEach(user => {
-                    const li = document.createElement('li');
-                    const roleColor = user.role === 'admin' ? '#FFD700' : 'var(--color-neon-green)';
-                    
-                    li.innerHTML = `
-                        <span style="color: ${roleColor}; font-weight: bold;">[${user.role.toUpperCase()}]</span> 
-                        ${user.username} 
-                        (Pièces: ${user.coins}💰)
-                    `;
-                    list.appendChild(li);
+            const users = loadUsers();
+            const searchTerm = document.getElementById('usernameSearch').value.toLowerCase();
+            
+            users.filter(u => u.username.toLowerCase().includes(searchTerm)).forEach(user => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <span>
+                        <b style="color: ${user.role === 'admin' ? '#FFD700' : 'var(--color-neon-green)'};">${user.username}</b> 
+                        (Rôle: ${user.role.toUpperCase()}) | Pièces: ${user.coins} 💰
+                    </span>
+                    <button onclick="document.getElementById('targetUsername').value='${user.username}'" 
+                            style="width: auto; padding: 5px 10px; margin: 0; background-color: var(--color-neon-orange); font-size: 0.9em;">
+                        Modifier
+                    </button>
+                `;
+                list.appendChild(li);
             });
         }
         
-        /** Gère la soumission du formulaire de suppression */
-        function handleDeleteAccount(event) {
-            event.preventDefault();
-            
-            const targetUsername = document.getElementById('targetUsername').value.trim();
-            const deletionReason = document.getElementById('deletionReason').value.trim();
-
-            if (!targetUsername || !deletionReason) {
-                alert("Veuillez remplir le nom d'utilisateur cible et la raison de la suppression.");
-                return;
+        function getTargetUser() {
+            const username = document.getElementById('targetUsername').value;
+            const users = loadUsers();
+            const user = users.find(u => u.username === username);
+            if (!user) {
+                alert(`Utilisateur "${username}" non trouvé.`);
             }
-
-            if (targetUsername === getCurrentUser().username) {
-                alert("Erreur: Vous ne pouvez pas supprimer votre propre compte Admin depuis ici.");
-                return;
-            }
-            
-            if (!confirm(`Êtes-vous SÛR de vouloir supprimer le compte "${targetUsername}" pour la raison : "${deletionReason}"?`)) {
-                return;
-            }
-
-            let users = loadUsers();
-            const userIndex = users.findIndex(u => u.username === targetUsername);
-
-            if (userIndex !== -1) {
-                users[userIndex].isDeleted = true;
-                users[userIndex].deletionReason = deletionReason;
-                
-                // Efface les données sensibles (scores/pièces)
-                users[userIndex].coins = 0;
-                users[userIndex].highScores = {};
-                
-                saveUsers(users);
-                alert(`Le compte ${targetUsername} a été marqué comme supprimé. L'utilisateur verra le message de raison à la prochaine connexion.`);
-                displayUserList(); // Rafraîchit la liste
-                
-                // Réinitialise le formulaire
-                document.getElementById('deleteAccountForm').reset();
-            } else {
-                alert(`Erreur: Le compte "${targetUsername}" n'existe pas ou est déjà supprimé.`);
-            }
+            return user;
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            checkAdminAccess();
-            displayUserList();
+        function addCoins() {
+            const user = getTargetUser();
+            const amount = parseInt(document.getElementById('coinAmount').value);
             
-            const deleteForm = document.getElementById('deleteAccountForm');
-            if (deleteForm) {
-                deleteForm.addEventListener('submit', handleDeleteAccount);
+            if (!user || isNaN(amount)) return;
+            
+            const newCoins = user.coins + amount;
+            if (newCoins < 0) {
+                 alert("Opération annulée : Le solde final ne peut être négatif.");
+                 return;
             }
-        });
+            
+            user.coins = newCoins;
+            updateGlobalUser(user);
+            alert(`Pièces de ${user.username} ajustées. Nouveau solde: ${newCoins} 💰.`);
+            renderUserList();
+        }
+        
+        function setHighScore() {
+            const user = getTargetUser();
+            const score = parseInt(document.getElementById('scoreAmount').value);
+            const game = document.getElementById('gameSelect').value;
+            
+            if (!user || isNaN(score) || score < 0) return;
+            
+            user.highScores[game] = score;
+            updateGlobalUser(user);
+            alert(`High Score de ${user.username} pour ${game} mis à jour à ${score}.`);
+            renderUserList();
+        }
+        
+        function setRole() {
+            const user = getTargetUser();
+            const role = document.getElementById('roleSelect').value;
+            
+            if (!user) return;
+            
+            if (user.username === getCurrentUser().username && role !== 'admin') {
+                alert("Erreur: Vous ne pouvez pas vous retirer vous-même le rôle d'Admin.");
+                return;
+            }
+            
+            user.role = role;
+            updateGlobalUser(user);
+            alert(`Rôle de ${user.username} mis à jour à ${role.toUpperCase()}.`);
+            renderUserList();
+        }
+        
+        function deleteUser() {
+             const user = getTargetUser();
+             if (!user) return;
+             
+             if (user.username === getCurrentUser().username) {
+                 alert("Opération annulée : Vous ne pouvez pas supprimer votre propre compte.");
+                 return;
+             }
+             
+             if (confirm(`Êtes-vous sûr de vouloir supprimer ${user.username} ? Cette action est irréversible (simulée).`)) {
+                 let users = loadUsers();
+                 users = users.filter(u => u.username !== user.username);
+                 saveUsers(users);
+                 alert(`L'utilisateur ${user.username} a été supprimé (du localStorage).`);
+                 
+                 document.getElementById('targetUsername').value = '';
+                 renderUserList();
+             }
+        }
+
+        document.addEventListener('DOMContentLoaded', checkAdminAccess);
+
     </script>
 </body>
 </html>
