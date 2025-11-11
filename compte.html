@@ -216,14 +216,17 @@
             updateTopBar();
         }
 
-        // FONCTION DE VALIDATION CONNEXION (Appelée par le lien)
+        // FONCTION DE VALIDATION CONNEXION (TEST DE CLIC IMMÉDIAT)
         window.validateLogin = function() {
+            // Pop-up immédiat pour vérifier le fonctionnement du clic
+            alert("Le bouton CONNEXION fonctionne !"); 
+            
             const username = document.getElementById('loginUsername').value;
             const password = document.getElementById('loginPassword').value;
 
             // Validation manuelle
             if (!username || !password) {
-                alert("Veuillez remplir tous les champs.");
+                // alert("Veuillez remplir tous les champs."); // On garde le test de fonctionnement en premier pour ce tour.
                 return; 
             }
             
@@ -233,14 +236,17 @@
             }
         }
 
-        // FONCTION DE VALIDATION INSCRIPTION (Appelée par le lien)
+        // FONCTION DE VALIDATION INSCRIPTION (TEST DE CLIC IMMÉDIAT)
         window.validateRegister = function() {
+            // Pop-up immédiat pour vérifier le fonctionnement du clic
+            alert("Le bouton INSCRIPTION fonctionne !");
+            
             const username = document.getElementById('registerUsername').value;
             const password = document.getElementById('registerPassword').value;
 
             // Validation manuelle
             if (!username || !password) {
-                alert("Veuillez remplir tous les champs.");
+                // alert("Veuillez remplir tous les champs.");
                 return;
             }
             
