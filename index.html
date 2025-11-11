@@ -7,32 +7,6 @@
     
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    
-    <style>
-        /* Styles spécifiques à l'accueil */
-        .featured-game {
-            background-color: var(--color-card-dark);
-            padding: 30px;
-            border-radius: 10px;
-            margin-top: 30px;
-            box-shadow: 0 0 15px var(--color-neon-orange);
-            text-align: center;
-        }
-        .featured-game h2 {
-            color: var(--color-neon-orange);
-            font-size: 2em;
-            margin-bottom: 15px;
-        }
-        .featured-game p {
-            color: var(--color-text-light);
-            margin-bottom: 25px;
-        }
-        .featured-game button {
-            background-color: var(--color-neon-green);
-            padding: 12px 30px;
-            font-size: 1.1em;
-        }
-    </style>
 </head>
 <body>
 
@@ -43,7 +17,14 @@
         <span style="font-size: 1.5em; font-weight: bold; color: var(--color-neon-green);">
             ARCADE MASTER
         </span>
-        <div id="right-container" style="display: flex; align-items: center; gap: 15px;">
+        <div style="display: flex; align-items: center; gap: 15px;">
+             <a href="boutique.html" class="currency-display" title="Boutique">
+                <span class="coin-count">0</span>
+                <button id="trollButton" type="button">+</button>
+            </a>
+            <a href="compte.html" style="color: var(--color-text-light);" title="Mon Compte" data-emoji="👤">
+                👤
+            </a>
         </div>
     </div>
 
@@ -60,34 +41,53 @@
     </div>
 
     <div class="main-container" id="mainContent">
+        
         <div style="padding-top: 50px;"></div> 
         
-        <h1 style="font-size: 2.5em; color: var(--color-neon-green);">BIENVENUE DANS L'ARCADE !</h1>
+        <h1 style="font-size: 3em; color: var(--color-neon-orange);">BIENVENUE DANS L'ARCADE</h1>
         
-        <div id="welcome-message" style="text-align: center; margin-top: 20px;">
-            <p style="font-size: 1.2em; color: var(--color-text-light);">
-                Connectez-vous pour enregistrer vos scores et accéder à la boutique.
-            </p>
-        </div>
+        <p style="font-size: 1.2em; color: var(--color-text-light); margin-bottom: 40px;">
+            Plongez dans l'ambiance Rétro-Neon de vos jeux classiques préférés, revisités en version 2.0 !
+        </p>
+        
+        <div class="card-group" style="margin-top: 20px;">
+            
+            <div class="action-card" onclick="window.location.href='jeux.html'">
+                <span class="card-icon">🎮</span>
+                <h3>JOUER</h3>
+                <p>Accéder aux jeux</p>
+            </div>
 
-        <div class="featured-game">
-            <h2>⭐ Jeu en Vedette : Space Invaders 2.0 ⭐</h2>
-            <p>
-                Repoussez les vagues d'envahisseurs avec votre vaisseau. Visez avec la souris, tirez avec le clic gauche/Espace, et utilisez ZQSD pour vous déplacer !
-            </p>
-            <a href="space_invaders.html">
-                <button>
-                    <i class="fa-solid fa-rocket"></i> Jouer Maintenant
-                </button>
-            </a>
+            <div class="action-card" onclick="window.location.href='classement.html'">
+                <span class="card-icon">🏆</span>
+                <h3>CLASSEMENT</h3>
+                <p>Voir le top score mondial</p>
+            </div>
+            
+            <div class="action-card" onclick="window.location.href='boutique.html'">
+                <span class="card-icon">🛍️</span>
+                <h3>BOUTIQUE</h3>
+                <p>Acheter des skins et bonus</p>
+            </div>
         </div>
         
-        <div style="margin-top: 40px; text-align: center;">
-            <p style="color: var(--color-neon-orange);">
-                **Dernières Mises à Jour :** Nouveau système de classement et ajout de la page Crédits.
-            </p>
-            <a href="classement.html" style="margin-right: 15px; color: #00AAFF;">Voir le Classement Global</a>
-            <a href="boutique.html" style="color: #FF00FF;">Découvrir la Boutique</a>
+        <div class="section-divider"></div>
+        
+        <h2 style="color: var(--color-neon-green);">VOTRE STATUT</h2>
+        
+        <div class="stats-card">
+            <div class="stat-item">
+                <span>Pièces 💰</span>
+                <span id="userCoins">N/A</span>
+            </div>
+            <div class="stat-item">
+                <span>Meilleur Score 🏆</span>
+                <span id="userHighScore">N/A</span>
+            </div>
+            <div class="stat-item">
+                <span>Connecté</span>
+                <span id="isConnected" style="color: var(--color-neon-red);">NON</span>
+            </div>
         </div>
         
     </div>
@@ -95,17 +95,25 @@
     <script src="base.js"></script>
     <script src="auth.js"></script>
     <script>
-        // Logique spécifique à l'accueil
-        document.addEventListener('DOMContentLoaded', () => {
-             const currentUser = getCurrentUser();
-             const welcomeMessage = document.getElementById('welcome-message');
-             
-             if (currentUser) {
-                 welcomeMessage.innerHTML = `<p style="font-size: 1.2em; color: var(--color-text-light);">
-                    Heureux de vous revoir, <b style="color: var(--color-neon-orange);">${currentUser.username}</b> !</p>
-                 `;
-             }
-        });
+        // Logique pour l'accueil (simple affichage des stats)
+        function updateHomeStats() {
+            const currentUser = getCurrentUser();
+            const isConnectedElement = document.getElementById('isConnected');
+            
+            if (currentUser) {
+                document.getElementById('userCoins').textContent = currentUser.coins;
+                document.getElementById('userHighScore').textContent = currentUser.highScores['space_invaders'] || 0;
+                isConnectedElement.textContent = 'OUI';
+                isConnectedElement.style.color = 'var(--color-neon-green)';
+            } else {
+                document.getElementById('userCoins').textContent = 'Se connecter';
+                document.getElementById('userHighScore').textContent = 'Se connecter';
+                isConnectedElement.textContent = 'NON';
+                isConnectedElement.style.color = 'var(--color-neon-red)';
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', updateHomeStats);
     </script>
 </body>
 </html>
