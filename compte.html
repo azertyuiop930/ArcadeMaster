@@ -168,20 +168,30 @@
         // --- LOGIQUE D'AFFICHAGE DE LA PAGE COMPTE ---
 
         function showLogin() {
-            document.getElementById('loginForm').style.display = 'block';
-            document.getElementById('registerForm').style.display = 'none';
-            document.getElementById('profileView').style.display = 'none';
+            const loginForm = document.getElementById('loginForm');
+            if (loginForm) loginForm.style.display = 'block';
+            
+            const registerForm = document.getElementById('registerForm');
+            if (registerForm) registerForm.style.display = 'none';
+            
+            const profileView = document.getElementById('profileView');
+            if (profileView) profileView.style.display = 'none';
         }
 
         function showRegister() {
-            document.getElementById('loginForm').style.display = 'none';
-            document.getElementById('registerForm').style.display = 'block';
-            document.getElementById('profileView').style.display = 'none';
+            const loginForm = document.getElementById('loginForm');
+            if (loginForm) loginForm.style.display = 'none';
+            
+            const registerForm = document.getElementById('registerForm');
+            if (registerForm) registerForm.style.display = 'block';
+            
+            const profileView = document.getElementById('profileView');
+            if (profileView) profileView.style.display = 'none';
         }
 
         // Met à jour la page pour afficher le profil ou les formulaires
         function renderAccountPage() {
-            // Vérifiez que les fonctions de auth.js sont chargées
+            // Vérification critique de la dépendance auth.js
             if (typeof getCurrentUser !== 'function') {
                  console.error("Erreur: Les fonctions d'authentification (auth.js) ne sont pas chargées.");
                  showLogin();
@@ -191,27 +201,41 @@
             const user = getCurrentUser(); 
 
             if (user) {
-                // Remplissage des champs du profil
-                document.getElementById('profileUsername').textContent = user.username;
-                document.getElementById('profileID').textContent = user.id;
-                document.getElementById('profileCoins').textContent = user.coins;
-                document.getElementById('profileHighScore').textContent = user.highScores['space_invaders'] || 0;
-                document.getElementById('profileRole').textContent = user.role;
-                document.getElementById('profilePicture').src = user.profilePictureUrl;
+                // Remplissage des champs du profil avec vérifications d'existence
+                const profileUsername = document.getElementById('profileUsername');
+                if (profileUsername) profileUsername.textContent = user.username;
+
+                const profileID = document.getElementById('profileID');
+                if (profileID) profileID.textContent = user.id;
+
+                const profileCoins = document.getElementById('profileCoins');
+                if (profileCoins) profileCoins.textContent = user.coins;
+                
+                const profileHighScore = document.getElementById('profileHighScore');
+                if (profileHighScore) profileHighScore.textContent = user.highScores['space_invaders'] || 0;
+                
+                const profileRole = document.getElementById('profileRole');
+                if (profileRole) profileRole.textContent = user.role;
+                
+                const profilePicture = document.getElementById('profilePicture');
+                if (profilePicture) profilePicture.src = user.profilePictureUrl;
                 
                 const activeShipElement = document.getElementById('activeShip');
-                if(activeShipElement) {
-                    activeShipElement.textContent = user.skins.active.ship;
-                }
-
+                if(activeShipElement) activeShipElement.textContent = user.skins.active.ship;
+                
                 // Affichage du profil
-                document.getElementById('profileView').style.display = 'block';
-                document.getElementById('loginForm').style.display = 'none';
-                document.getElementById('registerForm').style.display = 'none';
+                const profileView = document.getElementById('profileView');
+                if (profileView) profileView.style.display = 'block';
+
+                const loginForm = document.getElementById('loginForm');
+                if (loginForm) loginForm.style.display = 'none';
+                
+                const registerForm = document.getElementById('registerForm');
+                if (registerForm) registerForm.style.display = 'none';
+
             } else {
                 // Affichage Connexion/Inscription par défaut
                 showLogin();
-                document.getElementById('profileView').style.display = 'none';
             }
             
             // Met à jour l'icône dans la barre supérieure
