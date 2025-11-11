@@ -14,10 +14,17 @@
         <div id="menuToggle" class="menu-toggle">
             <i class="fa-solid fa-bars"></i>
         </div>
-        <span style="font-size: 1.5em; font-weight: bold; color: var(--color-neon-orange);">
+        <span style="font-size: 1.5em; font-weight: bold; color: var(--color-neon-green);">
             MON COMPTE
         </span>
-        <div id="right-container" style="display: flex; align-items: center; gap: 15px;">
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <a href="boutique.html" class="currency-display" title="Boutique">
+                <span class="coin-count">0</span>
+                <button id="trollButton" type="button">+</button>
+            </a>
+            <a href="compte.html" style="color: var(--color-text-light);" title="Mon Compte" data-emoji="👤">
+                👤
+            </a>
         </div>
     </div>
 
@@ -36,42 +43,61 @@
     <div class="main-container" id="mainContent">
         <div style="padding-top: 50px;"></div> 
         
-        <h1 style="font-size: 2em; color: var(--color-neon-orange);">GESTION DU COMPTE</h1>
-        
-        <div id="authContainer" class="auth-card-wrapper" style="max-width: 600px; margin: 30px auto;">
-            
-            <div id="loginArea" class="auth-card">
-                <h2>🔑 Connexion</h2>
-                <form id="loginForm">
-                    <label for="loginUsername">Nom d'utilisateur</label>
-                    <input type="text" id="loginUsername" required>
-                    
-                    <label for="loginPassword">Mot de passe</label>
-                    <input type="password" id="loginPassword" required>
-                    
-                    <button type="submit">Se connecter</button>
-                </form>
-                <p style="margin-top: 15px;">Pas encore de compte ? 
-                    <a href="#" id="showRegister" style="color: var(--color-neon-green); text-decoration: underline;">S'inscrire ici</a>
-                </p>
+        <h1 style="font-size: 2.5em; color: var(--color-neon-orange); text-align: center;">CONNEXION / INSCRIPTION</h1>
+
+        <div id="authContainer">
             </div>
+
+        <div id="profileView" class="auth-card" style="display: none;">
+            <h2 style="color: var(--color-neon-green);">Bienvenue, <span id="profileUsername"></span> !</h2>
             
-            <div id="registerArea" class="auth-card" style="display: none;">
-                <h2>📝 Inscription</h2>
-                <form id="registerForm">
-                    <label for="registerUsername">Nom d'utilisateur (3+ caractères)</label>
-                    <input type="text" id="registerUsername" required>
-                    
-                    <label for="registerPassword">Mot de passe (4+ caractères)</label>
-                    <input type="password" id="registerPassword" required>
-                    
-                    <button type="submit" style="background-color: var(--color-neon-green);">S'inscrire</button>
-                </form>
-                <p style="margin-top: 15px;">Déjà un compte ? 
-                    <a href="#" id="showLogin" style="color: var(--color-neon-orange); text-decoration: underline;">Se connecter</a>
-                </p>
+            <div class="stats-card" style="margin-top: 20px;">
+                <div class="stat-item">
+                    <span>ID Utilisateur</span>
+                    <span id="profileID"></span>
+                </div>
+                <div class="stat-item">
+                    <span>Pièces 💰</span>
+                    <span id="profileCoins"></span>
+                </div>
+                <div class="stat-item">
+                    <span>Meilleur Score (Invaders) 🏆</span>
+                    <span id="profileHighScore"></span>
+                </div>
+                <div class="stat-item">
+                    <span>Rôle</span>
+                    <span id="profileRole"></span>
+                </div>
             </div>
-            
+
+            <h3 style="color: var(--color-neon-orange); margin-top: 30px;">Skins Actifs</h3>
+            <div id="activeSkins" class="skin-display-group">
+                <span class="skin-item">Vaisseau: <b id="activeShip">🚀</b></span>
+            </div>
+
+            <button onclick="logoutUser()" class="btn-primary" style="background-color: var(--color-neon-red); margin-top: 30px;">
+                Se Déconnecter
+            </button>
+        </div>
+
+        <div id="loginForm" class="auth-card">
+            <h2>Se Connecter</h2>
+            <form id="loginSubmit">
+                <input type="text" id="loginUsername" placeholder="Nom d'utilisateur" required>
+                <input type="password" id="loginPassword" placeholder="Mot de passe" required>
+                <button type="submit" class="btn-primary">Connexion</button>
+            </form>
+            <p onclick="showRegister()" style="cursor: pointer; color: var(--color-neon-green); margin-top: 15px;">Pas de compte ? S'inscrire</p>
+        </div>
+
+        <div id="registerForm" class="auth-card" style="display: none;">
+            <h2>Créer un Compte</h2>
+            <form id="registerSubmit">
+                <input type="text" id="registerUsername" placeholder="Nom d'utilisateur" required>
+                <input type="password" id="registerPassword" placeholder="Mot de passe" required>
+                <button type="submit" class="btn-primary" style="background-color: var(--color-neon-orange);">Inscription</button>
+            </form>
+            <p onclick="showLogin()" style="cursor: pointer; color: var(--color-neon-green); margin-top: 15px;">Déjà un compte ? Se Connecter</p>
         </div>
         
     </div>
@@ -79,128 +105,73 @@
     <script src="base.js"></script>
     <script src="auth.js"></script>
     <script>
-        // Scripts spécifiques à la page compte
-        
-        const authContainer = document.getElementById('authContainer');
-
-        /**
-         * Affiche la vue de gestion du profil si l'utilisateur est connecté.
-         * Sinon, laisse les formulaires d'auth et attache les écouteurs.
-         */
-        window.renderProfileView = function() {
-            const currentUser = getCurrentUser(); // Fonction de auth.js
-            
-            if (currentUser) {
-                // --- VUE CONNECTÉE ---
-                authContainer.innerHTML = `
-                    <div class="auth-card" style="max-width: 500px; text-align: center;">
-                        <h2>Bienvenue, ${currentUser.username}!</h2>
-                        
-                        <div style="margin: 20px 0;">
-                            <img id="profilePic" src="${currentUser.profilePic || 'default.png'}" 
-                                 alt="Photo de profil" style="width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--color-neon-orange);">
-                            
-                            <p style="color: var(--color-text-light); margin-top: 10px;">
-                                Rôle: <span style="color: ${currentUser.role === 'admin' ? '#FFD700' : 'var(--color-neon-green)'}; font-weight: bold;">${currentUser.role.toUpperCase()}</span>
-                            </p>
-                            <p class="currency-display" style="justify-content: center; font-size: 1.5em; margin-top: 10px;">
-                                <span class="coin-count">${currentUser.coins}</span> Pièces
-                            </p>
-                        </div>
-                        
-                        <form id="changePasswordForm">
-                            <h3 style="color: var(--color-neon-green); border-bottom: none; margin-top: 30px;">Changer le mot de passe</h3>
-                            <label for="newPassword">Nouveau mot de passe</label>
-                            <input type="password" id="newPassword" required>
-                            <button type="submit" style="background-color: var(--color-neon-orange);">Mettre à jour le mot de passe</button>
-                        </form>
-                        
-                        <button id="logoutButton" style="background-color: var(--color-neon-red); margin-top: 30px;">
-                            Déconnexion
-                        </button>
-                        
-                        <p style="margin-top: 20px;"><a href="boutique.html" style="color: var(--color-neon-green);">🛍️ Accéder à la boutique de cosmétiques</a></p>
-                    </div>
-                `;
-
-                // Attache l'écouteur de déconnexion
-                document.getElementById('logoutButton').addEventListener('click', logout);
-                
-                // Attache l'écouteur de changement de mot de passe
-                document.getElementById('changePasswordForm').addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    const newPassword = document.getElementById('newPassword').value;
-                    if (newPassword.length < 4) {
-                        alert("Le mot de passe doit contenir au moins 4 caractères.");
-                        return;
-                    }
-                    
-                    currentUser.password = newPassword;
-                    updateGlobalUser(currentUser); // Fonction de auth.js
-                    alert("Mot de passe mis à jour avec succès !");
-                    document.getElementById('newPassword').value = '';
-                });
-
-                
-            } else {
-                // --- VUE DÉCONNECTÉE : Gère les soumissions de formulaires ---
-                
-                // 1. Soumission de Connexion
-                const loginForm = document.getElementById('loginForm');
-                if (loginForm) {
-                    loginForm.addEventListener('submit', (e) => {
-                        e.preventDefault();
-                        const username = document.getElementById('loginUsername').value;
-                        const password = document.getElementById('loginPassword').value;
-                        login(username, password); // Fonction de auth.js
-                    });
-                }
-
-                // 2. Soumission d'Inscription
-                const registerForm = document.getElementById('registerForm');
-                if (registerForm) {
-                    registerForm.addEventListener('submit', (e) => {
-                        e.preventDefault();
-                        const username = document.getElementById('registerUsername').value;
-                        const password = document.getElementById('registerPassword').value;
-                        register(username, password); // Fonction de auth.js
-                    });
-                }
-
-                // 3. Basculement Connexion/Inscription
-                const showRegister = document.getElementById('showRegister');
-                const showLogin = document.getElementById('showLogin');
-                const loginArea = document.getElementById('loginArea');
-                const registerArea = document.getElementById('registerArea');
-
-                if (showRegister) {
-                    showRegister.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        if (loginArea && registerArea) {
-                            loginArea.style.display = 'none';
-                            registerArea.style.display = 'block';
-                        }
-                    });
-                }
-
-                if (showLogin) {
-                    showLogin.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        if (loginArea && registerArea) {
-                            registerArea.style.display = 'none';
-                            loginArea.style.display = 'block';
-                        }
-                    });
-                }
-            }
+        // Logique d'affichage des vues
+        function showLogin() {
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('registerForm').style.display = 'none';
+        }
+        function showRegister() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'block';
         }
 
-        // Exécute la vue appropriée au chargement (doit être fait après que le DOM est prêt)
+        function renderAccountPage() {
+            const user = getCurrentUser();
+
+            if (user) {
+                // Vue Profil
+                document.getElementById('profileUsername').textContent = user.username;
+                document.getElementById('profileID').textContent = user.id;
+                document.getElementById('profileCoins').textContent = user.coins;
+                document.getElementById('profileHighScore').textContent = user.highScores['space_invaders'] || 0;
+                document.getElementById('profileRole').textContent = user.role;
+                
+                document.getElementById('activeShip').textContent = user.skins.active.ship;
+
+                document.getElementById('profileView').style.display = 'block';
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('registerForm').style.display = 'none';
+            } else {
+                // Vue Connexion/Inscription par défaut
+                showLogin();
+                document.getElementById('profileView').style.display = 'none';
+            }
+        }
+        
+        // Initialisation des listeners et de l'affichage
         document.addEventListener('DOMContentLoaded', () => {
-             // Utilisation d'un court délai pour garantir que base.js et auth.js ont fini d'exécuter
-             setTimeout(renderProfileView, 50); 
+            renderAccountPage();
+            
+            // Listener de soumission de Connexion
+            document.getElementById('loginSubmit').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const username = document.getElementById('loginUsername').value;
+                const password = document.getElementById('loginPassword').value;
+                if (loginUser(username, password)) {
+                    // Si la connexion réussit (gérée dans auth.js)
+                    renderAccountPage();
+                    updateTopBar(); // Mettre à jour la barre supérieure après connexion
+                }
+            });
+
+            // Listener de soumission d'Inscription
+            document.getElementById('registerSubmit').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const username = document.getElementById('registerUsername').value;
+                const password = document.getElementById('registerPassword').value;
+                if (registerUser(username, password)) {
+                    // Si l'inscription réussit (gérée dans auth.js)
+                    renderAccountPage();
+                    updateTopBar();
+                }
+            });
         });
 
+        window.logoutUser = function() {
+            logout();
+            renderAccountPage();
+            updateTopBar();
+        }
     </script>
 </body>
 </html>
