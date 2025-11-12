@@ -6,6 +6,69 @@
     <title>Arcade Master - Crédits</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* CSS spécifique pour les "bulles" de texte dans les crédits */
+        .credits-container {
+            max-width: 900px; /* Conteneur global pour centrer le contenu */
+            margin: 0 auto;
+            display: flex; /* Permet d'aligner les cartes côte à côte si nécessaire */
+            flex-wrap: wrap; /* Permet aux cartes de passer à la ligne sur petits écrans */
+            gap: 20px; /* Espace entre les cartes */
+            justify-content: center; /* Centre les cartes horizontalement */
+            padding-top: 20px;
+        }
+
+        .credits-card {
+            background-color: var(--color-background-dark);
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid var(--color-neon-blue); /* Bordure comme les autres éléments */
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.3); /* Ombre pour l'effet "bulle" */
+            flex: 1 1 400px; /* Permet aux cartes de s'étirer mais avec un minimum de 400px */
+            min-width: 300px; /* Taille minimale */
+            max-width: 450px; /* Taille maximale pour ne pas être trop large */
+            display: flex; /* Pour centrer le contenu à l'intérieur */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .credits-card h2 {
+            margin-bottom: 20px;
+        }
+
+        .credits-card ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .credits-card li {
+            margin: 8px 0;
+            font-size: 1.1em;
+            color: var(--color-text-light);
+        }
+
+        .credits-card p strong {
+            color: var(--color-neon-orange); /* Couleur pour les noms importants */
+        }
+        
+        .final-message {
+            margin-top: 50px;
+            font-size: 1.1em;
+            color: var(--color-text-medium);
+            text-align: center;
+            width: 100%; /* S'assure que le message final prend toute la largeur */
+        }
+
+        @media screen and (max-width: 768px) {
+            .credits-card {
+                flex: 1 1 100%; /* Les cartes prennent toute la largeur sur mobile */
+                max-width: 90%; /* Avec une petite marge sur les côtés */
+            }
+        }
+    </style>
 </head>
 <body>
     
@@ -20,10 +83,10 @@
         <h1 style="color: var(--color-neon-blue); text-align: center; padding-top: 10px;">📜 Crédits du Projet Arcade Master</h1>
         <hr>
 
-        <div style="max-width: 800px; margin: 0 auto; text-align: center;">
+        <div class="credits-container">
             
-            <section style="margin-bottom: 40px;">
-                <h2 style="color: var(--color-neon-orange); margin-bottom: 15px;">Équipe de Développement Principale</h2>
+            <div class="credits-card">
+                <h2 style="color: var(--color-neon-orange);">Équipe de Développement Principale</h2>
                 
                 <p style="font-size: 1.1em; margin: 10px 0;">
                     <strong>Chef de Projet, Concept & Design :</strong> Zelda5962
@@ -31,25 +94,23 @@
                 <p style="font-size: 1.1em; margin: 10px 0;">
                     <strong>Assistant de Codage & Génération de Logique :</strong> Gemini AI (Modèle Flash 2.5)
                 </p>
-            </section>
+            </div>
 
-            <section style="margin-bottom: 40px;">
-                <h2 style="color: var(--color-neon-green); margin-bottom: 15px;">Remerciements Spéciaux</h2>
-                <p style="margin-bottom: 20px;">
+            <div class="credits-card">
+                <h2 style="color: var(--color-neon-green);">Remerciements Spéciaux</h2>
+                <p style="margin-bottom: 20px; color: var(--color-text-medium);">
                     Un immense merci à nos testeurs pour leurs retours cruciaux et leur aide dans l'amélioration du jeu.
                 </p>
                 
-                <ul style="list-style-type: none; padding: 0; font-size: 1.1em; color: var(--color-text-light);">
+                <ul style="list-style-type: none; padding: 0; margin: 0;">
                     <li style="margin: 5px 0;">Babou3</li>
                     <li style="margin: 5px 0;">Adamus_44</li>
                     <li style="margin: 5px 0;">N-0DRIX</li>
                     <li style="margin: 5px 0;">[testeur 4]</li>
                 </ul>
-            </section>
+            </div>
             
-            <hr>
-
-            <p style="font-size: 0.9em; color: var(--color-text-medium); margin-top: 30px;">
+            <p class="final-message">
                 Ce projet est réalisé dans un but éducatif et ludique.
             </p>
 
