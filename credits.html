@@ -4,108 +4,53 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Arcade Master - Crédits</title>
-    
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    
-    <style>
-        /* Styles spécifiques aux crédits */
-        .credits-list {
-            list-style: none;
-            padding: 0;
-            max-width: 700px;
-            margin: 30px auto;
-        }
-        .credits-list li {
-            background-color: var(--color-card-dark);
-            padding: 20px;
-            margin-bottom: 15px;
-            border-left: 5px solid var(--color-neon-green);
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 255, 0, 0.1);
-        }
-        .credits-list li h3 {
-            color: var(--color-neon-orange);
-            margin-top: 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding-bottom: 5px;
-            margin-bottom: 10px;
-        }
-        .credits-list li p {
-            color: var(--color-text-light);
-        }
-        .credits-list li a {
-            color: #00AAFF;
-            text-decoration: none;
-        }
-        .credits-list li a:hover {
-            text-decoration: underline;
-        }
-    </style>
 </head>
 <body>
-
-    <div id="top-bar">
-        <div id="menuToggle" class="menu-toggle">
-            <i class="fa-solid fa-bars"></i>
-        </div>
-        <span style="font-size: 1.5em; font-weight: bold; color: var(--color-neon-green);">
-            CRÉDITS
-        </span>
-        <div style="display: flex; align-items: center; gap: 15px;">
-            <a href="boutique.html" class="currency-display" title="Boutique">
-                <span class="coin-count">0</span>
-                <button id="trollButton" type="button">+</button>
-            </a>
-            <a href="compte.html" style="color: var(--color-text-light);" title="Mon Compte" data-emoji="👤">
-                👤
-            </a>
-        </div>
-    </div>
-
+    <div id="top-bar"></div>
     <div id="sidebar" class="sidenav">
-        <a href="javascript:void(0)" class="closebtn" id="closeNav" onclick="closeNav()" style="position: absolute; top: 0; right: 25px; font-size: 36px; color: var(--color-neon-orange);">&times;</a>
-        <div id="nav-links">
-            <a href="index.html" data-emoji="🏠">🏠 Accueil</a>
-            <a href="jeux.html" data-emoji="🎮">🎮 Menu Jeux</a>
-            <a href="compte.html" data-emoji="👤">👤 Mon Compte</a>
-            <a href="boutique.html" data-emoji="🛍️">🛍️ Boutique</a>
-            <a href="classement.html" data-emoji="🏆">🏆 Classement</a>
-            <a href="credits.html" data-emoji="📜">📜 Crédits</a>
-        </div>
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        <div id="nav-links"></div>
     </div>
 
     <div class="main-container" id="mainContent">
-        <div style="padding-top: 50px;"></div> 
+        <h1 style="color: var(--color-neon-blue); padding-top: 20px;">📜 Crédits du Projet Arcade Master</h1>
+        <hr>
+
+        <section class="credits-section">
+            <h2 style="color: var(--color-neon-green);">Équipe de Développement Principale</h2>
+            <ul>
+                <li>
+                    <strong>Chef de Projet, Concept & Design :</strong> 
+                    <span style="color: var(--color-neon-orange);">Zelda5962</span>
+                </li>
+                <li>
+                    <strong>Assistant de Codage & Génération de Logique :</strong> 
+                    <span style="color: var(--color-neon-blue);">Gemini AI</span> (Modèle Flash 2.5)
+                </li>
+            </ul>
+        </section>
+
+        <section class="credits-section">
+            <h2 style="color: var(--color-neon-green);">Remerciements Spéciaux</h2>
+            <p>Un immense merci à nos testeurs pour leurs retours cruciaux et leur aide dans l'amélioration du jeu.</p>
+            <ul>
+                <li>Babou3</li>
+                <li>Adamus_44</li>
+                <li>N-0DRIX</li>
+                <li>[testeur 4]</li>
+            </ul>
+        </section>
         
-        <h1 style="font-size: 2.5em; color: var(--color-neon-green);">REMERCIEMENTS ET CRÉDITS</h1>
-        
-        <ul class="credits-list">
-            <li>
-                <h3>Développement du Projet</h3>
-                <p>Création, Design et Logique du Jeu : Zelda5962</p>
-                <p>Assistant de codage: Gemini IA <p>
-            </li>
-            <li>
-                <h3>Assets et Librairies</h3>
-                <p>Icônes : <a href="https://fontawesome.com/" target="_blank">Font Awesome</a> (Licence Propre)</p>
-                <p>Polices de Caractères : Standard Web Fonts</p>
-                <p>Sons/Musique : (À ajouter si vous utilisez des ressources externes)</p>
-            </li>
-            <li>
-                <h3>Inspirations</h3>
-                <p>Jeu *Space Invaders 2.0* inspiré du classique *Space Invaders* (Taito, 1978).</p>
-                <p>Design Néo-Rétro/Neon inspiré de l'esthétique Synthwave et des jeux d'arcade des années 80.</p>
-            </li>
-        </ul>
-        
+        <section class="credits-section" style="margin-top: 50px;">
+             <p style="font-style: italic; color: var(--color-text-light);">
+                Ce projet est réalisé dans un but éducatif et ludique.
+             </p>
+        </section>
+
     </div>
     
     <script src="base.js"></script>
     <script src="auth.js"></script>
-    <script>
-        // Appel de la fonction de base pour synchroniser la barre
-        document.addEventListener('DOMContentLoaded', updateTopBar); 
-    </script>
 </body>
 </html>
