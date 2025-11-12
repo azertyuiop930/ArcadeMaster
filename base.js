@@ -2,28 +2,24 @@
 
 // --- 1. GESTION UTILISATEUR ET SKINS ---
 
-// Récupère l'utilisateur actuel (connecté ou déconnecté)
 function getCurrentUser() {
     const userData = localStorage.getItem('currentUser');
     if (userData) {
         return JSON.parse(userData);
     }
-    // Utilisateur par défaut (déconnecté/guest), utilise les tempCoins
     return { 
         id: 0, 
         username: 'Joueur Déconnecté', 
         coins: parseInt(localStorage.getItem('tempCheatCoins') || '0'), 
         skins: { active: {}, owned: {} },
-        isAdmin: false // Par défaut, non admin
+        isAdmin: false
     };
 }
 
-// Met à jour et sauvegarde l'objet utilisateur global
 function updateGlobalUser(user) {
     if (user && user.id !== 0) {
         localStorage.setItem('currentUser', JSON.stringify(user));
     }
-    // Met à jour les coins temporaires si l'utilisateur est déconnecté (pour le Konami Code)
     if (user && user.id === 0) {
         localStorage.setItem('tempCheatCoins', user.coins.toString());
     }
@@ -31,16 +27,17 @@ function updateGlobalUser(user) {
 
 // --- 2. GESTION DE LA NAVIGATION (Barres Supérieures et Latérales) ---
 
-// Met à jour le contenu de la barre supérieure
+// * CORRECTION CRITIQUE : Assurer que le menu toggle et le titre de la page sont bien générés.
 function updateTopBar() {
     const user = getCurrentUser();
     const topBar = document.getElementById('top-bar');
     
     if (!topBar) return;
 
+    // Structure de la barre supérieure (Menu Toggle | Titre Page | Monnaie/Compte)
     topBar.innerHTML = `
         <div id="menuToggle" class="menu-toggle" onclick="openNav()">
-            <i class="fa-solid fa-bars"></i>
+            <i class="fa-solid fa-bars"></i> 
         </div>
         <span style="font-size: 1.5em; font-weight: bold; color: var(--color-neon-blue);">
             ${document.title.split(' - ')[1] || 'ARCADE MASTER'}
@@ -57,10 +54,8 @@ function updateTopBar() {
     `;
 }
 
-// Ouvre le menu latéral (Sidebar)
 function openNav() {
     const user = getCurrentUser();
-    // VÉRIFICATION ADMIN
     const isAdmin = user && user.id !== 0 && user.isAdmin === true; 
     
     const navLinks = document.getElementById('nav-links');
@@ -88,7 +83,6 @@ function openNav() {
     document.getElementById("mainContent").style.marginLeft = "250px";
 }
 
-// Ferme le menu latéral
 function closeNav() {
     document.getElementById("sidebar").style.width = "0";
     document.getElementById("mainContent").style.marginLeft = "0";
@@ -96,7 +90,7 @@ function closeNav() {
 
 // --- 3. INITIALISATION ---
 
-// Appel essentiel pour que les barres apparaissent sur toutes les pages
 document.addEventListener('DOMContentLoaded', () => {
+    // Ceci est CRITIQUE. S'assurer qu'il est appelé au chargement de chaque page.
     updateTopBar(); 
 });
