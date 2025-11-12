@@ -6,6 +6,56 @@
     <title>Arcade Master - Accueil</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"> 
+    <style>
+        /* Styles spécifiques pour les bulles de l'Accueil (similaire à credits-card) */
+        /* Note: Ces styles devraient être dans styles.css pour être cohérents. */
+        .accueil-info-container {
+            max-width: 900px; /* Conteneur global */
+            margin: 20px auto;
+            padding: 20px 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px; /* Espace entre les deux bulles */
+            justify-content: center;
+        }
+        
+        /* Style de la bulle / carte */
+        .accueil-card {
+            background-color: var(--color-background-dark);
+            padding: 30px;
+            border-radius: 10px;
+            border: 2px solid var(--color-neon-blue);
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.3);
+            flex: 1 1 350px; /* Taille flexible */
+            min-width: 300px;
+            text-align: left;
+        }
+
+        .accueil-card h2 {
+            margin-top: 0;
+            padding-bottom: 5px;
+            border-bottom: 1px dashed var(--color-text-medium);
+        }
+
+        .actions-list p {
+            margin: 15px 0;
+            line-height: 1.4;
+            padding-left: 5px;
+            /* Rétablit le style du texte des actions rapides */
+            color: var(--color-text-medium); 
+        }
+
+        .status-section p {
+            margin: 10px 0;
+            font-size: 1.1em;
+        }
+        
+        @media screen and (max-width: 768px) {
+            .accueil-card {
+                flex: 1 1 100%;
+            }
+        }
+    </style>
 </head>
 <body>
     
@@ -18,56 +68,57 @@
 
     <div class="main-container" id="mainContent">
         
-        <h1 style="color: var(--color-neon-blue); padding-top: 10px;">Bienvenue dans l'Arcade Master !</h1>
-        <p>Préparez-vous à jouer, à gagner des pièces et à grimper dans le classement.</p>
+        <h1 style="color: var(--color-neon-blue); text-align: center; padding-top: 10px;">Bienvenue dans l'Arcade Master !</h1>
+        <p style="text-align: center;">Préparez-vous à jouer, à gagner des pièces et à grimper dans le classement.</p>
         <hr>
 
-        <section class="status-section">
-            <h2 style="color: var(--color-neon-green);">Statut du Compte</h2>
-            <p>Statut : <span id="statusConnect" style="color: var(--color-neon-green);">Déconnecté</span></p>
-            <p>Nom d'utilisateur : <span id="usernameDisplay">Joueur Déconnecté</span></p>
-            <p>Pièces en poche 💰 : <span id="coinDisplay">0</span></p>
-            <p>Meilleur Score (Invaders) 👾 : <span id="bestScoreInvaders">0</span></p>
-        </section>
-        <hr>
+        <div class="accueil-info-container">
+            
+            <div class="accueil-card status-section">
+                <h2 style="color: var(--color-neon-green);">Statut du Compte</h2>
+                <p>Statut : <span id="statusConnect" style="color: var(--color-neon-green);">Déconnecté</span></p>
+                <p>Nom d'utilisateur : <span id="usernameDisplay">Joueur Déconnecté</span></p>
+                <p>Pièces en poche 💰 : <span id="coinDisplay">0</span></p>
+                <p>Meilleur Score (Invaders) 👾 : <span id="bestScoreInvaders">0</span></p>
+            </div>
+            
+            <div class="accueil-card actions-section">
+                <h2 style="color: var(--color-neon-orange);">Actions Rapides</h2>
+                
+                <div class="actions-list">
+                    <p>
+                        <a href="jeux.html">🎮 Jouer</a><br>
+                        Lancez vos jeux d'arcade préférés.
+                    </p>
+                    <p>
+                        <a href="compte.html">👤 Mon Compte</a><br>
+                        Gérez votre profil et vos statistiques.
+                    </p>
+                    <p>
+                        <a href="boutique.html">🛍️ Boutique</a><br>
+                        Achetez des skins avec vos pièces.
+                    </p>
+                    <p>
+                        <a href="classement.html">🏆 Classement</a><br>
+                        Voyez qui est le maître de l'arcade.
+                    </p>
+                    <p>
+                        <a href="credits.html">📜 Crédits</a><br>
+                        Les remerciements et sources.
+                    </p>
+                </div>
+            </div>
 
-        <section class="actions-section">
-            <h2 style="color: var(--color-neon-orange);">Actions Rapides</h2>
-            
-            <p>
-                <a href="jeux.html">🎮 Jouer</a><br>
-                Lancez vos jeux d'arcade préférés.
-            </p>
-            
-            <p>
-                <a href="compte.html">👤 Mon Compte</a><br>
-                Gérez votre profil et vos statistiques.
-            </p>
-            
-            <p>
-                <a href="boutique.html">🛍️ Boutique</a><br>
-                Achetez des skins avec vos pièces.
-            </p>
-            
-            <p>
-                <a href="classement.html">🏆 Classement</a><br>
-                Voyez qui est le maître de l'arcade.
-            </p>
-            
-            <p>
-                <a href="credits.html">📜 Crédits</a><br>
-                Les remerciements et sources.
-            </p>
-        </section>
+        </div>
+        
+        <hr style="max-width: 900px; margin: 40px auto;"> 
 
     </div>
     
     <script src="base.js"></script>
     <script src="auth.js"></script>
     <script>
-        // Met à jour les informations du joueur au chargement de la page
         document.addEventListener('DOMContentLoaded', () => {
-             // Utilise getCurrentUser() de base.js pour récupérer votre solde, même s'il est à 200k.
              const user = typeof getCurrentUser === 'function' ? getCurrentUser() : { username: 'Erreur', coins: 0, scores: {} };
              
              document.getElementById('usernameDisplay').textContent = user.username;
