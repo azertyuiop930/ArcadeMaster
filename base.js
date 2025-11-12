@@ -1,6 +1,6 @@
 // --- LOGIQUE GLOBALE (base.js) ---
 
-// --- 1. GESTION UTILISATEUR ET SKINS (Doit être en accord avec auth.js) ---
+// --- 1. GESTION UTILISATEUR ET SKINS ---
 
 // Récupère l'utilisateur actuel (connecté ou déconnecté)
 function getCurrentUser() {
@@ -51,7 +51,7 @@ function updateTopBar() {
                 <button id="trollButton" type="button" onclick="window.location.href = 'boutique.html'">💰</button>
             </a>
             <a href="compte.html" style="color: var(--color-text-light);" title="${user.username}">
-                👤
+                <i class="fa-solid fa-user"></i>
             </a>
         </div>
     `;
@@ -99,5 +99,4 @@ function closeNav() {
 // Appel essentiel pour que les barres apparaissent sur toutes les pages
 document.addEventListener('DOMContentLoaded', () => {
     updateTopBar(); 
-    // Assurez-vous d'avoir la Font Awesome pour les icônes (dans le <head> de vos HTML)
 });
