@@ -7,6 +7,7 @@ function getCurrentUser() {
     if (userData) {
         return JSON.parse(userData);
     }
+    // Utilisateur par défaut (déconnecté/guest)
     return { 
         id: 0, 
         username: 'Joueur Déconnecté', 
@@ -27,22 +28,23 @@ function updateGlobalUser(user) {
 
 // --- 2. GESTION DE LA NAVIGATION (Barres Supérieures et Latérales) ---
 
-// * CORRECTION CRITIQUE : Assurer que le menu toggle et le titre de la page sont bien générés.
 function updateTopBar() {
     const user = getCurrentUser();
     const topBar = document.getElementById('top-bar');
     
     if (!topBar) return;
 
-    // Structure de la barre supérieure (Menu Toggle | Titre Page | Monnaie/Compte)
+    // Le titre est centré, les éléments sont à gauche (menu) et à droite (coins/compte)
     topBar.innerHTML = `
         <div id="menuToggle" class="menu-toggle" onclick="openNav()">
             <i class="fa-solid fa-bars"></i> 
         </div>
-        <span style="font-size: 1.5em; font-weight: bold; color: var(--color-neon-blue);">
+        
+        <span style="position: absolute; left: 50%; transform: translateX(-50%); font-size: 1.5em; font-weight: bold; color: var(--color-neon-blue);">
             ${document.title.split(' - ')[1] || 'ARCADE MASTER'}
         </span>
-        <div style="display: flex; align-items: center; gap: 15px;">
+        
+        <div style="display: flex; align-items: center; gap: 15px; margin-left: auto;">
             <a href="boutique.html" class="currency-display" title="Boutique">
                 <span class="coin-count">${user.coins.toLocaleString('fr-FR')}</span>
                 <button id="trollButton" type="button" onclick="window.location.href = 'boutique.html'">💰</button>
@@ -54,6 +56,7 @@ function updateTopBar() {
     `;
 }
 
+// Ouvre le menu latéral
 function openNav() {
     const user = getCurrentUser();
     const isAdmin = user && user.id !== 0 && user.isAdmin === true; 
@@ -61,7 +64,7 @@ function openNav() {
     const navLinks = document.getElementById('nav-links');
     if (!navLinks) return;
 
-    // Liens de base
+    // Liens de base (incluant CREDITS)
     let htmlContent = `
         <a href="index.html" data-emoji="🏠">🏠 Accueil</a>
         <a href="jeux.html" data-emoji="🎮">🎮 Menu Jeux</a>
@@ -75,6 +78,7 @@ function openNav() {
         htmlContent += `<a href="admin.html" data-emoji="🔑" style="color: var(--color-neon-red); border-top: 1px dashed var(--color-neon-red);">🔑 Administration</a>`;
     }
 
+    // AJOUT DU LIEN CREDITS (toujours présent)
     htmlContent += `<a href="credits.html" data-emoji="📜">📜 Crédits</a>`;
     
     navLinks.innerHTML = htmlContent;
@@ -91,6 +95,5 @@ function closeNav() {
 // --- 3. INITIALISATION ---
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Ceci est CRITIQUE. S'assurer qu'il est appelé au chargement de chaque page.
     updateTopBar(); 
 });
