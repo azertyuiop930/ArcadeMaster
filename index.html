@@ -4,140 +4,65 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Arcade Master - Accueil</title>
-    
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"> 
 </head>
 <body>
-
-    <div id="top-bar">
-        <div id="menuToggle" class="menu-toggle">
-            <i class="fa-solid fa-bars"></i>
-        </div>
-        <span style="font-size: 1.5em; font-weight: bold; color: var(--color-neon-orange);">
-            ARCADE MASTER
-        </span>
-        <div style="display: flex; align-items: center; gap: 15px;">
-            <a href="boutique.html" class="currency-display" title="Boutique">
-                <span class="coin-count">0</span>
-                <button id="trollButton" type="button">+</button>
-            </a>
-            <a href="compte.html" style="color: var(--color-text-light);" title="Mon Compte" data-emoji="👤">
-                👤
-            </a>
-        </div>
-    </div>
-
+    
+    <div id="top-bar"></div>
+    
     <div id="sidebar" class="sidenav">
-        <a href="javascript:void(0)" class="closebtn" id="closeNav" onclick="closeNav()" style="position: absolute; top: 0; right: 25px; font-size: 36px; color: var(--color-neon-orange);">&times;</a>
-        <div id="nav-links">
-            <a href="index.html" data-emoji="🏠">🏠 Accueil</a>
-            <a href="jeux.html" data-emoji="🎮">🎮 Menu Jeux</a>
-            <a href="compte.html" data-emoji="👤">👤 Mon Compte</a>
-            <a href="boutique.html" data-emoji="🛍️">🛍️ Boutique</a>
-            <a href="classement.html" data-emoji="🏆">🏆 Classement</a>
-            <a href="credits.html" data-emoji="📜">📜 Crédits</a>
-        </div>
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        <div id="nav-links"></div>
     </div>
 
     <div class="main-container" id="mainContent">
-        <div style="padding-top: 50px;"></div> 
         
-        <h1 style="color: var(--color-neon-orange);">Bienvenue dans l'Arcade Master !</h1>
+        <h1 style="color: var(--color-neon-blue);">Bienvenue dans l'Arcade Master !</h1>
         <p>Préparez-vous à jouer, à gagner des pièces et à grimper dans le classement.</p>
+        <hr>
 
-        <div class="section-divider"></div>
+        <section class="status-section">
+            <h2 style="color: var(--color-neon-green);">Statut du Compte</h2>
+            <p>Statut : <span id="statusConnect">Connecté</span></p>
+            <p>Nom d'utilisateur : <span id="usernameDisplay">Joueur Déconnecté</span></p>
+            <p>Pièces en poche 💰 : <span id="coinDisplay">0</span></p>
+            <p>Meilleur Score (Invaders) 👾 : <span id="bestScoreInvaders">0</span></p>
+        </section>
+        <hr>
 
-        <h2 style="color: var(--color-neon-green);">Statut du Compte</h2>
-
-        <div id="status-card" class="stats-card">
-            <div class="stat-item">
-                <span>Statut :</span>
-                <span id="login-status" style="color: var(--color-neon-red); font-weight: bold;">Déconnecté</span>
-            </div>
-            <div class="stat-item">
-                <span>Nom d'utilisateur :</span>
-                <span id="username-display">Non Connecté</span>
-            </div>
-            <div class="stat-item">
-                <span>Pièces en poche 💰 :</span>
-                <span id="coins-display">0</span>
-            </div>
-            <div class="stat-item">
-                <span>Meilleur Score (Invaders) 🏆 :</span>
-                <span id="highscore-display">0</span>
-            </div>
-        </div>
-        
-        <div class="section-divider"></div>
-        
-        <h2 style="color: var(--color-neon-orange);">Actions Rapides</h2>
-        
-        <div class="card-group">
+        <section class="actions-section">
+            <h2 style="color: var(--color-neon-orange);">Actions Rapides</h2>
             
-            <a href="jeux.html" class="action-card">
-                <span class="card-icon">🎮</span>
-                <h3>Jouer</h3>
-                <p>Lancez vos jeux d'arcade préférés.</p>
-            </a>
+            <p><a href="jeux.html" style="font-size: 1.2em;">🎮 Jouer</a><br>
+            Lancez vos jeux d'arcade préférés.</p>
             
-            <a href="compte.html" class="action-card">
-                <span class="card-icon">👤</span>
-                <h3>Mon Compte</h3>
-                <p>Gérez votre profil et vos statistiques.</p>
-            </a>
+            <p><a href="compte.html" style="font-size: 1.2em;">👤 Mon Compte</a><br>
+            Gérez votre profil et vos statistiques.</p>
+            
+            <p><a href="boutique.html" style="font-size: 1.2em;">🛍️ Boutique</a><br>
+            Achetez des skins avec vos pièces.</p>
+            
+            <p><a href="classement.html" style="font-size: 1.2em;">🏆 Classement</a><br>
+            Voyez qui est le maître de l'arcade.</p>
+            
+            <p><a href="credits.html" style="font-size: 1.2em;">📜 Crédits</a><br>
+            Les remerciements et sources.</p>
+        </section>
 
-            <a href="boutique.html" class="action-card">
-                <span class="card-icon">🛍️</span>
-                <h3>Boutique</h3>
-                <p>Achetez des skins avec vos pièces.</p>
-            </a>
-            
-            <a href="classement.html" class="action-card">
-                <span class="card-icon">🏆</span>
-                <h3>Classement</h3>
-                <p>Voyez qui est le maître de l'arcade.</p>
-            </a>
-            
-            <a href="credits.html" class="action-card" style="border-color: var(--color-neon-blue);">
-                <span class="card-icon">📜</span>
-                <h3>Crédits</h3>
-                <p>Les remerciements et sources.</p>
-            </a>
-
-        </div>
     </div>
     
     <script src="base.js"></script>
     <script src="auth.js"></script>
     <script>
-        // Met à jour la carte d'état sur la page d'accueil
-        function updateStatusCard() {
-            const user = getCurrentUser();
-            
-            const loginStatus = document.getElementById('login-status');
-            const usernameDisplay = document.getElementById('username-display');
-            const coinsDisplay = document.getElementById('coins-display');
-            const highscoreDisplay = document.getElementById('highscore-display');
-            
-            if (user) {
-                loginStatus.textContent = 'Connecté';
-                loginStatus.style.color = 'var(--color-neon-green)';
-                usernameDisplay.textContent = user.username;
-                coinsDisplay.textContent = user.coins;
-                highscoreDisplay.textContent = user.highScores['space_invaders'] || 0;
-            } else {
-                loginStatus.textContent = 'Déconnecté';
-                loginStatus.style.color = 'var(--color-neon-red)';
-                usernameDisplay.textContent = 'Non Connecté';
-                coinsDisplay.textContent = '0';
-                highscoreDisplay.textContent = '0';
-            }
-        }
-        
+        // JS spécifique pour mettre à jour l'accueil
         document.addEventListener('DOMContentLoaded', () => {
-            updateStatusCard();
-            updateTopBar();
+             const user = typeof getCurrentUser === 'function' ? getCurrentUser() : { username: 'Erreur', coins: 0, scores: {} };
+             
+             document.getElementById('usernameDisplay').textContent = user.username;
+             document.getElementById('coinDisplay').textContent = user.coins.toLocaleString('fr-FR');
+             document.getElementById('bestScoreInvaders').textContent = user.scores && user.scores.space_invaders ? user.scores.space_invaders : 0;
+             document.getElementById('statusConnect').textContent = user.id !== 0 ? 'Connecté' : 'Déconnecté';
         });
     </script>
 </body>
