@@ -66,7 +66,7 @@
                 
                 <div class="shop-list">
                     
-                    <div class="shop-card" data-item-id="vessel_base" data-owned="true" data-equipped="true">
+                    <div class="shop-card" data-item-id="vessel_base">
                         <span class="item-icon" style="color: var(--color-neon-green);">🚀</span>
                         <h3 style="color: var(--color-neon-green);">Vaisseau Standard</h3>
                         <p class="price" style="color: var(--color-text-light);">Gratuit</p>
@@ -75,7 +75,7 @@
                         </button>
                     </div>
 
-                    <div class="shop-card" data-item-id="vessel_ninja" data-owned="false">
+                    <div class="shop-card" data-item-id="vessel_ninja">
                         <span class="item-icon" style="color: var(--color-text-medium);">🌑</span>
                         <h3 style="color: var(--color-text-light);">Skin Ninja</h3>
                         <p class="price">15 000 💰</p>
@@ -84,12 +84,12 @@
                         </button>
                     </div>
 
-                    <div class="shop-card" data-item-id="vessel_gold" data-owned="true" data-equipped="false">
+                    <div class="shop-card" data-item-id="vessel_gold">
                         <span class="item-icon" style="color: gold;">🏆</span>
                         <h3 style="color: var(--color-neon-orange);">Vaisseau Gold</h3>
-                        <p class="price" style="color: var(--color-text-light);">Possédé</p>
-                        <button class="btn-primary btn-equip" style="background-color: var(--color-neon-orange);">
-                            Équiper
+                        <p class="price">500 💰</p>
+                        <button class="btn-primary btn-buy" style="background-color: var(--color-neon-green);">
+                            Acheter
                         </button>
                     </div>
 
@@ -103,7 +103,7 @@
                 
                 <div class="shop-list">
                     
-                    <div class="shop-card" data-item-id="monster_squid" data-owned="false">
+                    <div class="shop-card" data-item-id="monster_squid">
                         <span class="item-icon" style="color: purple;">🦑</span>
                         <h3 style="color: var(--color-neon-purple);">Squid Alien</h3>
                         <p class="price">25 000 💰</p>
@@ -112,7 +112,7 @@
                         </button>
                     </div>
                     
-                    <div class="shop-card" data-item-id="monster_ghost" data-owned="false">
+                    <div class="shop-card" data-item-id="monster_ghost">
                         <span class="item-icon" style="color: white;">👻</span>
                         <h3 style="color: var(--color-neon-red);">Fantôme</h3>
                         <p class="price">50 000 💰</p>
@@ -150,68 +150,113 @@
                     </div>
                 </div>
             </section>
-            </div>
+
+        </div>
     </div>
     
     <script src="base.js"></script>
     <script src="auth.js"></script>
     <script>
-        // Logique pour afficher/masquer le contenu si l'utilisateur est connecté
+        // Fonction utilitaire pour obtenir les données de l'article de la carte
+        function getItemData(card) {
+            const priceText = card.querySelector('.price').textContent;
+            // Tente de trouver un nombre (avec ou sans espace) avant le 💰
+            const priceMatch = priceText.match(/(\d[\d\s]*)/); 
+            const price = priceMatch ? parseInt(priceMatch[0].replace(/\s/g, '')) : 0;
+            const itemId = card.dataset.itemId;
+            const itemType = itemId.split('_')[0]; // 'vessel' ou 'monster'
+            
+            return { price, itemId, itemType };
+        }
+        
+        // Fonction pour mettre à jour l'état visuel d'une carte
+        function updateCardVisual(card, user) {
+            const item = getItemData(card);
+            const isOwned = user.skins.owned && user.skins.owned[item.itemId];
+            const isActive = user.skins.active && user.skins.active[item.itemType] === item.itemId;
+            
+            card.dataset.owned = isOwned ? 'true' : 'false';
+            card.dataset.equipped = isActive ? 'true' : 'false';
+
+            const button = card.querySelector('.btn-primary');
+
+            if (isActive) {
+                button.textContent = 'Équipé';
+                button.disabled = true;
+                button.style.backgroundColor = 'var(--color-neon-blue)';
+                card.querySelector('.price').textContent = 'Possédé';
+                card.querySelector('.price').style.color = 'var(--color-text-light)';
+            } else if (isOwned) {
+                button.textContent = 'Équiper';
+                button.disabled = false;
+                button.style.backgroundColor = 'var(--color-neon-orange)';
+                button.classList.remove('btn-buy');
+                button.classList.add('btn-equip');
+                card.querySelector('.price').textContent = 'Possédé';
+                card.querySelector('.price').style.color = 'var(--color-text-light)';
+            } else {
+                 // Non possédé
+                button.textContent = 'Acheter';
+                button.disabled = false;
+                button.style.backgroundColor = 'var(--color-neon-green)';
+                button.classList.remove('btn-equip');
+                button.classList.add('btn-buy');
+                card.querySelector('.price').textContent = `${item.price.toLocaleString('fr-FR')} 💰`;
+                card.querySelector('.price').style.color = 'var(--color-neon-green)';
+            }
+        }
+        
+        // Logique principale
         document.addEventListener('DOMContentLoaded', () => {
-            // Assure que getCurrentUser est chargé via base.js
-            const user = typeof getCurrentUser === 'function' ? getCurrentUser() : { id: 0 };
+            const user = typeof getCurrentUser === 'function' ? getCurrentUser() : { id: 0, skins: { active: {}, owned: {} } };
             const notConnected = document.getElementById('notConnectedMessage');
             const content = document.getElementById('boutiqueContent');
+            const shopCards = document.querySelectorAll('.shop-card');
 
             if (user.id !== 0) {
                 notConnected.style.display = 'none';
                 content.style.display = 'block';
+
+                // 1. Initialiser l'état visuel des cartes selon l'utilisateur
+                shopCards.forEach(card => updateCardVisual(card, user));
             } else {
                 notConnected.style.display = 'block';
                 content.style.display = 'none';
+                return; // Arrêter si déconnecté
             }
             
-            // --- LOGIQUE SIMULÉE DES BOUTONS DE SKINS ---
+            // 2. Écouteurs d'événements pour Achat et Équipement
             
-            // Simule l'action d'acheter ou d'équiper un skin
-            document.querySelectorAll('.btn-buy, .btn-equip').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    const card = e.target.closest('.shop-card');
-                    const itemId = card.dataset.itemId;
+            shopCards.forEach(card => {
+                const item = getItemData(card);
+
+                card.addEventListener('click', (e) => {
+                    const button = e.target.closest('.btn-primary');
+                    if (!button) return;
+
+                    if (button.classList.contains('btn-buy')) {
+                        
+                        if (window.deductCoins(item.price)) {
+                            window.addOwnedSkin(item.itemId);
+                            alert(`Achat réussi ! ${item.itemId} est maintenant dans votre inventaire.`);
+                            
+                            // Recharger l'état de la carte après l'achat
+                            const updatedUser = getCurrentUser();
+                            updateCardVisual(card, updatedUser);
+
+                        } else {
+                            alert(`Échec de l'achat : Fonds insuffisants (besoin de ${item.price.toLocaleString('fr-FR')} pièces) !`);
+                        }
+                    } 
                     
-                    if (e.target.classList.contains('btn-buy')) {
-                        // Logique d'achat simulée (doit vérifier les pièces dans le vrai code)
-                        alert(`Achat simulé de l'objet : ${itemId}. Félicitations !`);
+                    else if (button.classList.contains('btn-equip')) {
                         
-                        // Simulation de la mise à jour après l'achat
-                        card.dataset.owned = 'true';
-                        e.target.classList.remove('btn-buy');
-                        e.target.classList.add('btn-equip');
-                        e.target.textContent = 'Équiper';
-                        e.target.style.backgroundColor = 'var(--color-neon-orange)';
-                        card.querySelector('.price').textContent = 'Possédé';
-                        card.querySelector('.price').style.color = 'var(--color-text-light)';
+                        window.equipSkin(item.itemId, item.itemType);
+                        alert(`Skin équipé : ${item.itemId}.`);
 
-                    } else if (e.target.classList.contains('btn-equip')) {
-                        // Logique d'équipement simulée
-                        
-                        // Déséquiper l'ancien (logique très simplifiée)
-                        document.querySelectorAll('.shop-card[data-equipped="true"]').forEach(equippedCard => {
-                            if (equippedCard !== card) {
-                                equippedCard.dataset.equipped = 'false';
-                                const eqBtn = equippedCard.querySelector('.btn-equip');
-                                if(eqBtn) {
-                                    eqBtn.textContent = 'Équiper';
-                                    eqBtn.disabled = false;
-                                }
-                            }
-                        });
-
-                        // Équiper le nouveau
-                        alert(`Équipement simulé de l'objet : ${itemId}.`);
-                        card.dataset.equipped = 'true';
-                        e.target.textContent = 'Équipé';
-                        e.target.disabled = true;
+                        // Recharger l'état de TOUTES les cartes après l'équipement
+                        const updatedUser = getCurrentUser();
+                        shopCards.forEach(c => updateCardVisual(c, updatedUser));
                     }
                 });
             });
