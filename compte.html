@@ -4,321 +4,41 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Arcade Master - Mon Compte</title>
-    
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        /* Style pour l'image de profil */
-        .profile-pic {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            border: 3px solid var(--color-neon-orange);
-            object-fit: cover;
-            margin-bottom: 15px;
-        }
-        .profile-header {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-        /* Styles pour les liens/boutons personnalisés */
-        .btn-link-action {
-            display: block;
-            width: 100%;
-            padding: 10px;
-            text-align: center;
-            font-weight: bold;
-            border-radius: 5px;
-            margin-top: 15px;
-            cursor: pointer;
-            text-decoration: none; /* Enlève le soulignement du lien */
-            color: black; /* Texte en noir sur les boutons néons */
-            transition: background-color 0.2s;
-        }
-        /* Style spécifique pour l'avatar dans la barre supérieure (utilisé dans base.js) */
-        .top-bar-profile-pic {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-right: 5px;
-        }
-    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-
-    <div id="top-bar">
-        <div id="menuToggle" class="menu-toggle">
-            <i class="fa-solid fa-bars"></i>
-        </div>
-        <span style="font-size: 1.5em; font-weight: bold; color: var(--color-neon-green);">
-            MON COMPTE
-        </span>
-        <div style="display: flex; align-items: center; gap: 15px;">
-            <a href="boutique.html" class="currency-display" title="Boutique">
-                <span class="coin-count">0</span>
-                <button id="trollButton" type="button">+</button>
-            </a>
-            <a href="compte.html" style="color: var(--color-text-light);" title="Mon Compte">
-                👤
-            </a>
-        </div>
-    </div>
-
+    
+    <div id="top-bar"></div>
     <div id="sidebar" class="sidenav">
-        <a href="javascript:void(0)" class="closebtn" id="closeNav" onclick="closeNav()" style="position: absolute; top: 0; right: 25px; font-size: 36px; color: var(--color-neon-orange);">&times;</a>
-        <div id="nav-links">
-            <a href="index.html" data-emoji="🏠">🏠 Accueil</a>
-            <a href="jeux.html" data-emoji="🎮">🎮 Menu Jeux</a>
-            <a href="compte.html" data-emoji="👤">👤 Mon Compte</a>
-            <a href="boutique.html" data-emoji="🛍️">🛍️ Boutique</a>
-            <a href="classement.html" data-emoji="🏆">🏆 Classement</a>
-            <a href="credits.html" data-emoji="📜">📜 Crédits</a>
-        </div>
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        <div id="nav-links"></div>
     </div>
 
     <div class="main-container" id="mainContent">
-        <div style="padding-top: 50px;"></div> 
         
-        <h1 style="font-size: 2.5em; color: var(--color-neon-orange); text-align: center;">CONNEXION / INSCRIPTION</h1>
-
-        <div id="profileView" class="auth-card" style="display: none;">
-            <div class="profile-header">
-                <img id="profilePicture" class="profile-pic" src="" alt="Photo de profil">
-                <h2 style="color: var(--color-neon-green);">Bienvenue, <span id="profileUsername"></span> !</h2>
-            </div>
-            
-            <div class="stats-card" style="margin-top: 0px;">
-                <div class="stat-item">
-                    <span>ID Utilisateur</span>
-                    <span id="profileID"></span>
-                </div>
-                <div class="stat-item">
-                    <span>Pièces 💰</span>
-                    <span id="profileCoins"></span>
-                </div>
-                <div class="stat-item">
-                    <span>Meilleur Score (Invaders) 🏆</span>
-                    <span id="profileHighScore"></span>
-                </div>
-                <div class="stat-item">
-                    <span>Rôle</span>
-                    <span id="profileRole"></span>
-                </div>
-            </div>
-
-            <h3 style="color: var(--color-neon-orange); margin-top: 30px;">Gestion du Compte</h3>
-            
-            <form id="profileUpdateForm">
-                <label style="color: var(--color-text-light); display: block; margin-top: 15px;">Nouvelle URL de Photo de Profil (Laissez vide pour garder l'actuelle)</label>
-                <input type="url" id="newProfilePicUrl" placeholder="URL de l'image">
+        <h1 style="color: var(--color-neon-blue); text-align: center;">CONNEXION / INSCRIPTION</h1>
+        
+        <div class="centered-container">
+            <h2 style="color: var(--color-neon-green); margin-bottom: 20px;">Se Connecter</h2>
+            <form id="loginForm">
+                <input type="text" id="loginUsername" placeholder="Nom d'utilisateur" required 
+                       style="width: 90%; padding: 12px; margin: 8px 0; background-color: var(--color-background-medium); border: 1px solid var(--color-neon-blue); color: var(--color-text-light); border-radius: 4px;">
+                <input type="password" id="loginPassword" placeholder="Mot de passe" required 
+                       style="width: 90%; padding: 12px; margin: 8px 0 20px; background-color: var(--color-background-medium); border: 1px solid var(--color-neon-blue); color: var(--color-text-light); border-radius: 4px;">
                 
-                <label style="color: var(--color-text-light); display: block; margin-top: 15px;">Nouveau Mot de Passe (Laissez vide pour garder l'actuel)</label>
-                <input type="password" id="newPassword" placeholder="Nouveau mot de passe">
-                <input type="password" id="confirmNewPassword" placeholder="Confirmer le nouveau mot de passe">
-
-                <button type="submit" class="btn-primary" style="background-color: var(--color-neon-blue); width: 100%; margin-top: 15px;">
-                    Mettre à Jour le Profil
-                </button>
+                <button type="submit" class="btn-primary" style="background-color: var(--color-neon-orange); width: 95%;">Connexion</button>
             </form>
             
-            <h3 style="color: var(--color-neon-orange); margin-top: 30px;">Skins Actifs</h3>
-            <div id="activeSkins" class="skin-display-group">
-                <span class="skin-item">Vaisseau: <b id="activeShip">🚀</b></span>
-            </div>
-
-            <button onclick="logoutAndRender()" class="btn-primary" style="background-color: var(--color-neon-red); margin-top: 30px;">
-                Se Déconnecter
-            </button>
-        </div>
-
-        <div id="loginForm" class="auth-card">
-            <h2>Se Connecter</h2>
-            <form>
-                <input type="text" id="loginUsername" placeholder="Nom d'utilisateur" required>
-                <input type="password" id="loginPassword" placeholder="Mot de passe" required>
-                
-                <a href="javascript:void(0)" onclick="handleLogin()" class="btn-link-action" style="background-color: var(--color-neon-green);">
-                    Connexion
-                </a>
-            </form>
-            <p onclick="showRegister()" style="cursor: pointer; color: var(--color-neon-green); margin-top: 15px;">Pas de compte ? S'inscrire</p>
-        </div>
-
-        <div id="registerForm" class="auth-card" style="display: none;">
-            <h2>Créer un Compte</h2>
-            <form>
-                <input type="text" id="registerUsername" placeholder="Nom d'utilisateur" required>
-                <input type="password" id="registerPassword" placeholder="Mot de passe" required>
-                
-                <a href="javascript:void(0)" onclick="handleRegister()" class="btn-link-action" style="background-color: var(--color-neon-orange);">
-                    Inscription
-                </a>
-            </form>
-            <p onclick="showLogin()" style="cursor: pointer; color: var(--color-neon-green); margin-top: 15px;">Déjà un compte ? Se Connecter</p>
+            <p style="margin-top: 20px; font-size: 0.9em;"><a href="#" onclick="showRegisterForm()" style="color: var(--color-neon-green);">Pas de compte ? S'inscrire</a></p>
         </div>
         
+        <div id="registerContainer" class="centered-container" style="display: none;">
+            </div>
+
     </div>
     
-    <script src="base.js"></script> 
+    <script src="base.js"></script>
     <script src="auth.js"></script>
-    <script>
-        // --- LOGIQUE D'AFFICHAGE DE LA PAGE COMPTE ---
-
-        function showLogin() {
-            const loginForm = document.getElementById('loginForm');
-            if (loginForm) loginForm.style.display = 'block';
-            
-            const registerForm = document.getElementById('registerForm');
-            if (registerForm) registerForm.style.display = 'none';
-            
-            const profileView = document.getElementById('profileView');
-            if (profileView) profileView.style.display = 'none';
-        }
-
-        function showRegister() {
-            const loginForm = document.getElementById('loginForm');
-            if (loginForm) loginForm.style.display = 'none';
-            
-            const registerForm = document.getElementById('registerForm');
-            if (registerForm) registerForm.style.display = 'block';
-            
-            const profileView = document.getElementById('profileView');
-            if (profileView) profileView.style.display = 'none';
-        }
-
-        // Met à jour la page pour afficher le profil ou les formulaires
-        function renderAccountPage() {
-            // Vérification critique de la dépendance auth.js
-            if (typeof getCurrentUser !== 'function') {
-                 console.error("Erreur: Les fonctions d'authentification (auth.js) ne sont pas chargées.");
-                 showLogin();
-                 return;
-            }
-
-            const user = getCurrentUser(); 
-
-            if (user) {
-                // Remplissage des champs du profil avec vérifications d'existence
-                const profileUsername = document.getElementById('profileUsername');
-                if (profileUsername) profileUsername.textContent = user.username;
-
-                const profileID = document.getElementById('profileID');
-                if (profileID) profileID.textContent = user.id;
-
-                const profileCoins = document.getElementById('profileCoins');
-                if (profileCoins) profileCoins.textContent = user.coins;
-                
-                const profileHighScore = document.getElementById('profileHighScore');
-                if (profileHighScore) profileHighScore.textContent = user.highScores['space_invaders'] || 0;
-                
-                const profileRole = document.getElementById('profileRole');
-                if (profileRole) profileRole.textContent = user.role;
-                
-                const profilePicture = document.getElementById('profilePicture');
-                if (profilePicture) profilePicture.src = user.profilePictureUrl;
-                
-                const activeShipElement = document.getElementById('activeShip');
-                if(activeShipElement) activeShipElement.textContent = user.skins.active.ship;
-                
-                // Affichage du profil
-                const profileView = document.getElementById('profileView');
-                if (profileView) profileView.style.display = 'block';
-
-                const loginForm = document.getElementById('loginForm');
-                if (loginForm) loginForm.style.display = 'none';
-                
-                const registerForm = document.getElementById('registerForm');
-                if (registerForm) registerForm.style.display = 'none';
-
-            } else {
-                // Affichage Connexion/Inscription par défaut
-                showLogin();
-            }
-            
-            // Met à jour l'icône dans la barre supérieure
-            if (typeof updateTopBar === 'function') {
-                updateTopBar();
-            }
-        }
-        
-        // Gère le clic du bouton Connexion (AVEC POP-UP DE TEST FORCÉ)
-        window.handleLogin = function() {
-            alert("Pop-up de test : Le bouton CONNEXION a été cliqué."); // Pop-up de test
-
-            const username = document.getElementById('loginUsername').value;
-            const password = document.getElementById('loginPassword').value;
-
-            if (!username || !password) {
-                alert("Veuillez remplir tous les champs."); 
-                return; 
-            }
-            
-            // Tente la connexion. Si successful, auth.js affiche pop-up.
-            if (loginUser(username, password)) {
-                renderAccountPage(); // Met à jour la vue de la page vers le profil
-            }
-        }
-
-        // Gère le clic du bouton Inscription (AVEC POP-UP DE TEST FORCÉ)
-        window.handleRegister = function() {
-            alert("Pop-up de test : Le bouton INSCRIPTION a été cliqué."); // Pop-up de test
-            
-            const username = document.getElementById('registerUsername').value;
-            const password = document.getElementById('registerPassword').value;
-
-            if (!username || !password) {
-                alert("Veuillez remplir tous les champs.");
-                return;
-            }
-            
-            // Tente l'inscription. Si successful, auth.js affiche pop-up.
-            if (registerUser(username, password)) {
-                renderAccountPage(); // Met à jour la vue de la page vers le profil
-            }
-        }
-
-        // Gère la déconnexion et la mise à jour de la vue
-        window.logoutAndRender = function() {
-            logout();
-            renderAccountPage(); // Revient à la vue de connexion
-        }
-
-
-        // Gestion de la mise à jour du profil
-        document.addEventListener('DOMContentLoaded', () => {
-            renderAccountPage(); // Initialisation de la vue au chargement de la page
-            
-            const profileUpdateForm = document.getElementById('profileUpdateForm');
-            if (profileUpdateForm) {
-                profileUpdateForm.addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    const newPass = document.getElementById('newPassword').value;
-                    const confirmPass = document.getElementById('confirmNewPassword').value;
-                    const newPicUrl = document.getElementById('newProfilePicUrl').value;
-                    
-                    let passwordToUpdate = null;
-                    
-                    if (newPass) {
-                        if (newPass !== confirmPass) {
-                            alert("Erreur : Le nouveau mot de passe et sa confirmation ne correspondent pas.");
-                            return;
-                        }
-                        if (newPass.length < 4) { 
-                            alert("Le mot de passe doit contenir au moins 4 caractères.");
-                            return;
-                        }
-                        passwordToUpdate = newPass;
-                    }
-
-                    if (updateProfile(passwordToUpdate, newPicUrl)) {
-                        renderAccountPage(); // Rafraîchit les données du profil
-                    }
-                });
-            }
-        });
-    </script>
 </body>
 </html>
