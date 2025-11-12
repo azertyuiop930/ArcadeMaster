@@ -3,91 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arcade Master - Sélection des Jeux</title>
-    
+    <title>Arcade Master - Menu Jeux</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-
-    <div id="top-bar">
-        <div id="menuToggle" class="menu-toggle">
-            <i class="fa-solid fa-bars"></i>
-        </div>
-        <span style="font-size: 1.5em; font-weight: bold; color: var(--color-neon-green);">
-            ARCADE MASTER
-        </span>
-        <div style="display: flex; align-items: center; gap: 15px;">
-            <a href="boutique.html" class="currency-display" title="Boutique">
-                <span class="coin-count">0</span>
-                <button id="trollButton" type="button">+</button>
-            </a>
-            <a href="compte.html" style="color: var(--color-text-light);" title="Mon Compte" data-emoji="👤">
-                👤
-            </a>
-        </div>
-    </div>
-
+    
+    <div id="top-bar"></div>
     <div id="sidebar" class="sidenav">
-        <a href="javascript:void(0)" class="closebtn" id="closeNav" onclick="closeNav()" style="position: absolute; top: 0; right: 25px; font-size: 36px; color: var(--color-neon-orange);">&times;</a>
-        <div id="nav-links">
-            <a href="index.html" data-emoji="🏠">🏠 Accueil</a>
-            <a href="jeux.html" data-emoji="🎮">🎮 Menu Jeux</a>
-            <a href="compte.html" data-emoji="👤">👤 Mon Compte</a>
-            <a href="boutique.html" data-emoji="🛍️">🛍️ Boutique</a>
-            <a href="classement.html" data-emoji="🏆">🏆 Classement</a>
-            <a href="credits.html" data-emoji="📜">📜 Crédits</a>
-        </div>
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        <div id="nav-links"></div>
     </div>
 
     <div class="main-container" id="mainContent">
         
-        <div style="padding-top: 50px;"></div> 
+        <h1 style="color: var(--color-neon-green); padding-top: 20px;">🕹️ Menu Jeux</h1>
+        <hr>
 
-        <div style="text-align: center;">
+        <section class="games-section">
+            <h2 style="color: var(--color-neon-orange);">Nos Jeux Actuels</h2>
             
-            <h1 style="font-size: 2em;">SÉLECTION DES JEUX</h1>
-            
-            <p style="color: var(--color-neon-green); margin-bottom: 30px;">
-                Choisissez votre version 2.0 préférée !
-            </p>
-            
-            <div class="card-group">
+            <div class="game-list">
                 
-                <div class="action-card" style="border-color: var(--color-neon-green);" 
-                     onclick="window.location.href='space_invaders.html'">
-                    <span class="card-icon">🚀</span>
-                    <h3 style="color: var(--color-neon-green);">Space Invaders 2.0</h3>
-                    <p style="font-size: 0.9em; color: #CCC;">Visée à la souris et bonus explosifs !</p>
-                </div>
-                
-                <div class="action-card coming-soon-card" style="border-color: #555; opacity: 0.5; cursor: not-allowed;">
-                    <span class="card-icon">🐍</span>
-                    <h3 style="color: #999;">Snake Infini</h3>
-                    <p style="font-size: 0.9em; color: #777;">COMING SOON</p>
-                </div>
-                
-                <div class="action-card coming-soon-card" style="border-color: #555; opacity: 0.5; cursor: not-allowed;">
-                    <span class="card-icon">🖱️</span>
-                    <h3 style="color: #999;">Clicker</h3>
-                    <p style="font-size: 0.9em; color: #777;">COMING SOON</p>
+                <div class="game-card">
+                    <span class="game-icon">👽</span>
+                    <h3>Space Invaders</h3>
+                    <p>Un jeu de tir survie rapide et nerveux.</p>
+                    <a href="jeu_invaders.html" class="btn-primary" style="background-color: var(--color-neon-orange);">Jouer</a>
                 </div>
 
-                <div class="action-card coming-soon-card" style="border-color: #555; opacity: 0.5; cursor: not-allowed;">
-                    <span class="card-icon">👾</span>
-                    <h3 style="color: #999;">Jeu Mystère</h3>
-                    <p style="font-size: 0.9em; color: #777;">COMING SOON</p>
+                </div>
+        </section>
+
+        <section class="games-section">
+            <h2 style="color: var(--color-neon-blue);">Jeux à Venir (Coming Soon)</h2>
+            
+            <div class="game-list">
+                
+                <div class="game-card coming-soon" title="Bientôt disponible">
+                    <span class="game-icon">🐍</span>
+                    <h3>Snake Infini</h3>
+                    <p>Le classique du serpent, réinventé pour la vitesse.</p>
                 </div>
                 
+                <div class="game-card coming-soon" title="Bientôt disponible">
+                    <span class="game-icon">👆</span>
+                    <h3>The Clicker</h3>
+                    <p>Détendez-vous et cliquez pour l'éternité.</p>
+                </div>
+                
+                <div class="game-card coming-soon" title="Bientôt disponible">
+                    <span class="game-icon">🐦</span>
+                    <h3>Flappy Bird</h3>
+                    <p>Le jeu rageant que tout le monde aime détester.</p>
+                </div>
+                
+                <div class="game-card coming-soon" title="Bientôt disponible">
+                    <span class="game-icon">🦍</span>
+                    <h3>King Kong (Donkey Kong-like)</h3>
+                    <p>Évitez les tonneaux de King Kong dans ce remake du classique NES.</p>
+                </div>
+
             </div>
-        </div>
+        </section>
+
     </div>
     
     <script src="base.js"></script>
     <script src="auth.js"></script>
-    <script>
-        // Appel de la fonction pour synchroniser la barre après le chargement
-        document.addEventListener('DOMContentLoaded', updateTopBar);
-    </script>
 </body>
 </html>
