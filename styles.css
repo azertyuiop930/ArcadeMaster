@@ -24,7 +24,7 @@ body {
     color: var(--color-text-light);
     margin: 0;
     padding: 0;
-    transition: margin-left 0.3s; /* Transition pour le déplacement du contenu principal */
+    transition: margin-left 0.3s; 
 }
 
 h1, h2, h3 {
@@ -49,6 +49,16 @@ hr {
     margin: 20px 0;
 }
 
+/* * CORRECTION CRITIQUE : 
+ * Le padding-top assure que le contenu démarre SOUS la top-bar fixe (50px)
+ */
+.main-container {
+    padding: 20px;
+    padding-top: 70px; /* 50px de top-bar + 20px de marge */
+    transition: margin-left 0.3s;
+    margin-left: 0; 
+}
+
 /* ==================================== */
 /* 3. BOUTONS GÉNÉRAUX */
 /* ==================================== */
@@ -61,7 +71,7 @@ hr {
     cursor: pointer;
     transition: background-color 0.3s, box-shadow 0.3s;
     text-transform: uppercase;
-    color: var(--color-background-dark); /* Texte sombre sur fond coloré */
+    color: var(--color-background-dark); 
 }
 
 .btn-primary:hover {
@@ -90,7 +100,7 @@ hr {
 /* 4. BARRE SUPÉRIEURE (TOP-BAR) */
 /* ==================================== */
 #top-bar {
-    position: fixed;
+    position: fixed; /* CRITIQUE */
     top: 0;
     left: 0;
     width: 100%;
@@ -101,7 +111,7 @@ hr {
     align-items: center;
     padding: 0 15px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
-    z-index: 20;
+    z-index: 20; /* CRITIQUE */
 }
 
 .menu-toggle {
@@ -111,7 +121,6 @@ hr {
     padding-right: 15px;
 }
 
-/* Affichage des Pièces et Icône Compte */
 .currency-display {
     display: flex;
     align-items: center;
@@ -140,14 +149,14 @@ hr {
 /* ==================================== */
 .sidenav {
     height: 100%;
-    width: 0; /* Fermé par défaut */
-    position: fixed;
-    z-index: 30;
+    width: 0; 
+    position: fixed; /* CRITIQUE */
+    z-index: 30; /* CRITIQUE */
     top: 0;
     left: 0;
     background-color: var(--color-background-dark);
     overflow-x: hidden;
-    padding-top: 60px;
+    padding-top: 60px; /* Laisse de la place à la top-bar */
     transition: 0.3s;
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.7);
 }
@@ -178,11 +187,6 @@ hr {
     border: none;
 }
 
-.main-container {
-    padding: 20px;
-    transition: margin-left 0.3s;
-    margin-left: 0; /* Décalé si la sidebar est ouverte */
-}
 
 /* ==================================== */
 /* 6. CARTES DE JEU (JEUX.HTML) - RGB ANIMÉ */
@@ -213,7 +217,6 @@ hr {
     text-align: center;
     transition: transform 0.3s, box-shadow 0.3s;
     
-    /* Applique la bordure et l'animation */
     border: 3px solid transparent; 
     animation: glowing-border 5s infinite alternate;
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
@@ -221,7 +224,7 @@ hr {
 
 .game-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(0, 229, 255, 0.3); /* Ombre portée bleue pour le hover */
+    box-shadow: 0 10px 30px rgba(0, 229, 255, 0.3); 
 }
 
 .game-icon {
@@ -245,14 +248,12 @@ hr {
 .game-card.coming-soon {
     opacity: 0.6;
     cursor: default;
-    /* La bordure RGB est toujours appliquée par .game-card */
 }
 
 /* ==================================== */
 /* 7. ADAPTATIONS RESPONSIVES */
 /* ==================================== */
 @media screen and (max-width: 768px) {
-    /* Sur les petits écrans, les cartes passent à 1 colonne */
     .game-list {
         grid-template-columns: 1fr;
     }
@@ -264,5 +265,6 @@ hr {
     }
     .main-container {
         padding: 10px;
+        padding-top: 60px; /* Ajustement pour la top-bar sur mobile */
     }
 }
