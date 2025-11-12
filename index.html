@@ -10,7 +10,6 @@
 <body>
     
     <div id="top-bar"></div>
-    
     <div id="sidebar" class="sidenav">
         <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
         <div id="nav-links"></div>
@@ -18,13 +17,13 @@
 
     <div class="main-container" id="mainContent">
         
-        <h1 style="color: var(--color-neon-blue);">Bienvenue dans l'Arcade Master !</h1>
+        <h1 style="color: var(--color-neon-orange);">Bienvenue dans l'Arcade Master !</h1>
         <p>Préparez-vous à jouer, à gagner des pièces et à grimper dans le classement.</p>
         <hr>
 
         <section class="status-section">
             <h2 style="color: var(--color-neon-green);">Statut du Compte</h2>
-            <p>Statut : <span id="statusConnect">Connecté</span></p>
+            <p>Statut : <span id="statusConnect" style="color: var(--color-neon-green);">Déconnecté</span></p>
             <p>Nom d'utilisateur : <span id="usernameDisplay">Joueur Déconnecté</span></p>
             <p>Pièces en poche 💰 : <span id="coinDisplay">0</span></p>
             <p>Meilleur Score (Invaders) 👾 : <span id="bestScoreInvaders">0</span></p>
@@ -34,20 +33,30 @@
         <section class="actions-section">
             <h2 style="color: var(--color-neon-orange);">Actions Rapides</h2>
             
-            <p><a href="jeux.html" style="font-size: 1.2em;">🎮 Jouer</a><br>
-            Lancez vos jeux d'arcade préférés.</p>
+            <p>
+                <a href="jeux.html">🎮 Jouer</a><br>
+                Lancez vos jeux d'arcade préférés.
+            </p>
             
-            <p><a href="compte.html" style="font-size: 1.2em;">👤 Mon Compte</a><br>
-            Gérez votre profil et vos statistiques.</p>
+            <p>
+                <a href="compte.html">👤 Mon Compte</a><br>
+                Gérez votre profil et vos statistiques.
+            </p>
             
-            <p><a href="boutique.html" style="font-size: 1.2em;">🛍️ Boutique</a><br>
-            Achetez des skins avec vos pièces.</p>
+            <p>
+                <a href="boutique.html">🛍️ Boutique</a><br>
+                Achetez des skins avec vos pièces.
+            </p>
             
-            <p><a href="classement.html" style="font-size: 1.2em;">🏆 Classement</a><br>
-            Voyez qui est le maître de l'arcade.</p>
+            <p>
+                <a href="classement.html">🏆 Classement</a><br>
+                Voyez qui est le maître de l'arcade.
+            </p>
             
-            <p><a href="credits.html" style="font-size: 1.2em;">📜 Crédits</a><br>
-            Les remerciements et sources.</p>
+            <p>
+                <a href="credits.html">📜 Crédits</a><br>
+                Les remerciements et sources.
+            </p>
         </section>
 
     </div>
@@ -55,7 +64,6 @@
     <script src="base.js"></script>
     <script src="auth.js"></script>
     <script>
-        // JS spécifique pour mettre à jour l'accueil
         document.addEventListener('DOMContentLoaded', () => {
              const user = typeof getCurrentUser === 'function' ? getCurrentUser() : { username: 'Erreur', coins: 0, scores: {} };
              
@@ -63,6 +71,7 @@
              document.getElementById('coinDisplay').textContent = user.coins.toLocaleString('fr-FR');
              document.getElementById('bestScoreInvaders').textContent = user.scores && user.scores.space_invaders ? user.scores.space_invaders : 0;
              document.getElementById('statusConnect').textContent = user.id !== 0 ? 'Connecté' : 'Déconnecté';
+             document.getElementById('statusConnect').style.color = user.id !== 0 ? 'var(--color-neon-green)' : 'var(--color-neon-red)';
         });
     </script>
 </body>
