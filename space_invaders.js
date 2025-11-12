@@ -1,234 +1,182 @@
-// --- LOGIQUE DU JEU SPACE INVADERS (space_invaders.js) ---
+// --- space_invaders_game.js ---
 
-// --- VARIABLES GLOBALES ET ÉLÉMENTS DU DOM ---
-const gameBoard = document.getElementById('gameBoard');
+// ******************************
+// 1. INITIALISATION DU CANVAS ET VARIABLES GLOBALES
+// ******************************
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas ? canvas.getContext('2d') : null;
+
+// Éléments du DOM pour l'interface
+const startScreen = document.getElementById('gameStartScreen');
+const launchButton = document.getElementById('launchButton');
 const scoreDisplay = document.getElementById('scoreDisplay');
-const bestScoreDisplay = document.getElementById('bestScoreDisplay'); // AJOUT
+const bestScoreDisplay = document.getElementById('bestScoreDisplay');
 const livesDisplay = document.getElementById('livesDisplay');
-const instructionsScreen = document.getElementById('instructionsScreen');
-const gameOverScreen = document.getElementById('gameOverScreen');
-const restartButton = document.getElementById('restartButton');
-const startButton = document.getElementById('startButton'); 
 
-// Paramètres du jeu
-const BOARD_WIDTH = 800; 
-const BOARD_HEIGHT = 600; 
-let isGameRunning = false;
-let isGameOver = false;
-let gameInterval;
+let gameRunning = false;
 let score = 0;
-let bestScore = 0; // NOUVEAU
 let lives = 3;
-let level = 1;
+const keys = {}; // Tableau pour suivre l'état des touches
 
-// Vaisseau du joueur
-let player = {
-    x: BOARD_WIDTH / 2 - 15, 
-    y: BOARD_HEIGHT / 2 - 15, 
-    width: 30,
-    height: 30,
-    rotation: 0 
+// ******************************
+// 2. OBJETS DU JEU
+// ******************************
+
+let player = { 
+    x: canvas.width / 2, 
+    y: canvas.height - 30, 
+    size: 20, 
+    speed: 5,
+    color: 'var(--color-neon-green)' 
 };
+let aliens = [];
+let bullets = [];
+let alienBullets = [];
 
-// Cool downs (Corrections des cadences)
-let mainGunCooldown = 0;
-const MAIN_GUN_RATE = 8; // 400ms entre les tirs principaux
-let shieldActive = false;
-let shieldTimeout;
-let shotgunCooldown = 0; 
-const SHOTGUN_RATE = 15; // 750ms entre les tirs de shotgun (ralenti)
+const ALIEN_ROWS = 4;
+const ALIEN_COLS = 10;
+const ALIEN_SIZE = 20;
 
-// Entités (listes)
-let enemies = [];
-let playerBullets = [];
-let enemyBullets = [];
-let powerups = [];
+// ******************************
+// 3. LOGIQUE DE JEU
+// ******************************
 
-// Input
-let mousePosition = { x: 0, y: 0 };
-let keysPressed = {};
-
-// Skins (Valeurs par défaut)
-let activeShipSkin = '🚀';
-let activeEnemySkin = '👾';
-
-
-// --- FONCTIONS D'AFFICHAGE ET INITIALISATION ---
-
-function setupBoard() {
-    gameBoard.style.width = `${BOARD_WIDTH}px`;
-    gameBoard.style.height = `${BOARD_HEIGHT}px`;
-}
-
-function resetGame() {
-    score = 0;
-    lives = 3;
-    level = 1;
+// Création de la vague initiale d'aliens
+function createAliens() {
+    aliens = [];
+    const padding = 20;
+    const offsetTop = 50;
     
-    enemies = [];
-    playerBullets = [];
-    enemyBullets = [];
-    powerups = [];
-    
-    shieldActive = false;
-    clearTimeout(shieldTimeout);
-    shotgunCooldown = 0;
-    mainGunCooldown = 0; 
-
-    player.x = BOARD_WIDTH / 2 - 15;
-    player.y = BOARD_HEIGHT / 2 - 15; 
-    player.rotation = 0;
-    
-    loadActiveSkins(); 
-    updateDisplay();
-    gameBoard.innerHTML = '';
-    
-    setTimeout(spawnEnemyFromEdge, 1000); 
-}
-
-function updateDisplay() {
-    scoreDisplay.textContent = `Score: ${score}`;
-    livesDisplay.textContent = `Vies: ${lives}`;
-    // Affichage du meilleur score
-    if (bestScoreDisplay) {
-        bestScoreDisplay.textContent = `Meilleur: ${bestScore}`;
-    }
-}
-
-
-// --- GESTION DES ENTITÉS : ENVAHISSEURS ---
-
-// CORRECTION: Vitesse des monstres (réduction du facteur d'accélération)
-function moveEnemies() {
-    const baseSpeed = 1;
-    // Taux d'augmentation réduit de 0.05 à 0.02
-    const currentSpeed = baseSpeed + Math.floor(score / 10) * 0.02; 
-
-    enemies.forEach(enemy => {
-        const dx = player.x + player.width / 2 - (enemy.x + enemy.width / 2);
-        const dy = player.y + player.height / 2 - (enemy.y + enemy.height / 2);
-        const distance = Math.sqrt(dx * dx + dy * dy);
-
-        enemy.x += (dx / distance) * currentSpeed;
-        enemy.y += (dy / distance) * currentSpeed;
-    });
-}
-
-// ... (fonctions spawnEnemyFromEdge, enemyShoot) ...
-
-
-// --- GESTION DU TIR DU JOUEUR (Corrections) ---
-
-function playerShoot(e) {
-    if (isGameOver || !isGameRunning) return;
-    if (e && e.button !== 0) return; 
-
-    e.preventDefault(); 
-    
-    // 1. Logique du Shotgun
-    if (shotgunCooldown > 0) {
-        // Applique le cooldown LENT du shotgun (750ms)
-        if (mainGunCooldown > 0) return; 
-        mainGunCooldown = SHOTGUN_RATE; 
-
-        // Tirez les 5 balles avec dispersion
-        const baseAngle = Math.atan2(mousePosition.y - (player.y + player.height / 2), mousePosition.x - (player.x + player.width / 2));
-        
-        for (let i = -2; i <= 2; i++) {
-            const angle = baseAngle + (i * 0.05); 
-            const speedX = Math.cos(angle) * 10;
-            const speedY = Math.sin(angle) * 10;
-
-            playerBullets.push({
-                x: player.x + player.width / 2 - 2,
-                y: player.y + player.height / 2 - 2,
-                width: 4,
-                height: 8,
-                speedX: speedX,
-                speedY: speedY
+    for (let r = 0; r < ALIEN_ROWS; r++) {
+        for (let c = 0; c < ALIEN_COLS; c++) {
+            aliens.push({
+                x: c * (ALIEN_SIZE + padding) + padding + 50,
+                y: r * (ALIEN_SIZE + padding) + offsetTop,
+                size: ALIEN_SIZE,
+                color: 'var(--color-neon-red)',
+                health: 1
             });
         }
-        return; 
     }
-    
-    // 2. Logique du Tir Principal
-    if (mainGunCooldown > 0) return; 
-    mainGunCooldown = MAIN_GUN_RATE; // Applique le cooldown rapide du tir principal (400ms)
-    
-    const centerX = player.x + player.width / 2;
-    const centerY = player.y + player.height / 2;
-
-    const angle = Math.atan2(mousePosition.y - centerY, mousePosition.x - centerX);
-    
-    const speedX = Math.cos(angle) * 10;
-    const speedY = Math.sin(angle) * 10;
-    
-    playerBullets.push({
-        x: centerX - 2,
-        y: centerY - 2,
-        width: 4,
-        height: 8,
-        speedX: speedX,
-        speedY: speedY
-    });
 }
 
-// ... (Le reste des fonctions de mouvement et de rendu sont inchangées) ...
+// Mise à jour de la position du joueur en fonction des touches pressées
+function updatePlayerMovement() {
+    // WASD et ZQSD
+    if (keys['a'] || keys['q']) { // Gauche
+        player.x -= player.speed;
+    }
+    if (keys['d']) { // Droite
+        player.x += player.speed;
+    }
+    
+    // Empêcher le joueur de sortir des limites du Canvas
+    if (player.x < player.size / 2) player.x = player.size / 2;
+    if (player.x > canvas.width - player.size / 2) player.x = canvas.width - player.size / 2;
+}
 
 
-// --- BOUCLE DE JEU ET ÉTATS ---
+// La boucle principale de mise à jour de la logique du jeu
+function update() {
+    updatePlayerMovement();
+    // Le reste de la logique (mouvement aliens, tirs, collisions) viendra ici
+}
+
+// ******************************
+// 4. FONCTIONS DE DESSIN
+// ******************************
+
+function draw() {
+    if (!ctx) return;
+    
+    // 1. Effacer l'écran à chaque frame
+    ctx.fillStyle = '#000000'; // Noir
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // 2. Dessiner le joueur (triangle pour ressembler à un vaisseau)
+    ctx.fillStyle = player.color;
+    ctx.beginPath();
+    ctx.moveTo(player.x, player.y - player.size / 2); // Point supérieur
+    ctx.lineTo(player.x - player.size / 2, player.y + player.size / 2); // Point bas-gauche
+    ctx.lineTo(player.x + player.size / 2, player.y + player.size / 2); // Point bas-droite
+    ctx.closePath();
+    ctx.fill();
+    
+    // 3. Dessiner les aliens (simples carrés)
+    aliens.forEach(alien => {
+        ctx.fillStyle = alien.color;
+        ctx.fillRect(alien.x - alien.size / 2, alien.y - alien.size / 2, alien.size, alien.size);
+    });
+
+    // 4. Mettre à jour l'affichage des informations
+    // Ces mises à jour sont pour l'interface DOM (HTML), pas pour le Canvas
+    scoreDisplay.textContent = `Score: ${score}`;
+    livesDisplay.textContent = `Vies: ${lives}`;
+    // bestScoreDisplay.textContent = `Meilleur: ${getCurrentUser().scores.space_invaders || 0}`; 
+    // ^ Cette ligne nécessitera une mise à jour d'auth.js pour fonctionner
+}
+
+// ******************************
+// 5. BOUCLE PRINCIPALE ET DÉMARRAGE
+// ******************************
 
 function gameLoop() {
-    if (isGameOver) return;
+    if (!gameRunning) return;
+    
+    update();
+    draw();
+    
+    // Demander au navigateur de rappeler gameLoop à la prochaine frame
+    requestAnimationFrame(gameLoop);
+}
 
-    // Décrémenter les cooldowns
-    if (mainGunCooldown > 0) mainGunCooldown--; 
-    if (shotgunCooldown > 0) shotgunCooldown--;
+// Démarrer la partie
+function initGame() {
+    if (!ctx) {
+        console.error("Erreur: Le Canvas n'a pas pu être initialisé. Vérifiez 'gameCanvas' dans le HTML.");
+        return;
+    }
+    
+    // Cacher l'écran de démarrage et afficher le Canvas
+    startScreen.style.display = 'none';
+    canvas.style.display = 'block';
+    
+    // Réinitialiser les variables
+    score = 0;
+    lives = 3;
+    gameRunning = true;
+    
+    // Créer la première vague d'aliens
+    createAliens();
+    
+    // Lancer la boucle de jeu
+    gameLoop();
+}
 
-    // ... (Mouvements, Collisions, Rendu) ...
+// Écouteur pour démarrer le jeu (lié au bouton HTML)
+if (launchButton) {
+    launchButton.addEventListener('click', initGame);
 }
 
 
-// CORRECTION: Fonction de fin de partie et gestion du meilleur score
-function endGame() {
-    if (isGameOver) return;
-    isGameOver = true;
-    isGameRunning = false;
-    clearInterval(gameInterval);
-    
-    // GESTION DU MEILLEUR SCORE
-    if (score > bestScore) {
-        bestScore = score;
-        // Sauvegarde du meilleur score localement
-        localStorage.setItem('invadersBestScore', bestScore); 
-        
-        // Mettre à jour le score dans le compte connecté si possible
-        if (typeof updateGlobalUserScore === 'function') {
-            updateGlobalUserScore('space_invaders', score);
-        }
-    }
-    
-    // Affichage des informations sur l'écran Game Over
-    if (document.getElementById('finalScore')) {
-        document.getElementById('finalScore').textContent = `Score final : ${score}`;
-    }
-    if (gameOverScreen) {
-        gameOverScreen.style.display = 'flex'; 
-    }
-    
-    updateDisplay(); // Mise à jour de l'affichage (Meilleur Score)
-}
+// ******************************
+// 6. GESTION DES ENTRÉES (Clavier)
+// ******************************
 
-
-// --- ÉVÉNEMENTS & INITIALISATION ---
-
-document.addEventListener('DOMContentLoaded', () => {
-    // CHARGEMENT DU MEILLEUR SCORE
-    bestScore = parseInt(localStorage.getItem('invadersBestScore') || '0');
-    
-    setupBoard();
-    loadActiveSkins(); 
-    updateDisplay(); 
+document.addEventListener('keydown', (e) => {
+    // Convertit la touche en minuscule et l'enregistre comme pressée
+    keys[e.key.toLowerCase()] = true; 
 });
 
-// ... (Le reste des Event Listeners reste inchangé) ...
+document.addEventListener('keyup', (e) => {
+    // Enregistre la touche comme relâchée
+    keys[e.key.toLowerCase()] = false;
+});
+
+// Gestion du tir (clic de la souris)
+document.addEventListener('click', (e) => {
+    if (!gameRunning) return;
+    
+    // Le code du tir sera implémenté ici plus tard
+    // console.log("TIR!");
+});
