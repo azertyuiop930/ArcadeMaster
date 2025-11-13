@@ -1,11 +1,15 @@
-// --- space_invaders_game.js ---
+// --- space_invaders_game.js (Version corrigée et complète pour le mouvement) ---
 
 // ******************************
 // 1. INITIALISATION DES ÉLÉMENTS DU DOM
 // ******************************
 const canvas = document.getElementById('gameCanvas');
-// Vérifie que le canvas existe avant d'obtenir le contexte
 const ctx = canvas ? canvas.getContext('2d') : null; 
+
+// Vérifie que le canvas et le contexte sont disponibles
+if (!canvas || !ctx) {
+    console.error("Erreur critique: Le Canvas ou son contexte 2D n'est pas disponible. Le jeu ne peut pas démarrer.");
+}
 
 // Éléments du DOM pour l'interface
 const startScreen = document.getElementById('gameStartScreen');
@@ -17,13 +21,14 @@ const livesDisplay = document.getElementById('livesDisplay');
 let gameRunning = false;
 let score = 0;
 let lives = 3;
-const keys = {}; // Tableau pour suivre l'état des touches
+const keys = {}; // Tableau pour suivre l'état des touches (ZQSD/WASD)
+let lastBulletTime = 0;
+const FIRE_RATE = 200; // Délai minimum entre les tirs en ms (pour éviter le spam)
 
 // ******************************
 // 2. CONSTANTES ET OBJETS DU JEU
 // ******************************
 
-// Les objets du jeu doivent être déclarés avant d'être utilisés
 let player = {}; 
 let aliens = [];
 let bullets = [];
@@ -33,8 +38,10 @@ const ALIEN_ROWS = 4;
 const ALIEN_COLS = 10;
 const ALIEN_SIZE = 20;
 
+// ******************************
+// 3. LOGIQUE DE JEU
+// ******************************
 
-// Fonction pour définir les propriétés de départ du joueur et des aliens
 function resetGameState() {
     if (!canvas) return;
 
@@ -69,16 +76,11 @@ function createAliens() {
     }
 }
 
-// ******************************
-// 3. LOGIQUE DE JEU
-// ******************************
-
 // Mise à jour de la position du joueur en fonction des touches pressées
 function updatePlayerMovement() {
-    // Vérifie si l'initialisation a échoué
     if (!gameRunning || !canvas) return; 
 
-    // WASD et ZQSD
+    // WASD et ZQSD (Vérifie les deux configurations)
     if (keys['a'] || keys['q']) { // Gauche
         player.x -= player.speed;
     }
@@ -91,10 +93,42 @@ function updatePlayerMovement() {
     if (player.x > canvas.width - player.size / 2) player.x = canvas.width - player.size / 2;
 }
 
+// Tir du joueur
+function fireBullet() {
+    const now = Date.now();
+    if (now - lastBulletTime < FIRE_RATE) return; // Limite la cadence de tir
+    
+    // Ajoute une balle juste au-dessus du joueur
+    bullets.push({
+        x: player.x,
+        y: player.y - player.size / 2,
+        speed: 8,
+        size: 4,
+        color: 'var(--color-neon-blue)'
+    });
+    
+    lastBulletTime = now;
+    // Jouer un son ici (futur)
+}
+
+// Mise à jour de la position des tirs
+function updateBullets() {
+    for (let i = bullets.length - 1; i >= 0; i--) {
+        const bullet = bullets[i];
+        bullet.y -= bullet.speed;
+        
+        // Supprimer la balle si elle sort de l'écran
+        if (bullet.y < 0) {
+            bullets.splice(i, 1);
+        }
+    }
+}
+
 // La boucle principale de mise à jour de la logique du jeu
 function update() {
     updatePlayerMovement();
-    // Logique future: Mouvement aliens, tirs, collisions
+    updateBullets();
+    // Logique future: Mouvement aliens, collisions, tirs aliens
 }
 
 // ******************************
@@ -122,10 +156,17 @@ function draw() {
         ctx.fillStyle = alien.color;
         ctx.fillRect(alien.x - alien.size / 2, alien.y - alien.size / 2, alien.size, alien.size);
     });
+    
+    // 4. Dessiner les tirs du joueur
+    bullets.forEach(bullet => {
+        ctx.fillStyle = bullet.color;
+        ctx.fillRect(bullet.x - bullet.size / 2, bullet.y - bullet.size / 2, bullet.size, bullet.size * 2); // Balle rectangulaire
+    });
 
-    // 4. Mettre à jour l'affichage des informations
-    scoreDisplay.textContent = `Score: ${score}`;
-    livesDisplay.textContent = `Vies: ${lives}`;
+    // 5. Mettre à jour l'affichage des informations (DOM)
+    if (scoreDisplay) scoreDisplay.textContent = `Score: ${score}`;
+    if (livesDisplay) livesDisplay.textContent = `Vies: ${lives}`;
+    // Mise à jour future du Best Score si auth.js est chargé
 }
 
 // ******************************
@@ -145,13 +186,13 @@ function gameLoop() {
 // Fonction appelée par le bouton "LANCER LE JEU"
 function initGame() {
     if (!ctx) {
-        alert("Erreur: Le moteur du jeu (Canvas) n'est pas disponible. Veuillez vérifier le HTML.");
+        alert("Erreur: Le moteur du jeu (Canvas) n'est pas prêt. Vérifiez la console pour les détails.");
         return;
     }
     
     // Cacher l'écran de démarrage et afficher le Canvas
-    startScreen.style.display = 'none';
-    canvas.style.display = 'block';
+    if (startScreen) startScreen.style.display = 'none';
+    if (canvas) canvas.style.display = 'block';
     
     // Réinitialiser l'état du jeu et les variables
     resetGameState();
@@ -168,13 +209,12 @@ function initGame() {
 
 // Assure que le bouton lance initGame()
 if (launchButton) {
-    // Retirez l'ancienne fonction d'alerte et utilisez la vraie fonction de jeu
     launchButton.onclick = initGame;
 }
 
 
 // ******************************
-// 6. GESTION DES ENTRÉES (Clavier)
+// 6. GESTION DES ENTRÉES (Clavier et Souris)
 // ******************************
 
 document.addEventListener('keydown', (e) => {
@@ -186,8 +226,8 @@ document.addEventListener('keyup', (e) => {
     if (!gameRunning) return;
     keys[e.key.toLowerCase()] = false;
     
-    // Gestion du tir (Espace)
+    // Tir (Touche ESPACE)
     if (e.key === ' ' || e.key === 'Spacebar') {
-        // Le code du tir sera implémenté ici
+        fireBullet();
     }
 });
